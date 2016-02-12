@@ -44,11 +44,12 @@ class TableService
      */
     private function addSearch(Table $table, Request $request, \Doctrine\ORM\QueryBuilder $queryBuilder)
     {
-        $queryParams = $request->get($table->getId()."_form");
+        $queryParams = $request->get($table->getFormId());
         // @todo gérer les différents types de filtre
-        foreach ($table->getFilters() as $filter) {
+        foreach ($table->getAllFilters() as $filter) {
             // selon le type de filtre
             switch (false) {
+                case Filter::TYPE_LIKE:
                 default:
                     if (isset($queryParams[$filter->getName()])) {
                         $searchParam = $queryParams[$filter->getName()];
@@ -75,11 +76,11 @@ class TableService
     {
         $form = $this->formFactory->createNamedBuilder($table->getId()."_form");
         //$this->formBuilder->set
-        foreach ($table->getFilters() as $filter) {
+        foreach ($table->getAllFilters() as $filter) {
             // selon le type de filtre
             switch ($filter->getType()) {
                 default:
-                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\TextType::class);
+                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\TextType::class, ["required"=>false]);
                     break;
             }
         }
@@ -108,50 +109,61 @@ class TableService
         $table->setRowsPerPage($request->get("rowsPerPage", 10));
         $table->setPage($request->get("page", 1));
 
-        $qb   = $table->getQueryBuilder();
-        // todo: ajouter les contraintes constantes
-        // todo: ajouter les contraintes des filtres
-        // count total rows
+        $qb = $table->getQueryBuilder();
+
+        // count total rows (without filters)
         $qbtr = clone $qb;
         $qbtr->select(" count(distinct {$table->getAlias()}.id) ");
         $table->setTotalRows($qbtr->getQuery()->getSingleScalarResult());
 
+        // count filtered rows (with filters)
         $qbfr = clone $qb;
         $this->addSearch($table, $request, $qbfr);
         $qbfr->select(" count(distinct {$table->getAlias()}.id) ");
         $table->setFilteredRows($qbfr->getQuery()->getSingleScalarResult());
 
+        // compute last page and floor curent page
         $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
 
         if ($table->getPage() > $table->getLastPage()) {
             $table->setPage($table->getLastPage());
         }
-        $this->addSearch($table, $request, $qb);
-        // todo: changer la limite 
-        $qb->setMaxResults($table->getRowsPerPage());
-        // todo: pagination, changer le premier
-        $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
-        $query = $qb->getQuery();
-        //$qb->get
-        // todo: gérer les filtres
-        // todo: gérer la pagination
-        //dump($qb);
 
+        // gets results
+        $this->addSearch($table, $request, $qb);
+        $qb->setMaxResults($table->getRowsPerPage());
+        $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
+
+        // handle ordering
+        $sortColumn = $request->get("sortColumn");
+        if ($sortColumn != "") {
+            $column = $table->getColumnByName($sortColumn);
+            // if column exists
+            if (!is_null($column)) {
+                $qb->resetDQLPart("orderBy");
+                foreach ($column->getAutoSort($request->get("sortReverse")) as $sortField=> $sortOrder) {
+                    $qb->addOrderBy($sortField, $sortOrder);
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        //$sortColumn=$request->get("")
+        //if($qb->)
+        // results as objects
         $objects = [];
         foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
             $objects[$object->getId()] = $object;
         }
-        //dump($objects);
-        // in some case, we need scalar results (with OneToMany)
-        $scalars = $query->getResult(Query::HYDRATE_SCALAR);
-        //dump($scalars);
+        $rows = $query->getResult(Query::HYDRATE_SCALAR);
 
-        $rows = [];
-        foreach ($scalars as $key=> $scalar) {
-            $rows[] = ["scalar"=>$scalar, "object"=>$objects[$scalar[$table->getAlias()."_id"]]];
-            //$rows[] = ["scalar"=>$scalar, "object"=>$objects[$key]];
+        // results as scalar
+        foreach ($rows as &$row) {
+            $row["object"] = $objects[$row[$table->getAlias()."_id"]];
         }
 
+        // prépare response
         $twigParams = [
             "table"=>$table,
             "rows"=>$rows,
@@ -169,6 +181,7 @@ class TableService
             "tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
         ];
 
+        // encode response
         $response = new Response(json_encode($responseParams));
 
         return $response;

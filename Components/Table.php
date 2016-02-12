@@ -59,7 +59,7 @@ class Table
      * 
      * @var type 
      */
-    private $template;
+    private $template = "KilikTableBundle::_defaultTable.html.twig";
 
     /**
      * 
@@ -91,11 +91,17 @@ class Table
     private $formView;
 
     /**
+     * @var array|Column
+     */
+    private $columns;
+
+    /**
      * Constructeur
      */
     public function __construct()
     {
         $this->filters = [];
+        $this->columns = [];
     }
 
     /**
@@ -321,6 +327,22 @@ class Table
     }
 
     /**
+     * Get all filters (filters + column filters)
+     * 
+     * @return array|Filter
+     */
+    public function getAllFilters()
+    {
+        $filters = $this->getFilters();
+        foreach ($this->getColumns() as $column) {
+            if (!is_null($column->getFilter())) {
+                $filters[] = $column->getFilter();
+            }
+        }
+        return $filters;
+    }
+
+    /**
      * Formulaire
      * 
      * @param type $formView
@@ -340,6 +362,75 @@ class Table
     public function getFormView()
     {
         return $this->formView;
+    }
+
+    /**
+     * Ajouter une colonne
+     * 
+     * @param Column $column
+     */
+    public function addColumn(Column $column)
+    {
+        $this->columns[] = $column;
+
+        return $this;
+    }
+
+    /**
+     * @return array|Column
+     */
+    public function getColumns()
+    {
+        return $this->columns;
+    }
+
+    /**
+     * Get a column by its name
+     * 
+     * @param string $name
+     * @return Column
+     */
+    public function getColumnByName($name)
+    {
+        foreach ($this->columns as $column) {
+            // if name match
+            if ($column->getName() == $name) {
+                return $column;
+            }
+        }
+
+        // if not found
+        return null;
+    }
+
+    /**
+     * Get the table body id
+     * 
+     * @return string
+     */
+    public function getBodyId()
+    {
+        return $this->id."_body";
+    }
+
+    /**
+     * Get the table foot id
+     * 
+     * @return string
+     */
+    public function getFootId()
+    {
+        return $this->id."_foot";
+    }
+
+    /**
+     * Get the form id
+     * 
+     * @return string
+     */
+    public function getFormId()
+    {
+        return $this->id."_form";
     }
 
 }

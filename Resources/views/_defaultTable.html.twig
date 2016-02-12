@@ -1,0 +1,67 @@
+{# src/Kilik/TableBundle/Resources/views/_defaultTable.html.twig #}
+{# @param Kilik\Components\Table table #}
+{{ form_start(table.formView) }}
+<table class="table table-responsive table-hover table-striped">
+    <thead>
+        {% block tableHead %}
+            <tr>
+                {% block tableHeadStdColumns %}
+                    {% for column in table.columns %}
+                        <th>
+                            {% if column.sortable %}
+                                <a href="#" class="columnSortable" data-sort-column="{{ column.name }}">{{ column.label }}</a>
+                                {# todo: tester si la colonne est triée #}
+                            {% else %}
+                                {{ column.label }}
+                            {% endif %}
+                        </th>
+                    {% endfor %}
+                {% endblock tableHeadStdColumns %}
+            </tr>
+            {% if table.columns|length > 0 %}
+                <tr>
+                    {% block tableHeadStdFilters %}
+                        {% for column in table.columns %}
+                            <td>
+                                {% if column.filter is not null %}
+                                    {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup"} }) }}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    {% endblock tableHeadStdFilters %}
+                </tr>
+            {% endif %}
+        {% endblock tableHead %}
+    </thead>    
+    <tbody id="{{ table.bodyId }}">
+        {% block tableBody %}
+            {% if rows is defined %}
+                {% for row in rows %}
+                    <tr>
+                        {% block tableBodyStdColumns %}
+                            {% for column in table.columns %}
+                                <td>
+                                    {% if column.name is not null %}
+                                        {{ attribute(row,column.name) }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        {% endblock tableBodyStdColumns %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        {% endblock tableBody %}
+    </tbody>
+    <tfoot id="{{ table.footId }}">
+        {% block tableFoot %}
+            {% if rows is defined %}
+                <tr>
+                    <td colspan="4">
+                        {{ "page"|trans|capitalize }} {{ table.page }} / {{ table.lastPage }} - {{ "records (filtered/total)"|trans|capitalize }}: {{ table.filteredRows }} / {{ table.totalRows }}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endblock tableFoot %}
+    </tfoot>
+</table>
+{{ form_end(table.formView) }}

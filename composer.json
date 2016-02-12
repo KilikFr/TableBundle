@@ -1,0 +1,27 @@
+{
+    "name": "kilik/table",
+    "description": "Symfony2 Ajax Datagrid Bundle for doctrine2 entities",
+    "keywords": ["symfony2","jquery","table"],
+    "homepage": "https://github.com/KilikFr/TableBundle",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Michel Naud",
+            "email": "mitch@kilik.fr",
+            "role": "Author"
+        }
+    ],
+    "require": {
+        "php": "~5.6|7.0",
+        "twig/twig": ">=1.8,<2.0-dev",
+        "doctrine/orm": "~2.3",
+        "doctrine/doctrine-bundle": "~1.0"
+    },
+    "target-dir": "Kilik/TableBundle",
+    "autoload": {
+        "psr-0": {
+            "Kilik\\TableBundle": ""
+        }
+    }
+}

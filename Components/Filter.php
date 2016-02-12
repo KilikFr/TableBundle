@@ -2,7 +2,6 @@
 
 namespace Kilik\TableBundle\Components;
 
-// @todo à déplacer
 class Filter
 {
 
