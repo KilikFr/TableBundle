@@ -158,14 +158,11 @@ class TableService
 
         $query = $qb->getQuery();
 
-        //$sortColumn=$request->get("")
-        //if($qb->)
         if (!is_null($qb->getDQLPart("groupBy"))) {
             // results as objects
             $objects = [];
             foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
                 if (is_object($object)) {
-                    dump($object);
                     $objects[$object->getId()] = $object;
                 }
             }
