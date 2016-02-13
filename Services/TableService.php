@@ -126,7 +126,7 @@ class TableService
         $qbfr = clone $qb;
         $this->addSearch($table, $request, $qbfr);
 
-        $paginatorFiltered = new Paginator($qbtr->getQuery());
+        $paginatorFiltered = new Paginator($qbfr->getQuery());
         $table->setFilteredRows($paginatorFiltered->count());
 
         // compute last page and floor curent page

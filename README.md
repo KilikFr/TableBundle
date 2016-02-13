@@ -14,9 +14,9 @@ Working features:
 - basic table template extendable
 - keep filters and orders in browser local storage (api REST)
 - filtering on queries with group by
+- show ordered column (normal and reverse)
 
 Planned features:
-- show ordered column (and way)
 - max items per page selector (customizable)
 - delay on keyup events (to prevent multiple reloads)
 - customize visibles colums (hide/show checkboxes)

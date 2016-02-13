@@ -1,0 +1,4 @@
+table:
+    showing_entries: "{0} no matching records found | ]1,Inf[ showing %firstRow% to %lastRow% of %filteredRows% entries"
+    filtered_from: "filtered from %totalRows% total entries"
+

@@ -16,44 +16,44 @@ function KilikTable(id, path) {
         var table = this;
 
         // bouton pour forcer une actualisation
-        $("#" + id + "_submit").click(function () {
+        $("#" + id + "_submit, #" + this.getFormName()).click(function () {
             table.doReload();
         });
 
         // boutons pour la pagination
         // bouton début
-        $("#" + id + "_pagination_start").click(function () {
+        $("#" + id + "_pagination_start, #" + this.getFormName()).click(function () {
             table.page = 1;
             table.doReload();
         });
         // bouton précedent
-        $("#" + id + "_pagination_previous").click(function () {
+        $("#" + id + "_pagination_previous, #" + this.getFormName()).click(function () {
             if (table.page > 1) {
                 table.page--;
             }
             table.doReload();
         });
         // bouton suivant
-        $("#" + id + "_pagination_next").click(function () {
+        $("#" + id + "_pagination_next, #" + this.getFormName()).click(function () {
             table.page++;
             table.doReload();
         });
         // bouton fin
-        $("#" + id + "_pagination_end").click(function () {
+        $("#" + id + "_pagination_end, #" + this.getFormName()).click(function () {
             table.page = table.lastPage;
             table.doReload();
         });
 
         // filtering
-        $(".refreshOnChange").change(function () {
+        $(".refreshOnChange, #" + this.getFormName()).change(function () {
             table.doReload();
         });
-        $(".refreshOnKeyup").keyup(function () {
+        $(".refreshOnKeyup, #" + this.getFormName()).keyup(function () {
             table.doReload();
         });
 
         // ordering binding
-        $(".columnSortable").click(function () {
+        $(".columnSortable, #" + this.getFormName()).click(function () {
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
             // if same column, inverse order
@@ -63,15 +63,45 @@ function KilikTable(id, path) {
                 table.sortColumn = sortColumn;
                 table.sortReverse = false;
             }
+            table.applyColumnSort();
             table.doReload();
         });
 
         // load previous filters
         this.loadFromLocalStorage();
 
+        // update sorted columns
+        this.applyColumnSort();
+
         // on actualise maintenant
         this.doReload();
     };
+
+    /**
+     * Apply column sorting
+     */
+    this.applyColumnSort = function () {
+        var table = this;
+        // update icons sort order
+        $(".columnSortableIcon, #" + table.getFormName()).each(function () {
+            var pColumn = $(this);
+            //consolepColumn.parent();
+            pSortColumn = pColumn.parent().attr("data-sort-column");
+            pColumn.removeClass("glyphicon-sort-by-alphabet");
+            pColumn.removeClass("glyphicon-sort-by-alphabet-alt");
+            pColumn.removeClass("glyphicon-sort");
+            // remove sorted, but keep sortable
+            if (pSortColumn != table.sortColumn) {
+                pColumn.addClass("glyphicon-sort");
+            } else {
+                if (table.sortReverse) {
+                    pColumn.addClass("glyphicon-sort-by-alphabet-alt");
+                } else {
+                    pColumn.addClass("glyphicon-sort-by-alphabet");
+                }
+            }
+        });
+    }
 
     /**
      * Get form name

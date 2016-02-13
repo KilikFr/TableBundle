@@ -433,4 +433,24 @@ class Table
         return $this->id."_form";
     }
 
+    /**
+     * Get the first row rank
+     * 
+     * @return int
+     */
+    public function getFirstRow()
+    {
+        return ($this->page - 1) * $this->rowsPerPage + 1;
+    }
+
+    /**
+     * Get the last row rank
+     * 
+     * @return int
+     */
+    public function getLastRow()
+    {
+        return min($this->filteredRows, ($this->page) * $this->rowsPerPage);
+    }
+
 }
