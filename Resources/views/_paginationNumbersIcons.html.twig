@@ -1,0 +1,18 @@
+{# src/KilikTableBundle/Resources/views/_paginationNumbersIcons.html.twig #}
+{% if tableRenderPagination is defined %}
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.previousPage }}">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.page }}">
+        {{ table.page }}
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.nextPage }}">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.lastPage }}">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+{% endif %}

@@ -245,6 +245,24 @@ class Table
 
     /**
      * 
+     * @return int
+     */
+    public function getPreviousPage()
+    {
+        return max(1, $this->page - 1);
+    }
+
+    /**
+     * 
+     * @return int
+     */
+    public function getNextPage()
+    {
+        return min($this->lastPage, $this->page + 1);
+    }
+
+    /**
+     * 
      * @param int $page
      * @return static
      */

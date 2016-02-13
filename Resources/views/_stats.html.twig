@@ -1,0 +1,7 @@
+{# src/KilikTableBundle/Resources/views/_stats.html.twig #}
+{% if tableRenderStats is defined %}
+    {{ "table.showing_entries"|transchoice(table.filteredRows,{"%firstRow%": table.firstRow,"%lastRow%": table.lastRow,"%filteredRows%":table.filteredRows})|capitalize }}
+    {% if table.filteredRows != table.totalRows %}
+        ({{ "table.filtered_from"|trans({"%totalRows%":table.totalRows})|capitalize }})
+    {% endif %}
+{% endif %}

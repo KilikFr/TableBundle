@@ -85,8 +85,7 @@ function KilikTable(id, path) {
         // update icons sort order
         $(".columnSortableIcon, #" + table.getFormName()).each(function () {
             var pColumn = $(this);
-            //consolepColumn.parent();
-            pSortColumn = pColumn.parent().attr("data-sort-column");
+            var pSortColumn = pColumn.parent().attr("data-sort-column");
             pColumn.removeClass("glyphicon-sort-by-alphabet");
             pColumn.removeClass("glyphicon-sort-by-alphabet-alt");
             pColumn.removeClass("glyphicon-sort");
@@ -173,11 +172,21 @@ function KilikTable(id, path) {
                 function (dataRaw) {
                     var data = $.parseJSON(dataRaw);
                     $("#" + id + "_body").html(data.tableBody);
-                    $("#" + id + "_foot").html(data.tableFoot);
+                    //$("#" + id + "_foot").html(data.tableFoot);
+                    $("#" + id + "_stats").html(data.tableStats);
+                    $("#" + id + "_pagination").html(data.tablePagination);
                     table.totalRows = data.totalRows;
                     table.totalFilteredRows = data.totalFilteredRows;
                     table.page = data.page;
                     table.lastPage = data.lastPage;
+
+                    // rebind click on pagination buttons
+                    $(".tablePaginationButton", "#" + id + "_pagination").click(function () {
+                        var button = $(this);
+                        table.page = button.attr("data-table-page");
+                        table.doReload();
+                    });
+
                     //console.log("ajax load done on " + id);
                 }
         ).done(function (data) {
