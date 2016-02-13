@@ -5,9 +5,13 @@ namespace Kilik\TableBundle\Components;
 class Filter
 {
 
-    const TYPE_DEFAULT = "like";
-    const TYPE_LIKE    = "like";
-    const TYPES        = [self::TYPE_LIKE];
+    const TYPE_DEFAULT          = "like";
+    const TYPE_LIKE             = "like";
+    const TYPE_GREATER          = ">";
+    const TYPE_GREATER_OR_EQUAL = ">=";
+    const TYPE_LESS             = "<";
+    const TYPE_LESS_OR_EQUAL    = "<=";
+    const TYPES                 = [self::TYPE_LIKE, self::TYPE_GREATER, self::TYPE_GREATER_OR_EQUAL, self::TYPE_LESS, self::TYPE_LESS_OR_EQUAL];
 
     /**
      *
@@ -82,6 +86,9 @@ class Filter
      */
     public function setType($type)
     {
+        if (!in_array($type, self::TYPES)) {
+            throw new \InvalidArgumentException("bad type {$type}");
+        }
         $this->type = $type;
 
         return $this;

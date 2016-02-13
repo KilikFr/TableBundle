@@ -30,6 +30,7 @@ Planned features:
 - new column display types (now: only raw text value)
 - column display callback
 - multiple lists on one page (binding jquery functions on good scopes)
+- easy export of filtered rows
 
 ## Example (need bootstrap + jquery)
 

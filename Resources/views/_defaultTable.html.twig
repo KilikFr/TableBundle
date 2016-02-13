@@ -1,6 +1,8 @@
 {# src/Kilik/TableBundle/Resources/views/_defaultTable.html.twig #}
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
+{% block tableBeforePanel %}
+{% endblock tableBeforePanel %}
 <div class="panel panel-info">        
     <div class="panel-heading">        
         <div class="panel-title">

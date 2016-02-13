@@ -48,16 +48,30 @@ class TableService
         $queryParams = $request->get($table->getFormId());
         // @todo gérer les différents types de filtre
         foreach ($table->getAllFilters() as $filter) {
+            if (isset($queryParams[$filter->getName()])) {
+                $searchParam = $queryParams[$filter->getName()];
+            }
+            else {
+                $searchParam = false;
+            }
             // selon le type de filtre
-            switch (false) {
+            switch ($filter->getType()) {
+                case Filter::TYPE_GREATER:
+                case Filter::TYPE_GREATER_OR_EQUAL:
+                case Filter::TYPE_LESS:
+                case Filter::TYPE_LESS_OR_EQUAL:
+                    if ($searchParam != false) {
+                        if ($filter->getHaving()) {
+                            $queryBuilder->andHaving($filter->getField()." {$filter->getType()} :filter_".$filter->getName());
+                        }
+                        else {
+                            $queryBuilder->andWhere($filter->getField()." {$filter->getType()} :filter_".$filter->getName());
+                        }
+                        $queryBuilder->setParameter("filter_".$filter->getName(), $searchParam);
+                    }
+                    break;
                 case Filter::TYPE_LIKE:
                 default:
-                    if (isset($queryParams[$filter->getName()])) {
-                        $searchParam = $queryParams[$filter->getName()];
-                    }
-                    else {
-                        $searchParam = false;
-                    }
                     if ($searchParam != false) {
                         if ($filter->getHaving()) {
                             $queryBuilder->andHaving($filter->getField()." like :filter_".$filter->getName());
