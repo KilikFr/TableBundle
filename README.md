@@ -3,12 +3,17 @@ information, with filtering and ordering features, with ajax queries.
 
 This bundle is a work in progress.
 
+Links:
+- [Live demo](http://tabledemo.kilik.fr/)
+- [KilikTableDemoBundle](https://github.com/KilikFr/TableDemoBundle)
+
 Working features:
 - pagination
 - basic filtering (like %...%)
 - ordering by column (and reverse)
 - basic table template extendable
 - keep filters and orders in browser local storage (api REST)
+- filtering on queries with group by
 
 Planned features:
 - show ordered column (and way)

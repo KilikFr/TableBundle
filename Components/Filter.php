@@ -22,6 +22,13 @@ class Filter
     private $field;
 
     /**
+     * This filter is a HAVING constraint ?
+     * 
+     * @var bool
+     */
+    private $having = false;
+
+    /**
      * @var string
      */
     private $type = self::TYPE_DEFAULT;
@@ -87,6 +94,27 @@ class Filter
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * 
+     * @param bool $having
+     * @return static
+     */
+    public function setHaving($having)
+    {
+        $this->having = $having;
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    public function getHaving()
+    {
+        return $this->having;
     }
 
 }

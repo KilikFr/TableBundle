@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\Filter;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class TableService
 {
@@ -58,7 +59,12 @@ class TableService
                         $searchParam = false;
                     }
                     if ($searchParam != false) {
-                        $queryBuilder->andWhere($filter->getField()." like :filter_".$filter->getName());
+                        if ($filter->getHaving()) {
+                            $queryBuilder->andHaving($filter->getField()." like :filter_".$filter->getName());
+                        }
+                        else {
+                            $queryBuilder->andWhere($filter->getField()." like :filter_".$filter->getName());
+                        }
                         $queryBuilder->setParameter("filter_".$filter->getName(), "%".$searchParam."%");
                     }
                     break;
@@ -112,15 +118,16 @@ class TableService
         $qb = $table->getQueryBuilder();
 
         // count total rows (without filters)
-        $qbtr = clone $qb;
-        $qbtr->select(" count(distinct {$table->getAlias()}.id) ");
-        $table->setTotalRows($qbtr->getQuery()->getSingleScalarResult());
+        $qbtr           = clone $qb;
+        $paginatorTotal = new Paginator($qbtr->getQuery());
+        $table->setTotalRows($paginatorTotal->count());
 
-        // count filtered rows (with filters)
+        // count filtered rows (with filters this time)
         $qbfr = clone $qb;
         $this->addSearch($table, $request, $qbfr);
-        $qbfr->select(" count(distinct {$table->getAlias()}.id) ");
-        $table->setFilteredRows($qbfr->getQuery()->getSingleScalarResult());
+
+        $paginatorFiltered = new Paginator($qbtr->getQuery());
+        $table->setFilteredRows($paginatorFiltered->count());
 
         // compute last page and floor curent page
         $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
@@ -140,9 +147,11 @@ class TableService
             $column = $table->getColumnByName($sortColumn);
             // if column exists
             if (!is_null($column)) {
-                $qb->resetDQLPart("orderBy");
-                foreach ($column->getAutoSort($request->get("sortReverse")) as $sortField=> $sortOrder) {
-                    $qb->addOrderBy($sortField, $sortOrder);
+                if (!is_null($column->getSort())) {
+                    $qb->resetDQLPart("orderBy");
+                    foreach ($column->getAutoSort($request->get("sortReverse")) as $sortField=> $sortOrder) {
+                        $qb->addOrderBy($sortField, $sortOrder);
+                    }
                 }
             }
         }
@@ -151,16 +160,23 @@ class TableService
 
         //$sortColumn=$request->get("")
         //if($qb->)
-        // results as objects
-        $objects = [];
-        foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
-            $objects[$object->getId()] = $object;
+        if (!is_null($qb->getDQLPart("groupBy"))) {
+            // results as objects
+            $objects = [];
+            foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
+                if (is_object($object)) {
+                    dump($object);
+                    $objects[$object->getId()] = $object;
+                }
+            }
         }
         $rows = $query->getResult(Query::HYDRATE_SCALAR);
 
         // results as scalar
         foreach ($rows as &$row) {
-            $row["object"] = $objects[$row[$table->getAlias()."_id"]];
+            if (isset($objects[$row[$table->getAlias()."_id"]])) {
+                $row["object"] = $objects[$row[$table->getAlias()."_id"]];
+            }
         }
 
         // prépare response

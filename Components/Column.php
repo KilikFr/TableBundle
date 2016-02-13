@@ -45,6 +45,12 @@ class Column
     private $type = self::TYPE_DEFAULT;
 
     /**
+     *
+     * @var string 
+     */
+    private $name;
+
+    /**
      * 
      * @param Filter $filter
      * @return static
