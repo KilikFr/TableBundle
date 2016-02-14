@@ -249,7 +249,7 @@ class Table
      */
     public function getPreviousPage()
     {
-        return max(1, $this->page - 1);
+        return $this->page - 1;
     }
 
     /**

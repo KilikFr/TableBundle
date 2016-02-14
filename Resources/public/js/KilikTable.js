@@ -154,6 +154,13 @@ function KilikTable(id, path) {
     }
 
     /**
+     * Callback after reload
+     */
+    this.afterReload = function () {
+        
+    }
+
+    /**
      * Reload list from server side
      */
     this.doReload = function () {
@@ -190,7 +197,8 @@ function KilikTable(id, path) {
                     //console.log("ajax load done on " + id);
                 }
         ).done(function (data) {
-            // todo ...
+            // callback
+            table.afterReload();
         });
     };
 }
