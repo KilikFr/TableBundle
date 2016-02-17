@@ -499,4 +499,20 @@ class Table
         return min($this->filteredRows, ($this->page) * $this->rowsPerPage);
     }
 
+    /**
+     * Get the formatted value to display
+     * 
+     * @param Column $column
+     * @param array $row : the row to display
+     */
+    public function getValue(Column $column, $row)
+    {
+        if (!is_null($column->getName())) {
+            return $column->getValue($row);
+        }
+        else {
+            return "";
+        }
+    }
+
 }

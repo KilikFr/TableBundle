@@ -2,7 +2,7 @@
  * @param string id : id de la div où afficher la table
  * @param string path : cheming pour actualiser la table
  */
-function KilikTable(id, path) {
+function KilikTable(id, path, options) {
     this.id = id;
     this.path = path;
     this.rowsPerPage = 10;
@@ -11,6 +11,26 @@ function KilikTable(id, path) {
     this.totalFilteredRows = 0;
     this.sortColumn = "";
     this.sortReverse = false;
+
+    // apply styles on sorted columns
+    this.sortColumnClassSortable = "glyphicon-sort";
+    this.sortColumnClassSorted = "glyphicon-sort-by-alphabet";
+    this.sortColumnClassSortedReverse = "glyphicon-sort-by-alphabet-alt";
+
+    // for each option
+    for (optionKey in options) {
+        switch (optionKey) {
+            case "sortColumnClassSortable":
+                this.sortColumnClassSortable = options[optionKey];
+                break;
+            case "sortColumnClassSorted":
+                this.sortColumnClassSorted = options[optionKey];
+                break;
+            case "sortColumnClassSortedReverse":
+                this.sortColumnClassSortedReverse = options[optionKey];
+                break;
+        }
+    }
 
     this.init = function () {
         var table = this;
@@ -49,6 +69,11 @@ function KilikTable(id, path) {
             table.doReload();
         });
         $(".refreshOnKeyup, #" + this.getFormName()).keyup(function () {
+            table.doReload();
+        });
+
+        // force reload (on click)
+        $(".refreshOnClick, #" + this.getFormName()).click(function () {
             table.doReload();
         });
 
@@ -92,17 +117,17 @@ function KilikTable(id, path) {
         $(".columnSortableIcon, #" + table.getFormName()).each(function () {
             var pColumn = $(this);
             var pSortColumn = pColumn.parent().attr("data-sort-column");
-            pColumn.removeClass("glyphicon-sort-by-alphabet");
-            pColumn.removeClass("glyphicon-sort-by-alphabet-alt");
-            pColumn.removeClass("glyphicon-sort");
+            pColumn.removeClass(table.sortColumnClassSorted);
+            pColumn.removeClass(table.sortColumnClassSortedReverse);
+            pColumn.removeClass(table.sortColumnClassSortable);
             // remove sorted, but keep sortable
             if (pSortColumn != table.sortColumn) {
-                pColumn.addClass("glyphicon-sort");
+                pColumn.addClass(table.sortColumnClassSortable);
             } else {
                 if (table.sortReverse) {
-                    pColumn.addClass("glyphicon-sort-by-alphabet-alt");
+                    pColumn.addClass(table.sortColumnClassSortedReverse);
                 } else {
-                    pColumn.addClass("glyphicon-sort-by-alphabet");
+                    pColumn.addClass(table.sortColumnClassSorted);
                 }
             }
         });
@@ -156,7 +181,7 @@ function KilikTable(id, path) {
             for (var key in options.filters) {
                 $("[name='" + key + "'").val(options.filters[key]);
             }
-            $("#" + id + "_rows_per_page option[value='"+this.rowsPerPage+"'").prop("selected",true);
+            $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "'").prop("selected", true);
         }
     }
 
@@ -201,7 +226,6 @@ function KilikTable(id, path) {
                         table.doReload();
                     });
 
-                    //console.log("ajax load done on " + id);
                 }
         ).done(function (data) {
             // callback

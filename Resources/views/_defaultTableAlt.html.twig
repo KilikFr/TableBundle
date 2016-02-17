@@ -36,7 +36,7 @@
                                                 {{ column.label }}
                                             {% endif %}
                                         </a>
-                                        <span class="glyphicon glyphicon-sort columnSortableIcon"></span>
+                                        <span class="glyphicon columnSortableIcon"></span>
                                     </th>
                                 {% else %}
                                     <th>
@@ -73,9 +73,7 @@
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
                                         <td>
-                                            {% if column.name is not null %}
-                                                {{ attribute(row,column.name) }}
-                                            {% endif %}
+                                            {{ table.value(column,row) }}
                                         </td>
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}

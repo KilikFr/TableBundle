@@ -65,7 +65,7 @@
     {% endif %}
 
     {# next page #}
-    <a href="#" class="btn btn-default tablePaginationButton {% if table.page == table.lastPage %}disabled{% endif %}" data-table-page="{{ table.page+1 }}">
+        <a href="#" class="btn btn-default tablePaginationButton {% if table.page == table.lastPage or table.lastPage==0 %}disabled{% endif %}" data-table-page="{{ table.page+1 }}">
         {{ "kiliktable.next"|trans }} <span class="glyphicon glyphicon-arrow-right"></span>
     </a>
 {% endif %}

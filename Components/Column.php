@@ -10,6 +10,14 @@ class Column
     const TYPES        = [self::TYPE_TEXT];
 
     /**
+     * display formats
+     */
+    const FORMAT_DATE    = "date";
+    const FORMAT_TEXT    = "text";
+    const FORMAT_DEFAULT = self::FORMAT_TEXT;
+    const FORMATS        = [self::FORMAT_DATE, self::FORMAT_TEXT];
+
+    /**
      * filter on this column ?
      * 
      * @var Filter
@@ -56,6 +64,20 @@ class Column
      * @var bool 
      */
     private $translateLabel = false;
+
+    /**
+     * custom display method ?
+     * 
+     * @var string
+     */
+    private $displayFormat = self::FORMAT_DEFAULT;
+
+    /**
+     * custom display params ?
+     * 
+     * @var mixed
+     */
+    private $displayFormatParams = null;
 
     /**
      * 
@@ -227,6 +249,82 @@ class Column
     public function getTranslateLabel()
     {
         return $this->translateLabel;
+    }
+
+    /**
+     * @param string $displayFormat
+     * @return static
+     */
+    public function setDisplayFormat($displayFormat)
+    {
+        if (!in_array($displayFormat, static::FORMATS)) {
+            throw new \InvalidArgumentException("bad format '{$displayFormat}'");
+        }
+        $this->displayFormat = $displayFormat;
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    public function getDisplayFormat()
+    {
+        return $this->displayFormat;
+    }
+
+    /**
+     * @param array $displayFormatParams
+     * @return static
+     */
+    public function setDisplayFormatParams($displayFormatParams)
+    {
+        $this->displayFormatParams = $displayFormatParams;
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    public function getDisplayFormatParams()
+    {
+        return $this->displayFormatParams;
+    }
+
+    /**
+     * Get the formatted value to display
+     * 
+     * @param array $row : the row to display
+     */
+    public function getValue($row)
+    {
+        if (isset($row[$this->getName()])) {
+            $rawValue = $row[$this->getName()];
+            switch ($this->getDisplayFormat()) {
+                case static::FORMAT_DATE:
+                    $formatParams = $this->getDisplayFormatParams();
+                    if (is_null($formatParams)) {
+                        $formatParams = "Y-m-d H:i:s";
+                    }
+                    if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
+                        return $rawValue->format($formatParams);
+                    }
+                    else {
+                        return "bad argument";
+                    }
+                    break;
+                case static::FORMAT_TEXT:
+                default:
+                    return $rawValue;
+                    break;
+            }
+        }
+        else {
+            return "";
+        }
     }
 
 }
