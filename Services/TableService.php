@@ -170,6 +170,8 @@ class TableService
             }
         }
 
+
+	$qb->addOrderBy($table->getAlias().".id", "asc");
         $query = $qb->getQuery();
 
         if (!is_null($qb->getDQLPart("groupBy"))) {
