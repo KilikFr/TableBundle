@@ -34,11 +34,18 @@ class Table
     private $filters;
 
     /**
-     * Enregistrements par page
+     * Rows per page
      * 
      * @var int
      */
     private $rowsPerPage = 10;
+
+    /**
+     * Rows per page (options)
+     * 
+     * @var array|int
+     */
+    private $rowsPerPageOptions = [5, 10, 20, 50, 100];
 
     /**
      * Générateur de requêtes
@@ -220,6 +227,27 @@ class Table
     public function getRowsPerPage()
     {
         return $this->rowsPerPage;
+    }
+
+    /**
+     * 
+     * @param array|int $rowsPerPageOptions
+     * @return static
+     */
+    public function setRowsPerPageOptions($rowsPerPage)
+    {
+        $this->rowsPerPageOptions = $rowsPerPageOptions;
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @return int
+     */
+    public function getRowsPerPageOptions()
+    {
+        return $this->rowsPerPageOptions;
     }
 
     /**

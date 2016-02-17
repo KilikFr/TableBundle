@@ -1,4 +1,4 @@
-{# src/Kilik/TableBundle/Resources/views/_defaultTable.html.twig #}
+{# src/Kilik/TableBundle/Resources/views/_defaultTableAlt.html.twig #}
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
@@ -6,17 +6,19 @@
 <div class="panel panel-info">        
     <div class="panel-heading">        
         <div class="panel-title">
-            {% block tablePagination %}
-                <div id="{{ table.id }}_pagination" class="btn-group">
-                    {% block tablePaginationAjax %}
-                        {% include "KilikTableBundle::_paginationNumbersIcons.html.twig" %}
-                    {% endblock tablePaginationAjax %}
-                </div>
-            {% endblock tablePagination %}
             {% block tableTitle %}
                 Default title
             {% endblock tableTitle %}
         </div>
+        <span> 
+            {{ "kiliktable.show" |trans }}:
+            <select id="{{ table.id }}_rows_per_page" class="input-sm">
+                {% for rowsPerPage in table.rowsPerPageOptions %}
+                    <option value="{{ rowsPerPage }}">{{ rowsPerPage }}</option>
+                {% endfor %}
+            </select>
+            {{ "kiliktable.rows_per_page" |trans }}
+        </span>
     </div>        
     <div class="panel-body">        
         <table class="table table-responsive table-hover table-striped table-bordered">
@@ -84,15 +86,26 @@
             </tbody>
         </table>
     </div>        
-    <div class="panel-foot">        
-        {% block tableStats %}
-            <div id="{{ table.id }}_stats">
-                {% block tableStatsAjax %}
-                    {% include "KilikTableBundle::_stats.html.twig" %}
-                {% endblock tableStatsAjax %}
+</div>        
+<div class="col-md-6">
+    {% block tableStats %}
+        <div id="{{ table.id }}_stats">
+            {% block tableStatsAjax %}
+                {% include "KilikTableBundle::_stats.html.twig" %}
+            {% endblock tableStatsAjax %}
+        </div>
+    {% endblock tableStats %}
+</div>
+<div class="col-md-6">
+    <span class="pull-right">
+        {% block tablePagination %}
+            <div id="{{ table.id }}_pagination" class="btn-group">
+                {% block tablePaginationAjax %}
+                    {% include "KilikTableBundle::_paginationNumbers.html.twig" %}
+                {% endblock tablePaginationAjax %}
             </div>
-        {% endblock tableStats %}
-    </div>        
+        {% endblock tablePagination %}
+    </span>
 </div>        
 {% block tableAfterPanel %}
 {% endblock tableAfterPanel %}

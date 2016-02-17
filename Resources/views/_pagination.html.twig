@@ -1,7 +1,16 @@
 {# src/KilikTableBundle/Resources/views/_pagination.html.twig #}
-<div id="{{ table.id }}_pagination" class="btn-group">
-    <a href="#" id="{{ table.id }}_pagination_start" class="btn btn-default"><span class="glyphicon glyphicon-fast-backward"></span></a>
-    <a href="#" id="{{ table.id }}_pagination_previous" class="btn btn-default"><span class="glyphicon glyphicon-backward"></span></a>
-    <a href="#" id="{{ table.id }}_pagination_next" class="btn btn-default"><span class="glyphicon glyphicon-forward"></span></a>
-    <a href="#" id="{{ table.id }}_pagination_end" class="btn btn-default"><span class="glyphicon glyphicon-fast-forward"></span></a>
-</div>
+{# basic magination #}
+{% if tableRenderPagination is defined %}
+    <a href="#" class="btn btn-default tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="{{ table.page-1 }}">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton {% if table.page > table.lastPage-1 %}disabled{% endif %}" data-table-page="{{ table.page+1 }}">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton {% if table.page == table.lastPage %}disabled{% endif %}" data-table-page="{{ table.lastPage }}">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+{% endif %}

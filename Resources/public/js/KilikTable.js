@@ -67,6 +67,12 @@ function KilikTable(id, path) {
             table.doReload();
         });
 
+        // selectable rows per page
+        $("#" + id + "_rows_per_page").change(function () {
+            table.rowsPerPage = this.value;
+            table.doReload();
+        });
+
         // load previous filters
         this.loadFromLocalStorage();
 
@@ -150,6 +156,7 @@ function KilikTable(id, path) {
             for (var key in options.filters) {
                 $("[name='" + key + "'").val(options.filters[key]);
             }
+            $("#" + id + "_rows_per_page option[value='"+this.rowsPerPage+"'").prop("selected",true);
         }
     }
 
@@ -157,7 +164,7 @@ function KilikTable(id, path) {
      * Callback after reload
      */
     this.afterReload = function () {
-        
+
     }
 
     /**

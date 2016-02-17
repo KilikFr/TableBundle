@@ -51,6 +51,13 @@ class Column
     private $name;
 
     /**
+     * Activate label translation ?
+     * 
+     * @var bool 
+     */
+    private $translateLabel = false;
+
+    /**
      * 
      * @param Filter $filter
      * @return static
@@ -198,6 +205,28 @@ class Column
     public function sortable()
     {
         return !is_null($this->sort) || is_null($this->sortReverse);
+    }
+
+    /**
+     * Set label to translation
+     * 
+     * @param bool $translate
+     * @return static
+     */
+    public function setTranslateLabel($translate)
+    {
+        $this->translateLabel = $translate;
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @return bool
+     */
+    public function getTranslateLabel()
+    {
+        return $this->translateLabel;
     }
 
 }

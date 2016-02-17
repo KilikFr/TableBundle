@@ -1,4 +1,8 @@
-table:
+kiliktable:
     showing_entries: "{0} no matching records found | {1} showing 1 filtered entity |]1,Inf[ showing %firstRow% to %lastRow% of %filteredRows% entries"
     filtered_from: "filtered from %totalRows% total entries"
+    previous: previous
+    next: next
+    show: show
+    rows_per_page: rows per page
 
