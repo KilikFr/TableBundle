@@ -49,7 +49,7 @@ class TableService
         // @todo gérer les différents types de filtre
         foreach ($table->getAllFilters() as $filter) {
             if (isset($queryParams[$filter->getName()])) {
-                $searchParam = $queryParams[$filter->getName()];
+                $searchParam = trim($queryParams[$filter->getName()]);
             }
             else {
                 $searchParam = false;
