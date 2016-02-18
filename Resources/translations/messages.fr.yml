@@ -1,6 +1,6 @@
 kiliktable:
-    showing_entries: "{0} aucun enregistrement trouvé | {1} affichage de 1 élément filtré |]1,Inf[ affichage de l'élément %firstRow% à %lastRow% sur %filteredRows% éléments"
-    filtered_from: "{1} filtré depuis %totalRows% éléments | ]1,Inf[ filtrés depuis %totalRows% éléments"
+    showing_entries: "{0} aucun enregistrement trouvé |{1} affichage de 1 élément filtré |]1,Inf[ affichage de l'élément %firstRow% à %lastRow% sur %filteredRows% éléments"
+    filtered_from: "{1} filtré depuis %totalRows% éléments |]1,Inf[ filtrés depuis %totalRows% éléments"
     previous: précédent
     next: suivant
     show: afficher
