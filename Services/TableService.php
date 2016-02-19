@@ -171,7 +171,7 @@ class TableService
         }
 
 
-	$qb->addOrderBy($table->getAlias().".id", "asc");
+        $qb->addOrderBy($table->getAlias().".id", "asc");
         $query = $qb->getQuery();
 
         if (!is_null($qb->getDQLPart("groupBy"))) {
@@ -206,7 +206,7 @@ class TableService
             "totalRows"=>$table->getTotalRows(),
             "filteredRows"=>$table->getFilteredRows(),
             "lastPage"=>$table->getLastPage(),
-            "tableBody"=>$template->renderBlock("tableBody", array_merge($twigParams, ["tableRenderBody"=>true])),
+            "tableBody"=>$template->renderBlock("tableBody", array_merge($twigParams, ["tableRenderBody"=>true], $table->getTemplateParams())),
             //"tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
             "tableStats"=>$template->renderBlock("tableStatsAjax", array_merge($twigParams, ["tableRenderStats"=>true])),
             "tablePagination"=>$template->renderBlock("tablePaginationAjax", array_merge($twigParams, ["tableRenderPagination"=>true])),

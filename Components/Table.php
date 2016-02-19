@@ -62,11 +62,18 @@ class Table
     private $alias;
 
     /**
-     * Template pour la génération des lignes
+     * Template for table and lines
      * 
      * @var type 
      */
     private $template = "KilikTableBundle::_defaultTable.html.twig";
+
+    /**
+     * Params to pass to twig (when rendering the template)
+     * 
+     * @var array
+     */
+    private $templateParams = [];
 
     /**
      * 
@@ -191,6 +198,30 @@ class Table
     }
 
     /**
+     * Set template params
+     * 
+     * @param array $templateParams
+     * @return static
+     */
+    public function setTemplateParams($templateParams)
+    {
+        $this->templateParams = $templateParams;
+
+        return $this;
+    }
+
+    /**
+     * Get template params
+     * 
+     * @return array
+     */
+    public function getTemplateParams()
+    {
+        return $this->templateParams;
+    }
+
+    /**
+     * Get Table ID
      * 
      * @return string
      */
@@ -200,6 +231,7 @@ class Table
     }
 
     /**
+     * Get Table path
      * 
      * @return string
      */
@@ -209,6 +241,7 @@ class Table
     }
 
     /**
+     * Set Rows per page
      * 
      * @param int $rowsPerPage
      * @return static
@@ -221,6 +254,7 @@ class Table
     }
 
     /**
+     * Get rows per page
      * 
      * @return int
      */
@@ -230,6 +264,7 @@ class Table
     }
 
     /**
+     * Set rows per page options (selectable)
      * 
      * @param array|int $rowsPerPageOptions
      * @return static
@@ -242,6 +277,7 @@ class Table
     }
 
     /**
+     * Get rows per page options (selectable)
      * 
      * @return int
      */
