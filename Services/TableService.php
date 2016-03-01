@@ -69,6 +69,10 @@ class TableService
                             $sql = $filter->getField()." = :filter_".$filter->getName();
                             $queryBuilder->setParameter("filter_".$filter->getName(), $formatedSearch);
                             break;
+                        case Filter::TYPE_EQUAL:
+                            $sql = $filter->getField()." like :filter_".$filter->getName();
+                            $queryBuilder->setParameter("filter_".$filter->getName(), $formatedSearch);
+                            break;
                         default:
                         case Filter::TYPE_LIKE:
                             $sql = $filter->getField()." like :filter_".$filter->getName();
