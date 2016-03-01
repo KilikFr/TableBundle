@@ -504,11 +504,12 @@ class Table
      * 
      * @param Column $column
      * @param array $row : the row to display
+     * @param array $rows : all the rows of the page (optionnal)
      */
-    public function getValue(Column $column, $row)
+    public function getValue(Column $column, $row, $rows = [])
     {
         if (!is_null($column->getName())) {
-            return $column->getValue($row);
+            return $column->getValue($row, $rows);
         }
         else {
             return "";

@@ -71,7 +71,7 @@
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
                                         <td>
-                                            {{ table.value(column,row) }}
+                                            {{ table.value(column,row,rows) | raw }}
                                         </td>
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}

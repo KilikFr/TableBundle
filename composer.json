@@ -18,7 +18,6 @@
         "doctrine/orm": "~2.3",
         "doctrine/doctrine-bundle": "~1.0"
     },
-    "target-dir": "Kilik/TableBundle",
     "autoload": {
         "psr-0": {
             "Kilik\\TableBundle": ""

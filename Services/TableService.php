@@ -49,39 +49,42 @@ class TableService
         // @todo gérer les différents types de filtre
         foreach ($table->getAllFilters() as $filter) {
             if (isset($queryParams[$filter->getName()])) {
-                $searchParam = $queryParams[$filter->getName()];
-            }
-            else {
-                $searchParam = false;
-            }
-            // selon le type de filtre
-            switch ($filter->getType()) {
-                case Filter::TYPE_GREATER:
-                case Filter::TYPE_GREATER_OR_EQUAL:
-                case Filter::TYPE_LESS:
-                case Filter::TYPE_LESS_OR_EQUAL:
-                    if ($searchParam != false) {
+                $searchParamRaw = $queryParams[$filter->getName()];
+                list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
+                dump([$operator, $searchParam]);
+                if ($searchParam != false) {
+                    $formatedSearch = $filter->getFormatedInput($searchParam);
+
+                    $sql = false;
+                    // selon le type de filtre
+                    switch ($operator) {
+                        case Filter::TYPE_GREATER:
+                        case Filter::TYPE_GREATER_OR_EQUAL:
+                        case Filter::TYPE_LESS:
+                        case Filter::TYPE_LESS_OR_EQUAL:
+                        case Filter::TYPE_NOT_EQUAL:
+                            $sql = $filter->getField()." {$operator} :filter_".$filter->getName();
+                            $queryBuilder->setParameter("filter_".$filter->getName(), $formatedSearch);
+                            break;
+                        case Filter::TYPE_EQUAL_STRICT:
+                            $sql = $filter->getField()." = :filter_".$filter->getName();
+                            $queryBuilder->setParameter("filter_".$filter->getName(), $formatedSearch);
+                            break;
+                        default:
+                        case Filter::TYPE_LIKE:
+                            $sql = $filter->getField()." like :filter_".$filter->getName();
+                            $queryBuilder->setParameter("filter_".$filter->getName(), "%".$formatedSearch."%");
+                            break;
+                    }
+                    if (!is_null($sql)) {
                         if ($filter->getHaving()) {
-                            $queryBuilder->andHaving($filter->getField()." {$filter->getType()} :filter_".$filter->getName());
+                            $queryBuilder->andHaving($sql);
                         }
                         else {
-                            $queryBuilder->andWhere($filter->getField()." {$filter->getType()} :filter_".$filter->getName());
+                            $queryBuilder->andWhere($sql);
                         }
-                        $queryBuilder->setParameter("filter_".$filter->getName(), $searchParam);
                     }
-                    break;
-                case Filter::TYPE_LIKE:
-                default:
-                    if ($searchParam != false) {
-                        if ($filter->getHaving()) {
-                            $queryBuilder->andHaving($filter->getField()." like :filter_".$filter->getName());
-                        }
-                        else {
-                            $queryBuilder->andWhere($filter->getField()." like :filter_".$filter->getName());
-                        }
-                        $queryBuilder->setParameter("filter_".$filter->getName(), "%".$searchParam."%");
-                    }
-                    break;
+                }
             }
         }
     }
@@ -170,8 +173,7 @@ class TableService
             }
         }
 
-
-	$qb->addOrderBy($table->getAlias().".id", "asc");
+        $qb->addOrderBy($table->getAlias().".id", "asc");
         $query = $qb->getQuery();
 
         if (!is_null($qb->getDQLPart("groupBy"))) {

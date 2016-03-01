@@ -80,6 +80,13 @@ class Column
     private $displayFormatParams = null;
 
     /**
+     * callback for a custom display method 
+     * 
+     * @var mixed
+     */
+    private $displayCallback = null;
+
+    /**
      * 
      * @param Filter $filter
      * @return static
@@ -104,6 +111,7 @@ class Column
     }
 
     /**
+     * Set column label
      * 
      * @param string $label
      * @return static
@@ -116,6 +124,7 @@ class Column
     }
 
     /**
+     * Get column label
      * 
      * @return string
      */
@@ -148,6 +157,7 @@ class Column
     }
 
     /**
+     * Set sort fields
      * 
      * @param array $sort
      * @return static
@@ -192,6 +202,7 @@ class Column
     }
 
     /**
+     * Get sort fields
      * 
      * @return array
      */
@@ -201,6 +212,7 @@ class Column
     }
 
     /**
+     * Set reversed sort fields
      * 
      * @param array $sort
      * @return static
@@ -213,6 +225,7 @@ class Column
     }
 
     /**
+     * Get reversed sort fields
      * 
      * @return array
      */
@@ -222,6 +235,8 @@ class Column
     }
 
     /**
+     * Column is sortable ?
+     * 
      * @return bool
      */
     public function sortable()
@@ -243,6 +258,7 @@ class Column
     }
 
     /**
+     * Column label should be translated ?
      * 
      * @return bool
      */
@@ -252,6 +268,8 @@ class Column
     }
 
     /**
+     * Set the display format
+     * 
      * @param string $displayFormat
      * @return static
      */
@@ -266,6 +284,7 @@ class Column
     }
 
     /**
+     * Get the display format 
      * 
      * @return string
      */
@@ -275,6 +294,8 @@ class Column
     }
 
     /**
+     * Set display format parameters
+     * 
      * @param array $displayFormatParams
      * @return static
      */
@@ -286,6 +307,7 @@ class Column
     }
 
     /**
+     * Get display format parameters
      * 
      * @return string
      */
@@ -295,31 +317,83 @@ class Column
     }
 
     /**
+     * Set display callback method
+     * 
+     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values, rows)
+     * @return static
+     */
+    public function setDisplayCallback($callback)
+    {
+        $this->displayCallback = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Get display callback method
+     * 
+     * @return mixed
+     */
+    public function getDisplayCallback()
+    {
+        return $this->displayCallback;
+    }
+
+    /**
+     * Callback sample
+     * 
+     * @param mixed $value : the column value (the object or a field)
+     * @param array $row : the row values
+     * @param array $rows : the rows values (of the page)
+     */
+    public function sampleCallback($value, $row, $rows)
+    {
+        // this sample juste return the value, but could do many more
+        return (string) $value;
+    }
+
+    /**
      * Get the formatted value to display
      * 
+     * priority formatter methods:
+     * - callback
+     * - known formats
+     * - default (raw text)
+     * 
      * @param array $row : the row to display
+     * @param array $rows : all the rows of the page (optionnal)
      */
-    public function getValue($row)
+    public function getValue($row, $rows = [])
     {
         if (isset($row[$this->getName()])) {
             $rawValue = $row[$this->getName()];
-            switch ($this->getDisplayFormat()) {
-                case static::FORMAT_DATE:
-                    $formatParams = $this->getDisplayFormatParams();
-                    if (is_null($formatParams)) {
-                        $formatParams = "Y-m-d H:i:s";
-                    }
-                    if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
-                        return $rawValue->format($formatParams);
-                    }
-                    else {
-                        return "bad argument";
-                    }
-                    break;
-                case static::FORMAT_TEXT:
-                default:
-                    return $rawValue;
-                    break;
+            // if a callback is set
+            $callback = $this->getDisplayCallback();
+            if (!is_null($callback)) {
+                if (!is_callable($callback)) {
+                    throw new Exception("displayCallback is not callable");
+                }
+                return $callback($rawValue, $row, $rows);
+            }
+            else {
+                switch ($this->getDisplayFormat()) {
+                    case static::FORMAT_DATE:
+                        $formatParams = $this->getDisplayFormatParams();
+                        if (is_null($formatParams)) {
+                            $formatParams = "Y-m-d H:i:s";
+                        }
+                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
+                            return $rawValue->format($formatParams);
+                        }
+                        else {
+                            return "bad argument";
+                        }
+                        break;
+                    case static::FORMAT_TEXT:
+                    default:
+                        return $rawValue;
+                        break;
+                }
             }
         }
         else {

@@ -11,6 +11,9 @@ function KilikTable(id, path, options) {
     this.totalFilteredRows = 0;
     this.sortColumn = "";
     this.sortReverse = false;
+    // delay after a key pressed before reload (ms)
+    this.askForReloadDelay = 250;
+    this.askForReloadTimer = null;
 
     // apply styles on sorted columns
     this.sortColumnClassSortable = "glyphicon-sort";
@@ -28,6 +31,9 @@ function KilikTable(id, path, options) {
                 break;
             case "sortColumnClassSortedReverse":
                 this.sortColumnClassSortedReverse = options[optionKey];
+                break;
+            case "askForReloadDelay":
+                this.askForReloadDelay = options[optionKey];
                 break;
         }
     }
@@ -69,7 +75,8 @@ function KilikTable(id, path, options) {
             table.doReload();
         });
         $(".refreshOnKeyup, #" + this.getFormName()).keyup(function () {
-            table.doReload();
+            // delayed reload
+            table.askForReload();
         });
 
         // force reload (on click)
@@ -186,10 +193,45 @@ function KilikTable(id, path, options) {
     }
 
     /**
-     * Callback after reload
+     * Callback before ask for reload
      */
-    this.afterReload = function () {
+    this.beforeAskForReload = function () {
+        // could be overridden
+    }
 
+    /**
+     * Ask for reload, until timeout
+     */
+    this.askForReload = function () {
+        var table = this;
+
+        // callback
+        table.beforeAskForReload();
+        if (this.askForReloadTimer) {
+            clearTimeout(table.askForReloadTimer);
+        }
+
+        // reload planned
+        this.askForReloadTimer = setTimeout(function () {
+            table.doReload();
+        }, table.askForReloadDelay);
+
+        // callback
+        table.afterAskForReload();
+    }
+
+    /**
+     * Callback after ask for reload
+     */
+    this.afterAskForReload = function () {
+        // could be overridden
+    }
+
+    /**
+     * Callback before reload
+     */
+    this.beforeReload = function () {
+        // could be overridden
     }
 
     /**
@@ -205,6 +247,9 @@ function KilikTable(id, path, options) {
 
         // save data to localstorage
         table.saveToLocalStorage();
+
+        // callback
+        table.beforeReload();
 
         // and send the query
         $.post(this.path, postData,
@@ -232,4 +277,12 @@ function KilikTable(id, path, options) {
             table.afterReload();
         });
     };
+
+    /**
+     * Callback after reload
+     */
+    this.afterReload = function () {
+        // could be overridden
+    }
+
 }
