@@ -1,16 +1,7 @@
 {# src/KilikTableBundle/Resources/views/_stats.html.twig #}
 {% if tableRenderStats is defined %}
-    {#    <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="glyphicon glyphicon-list"></span>
-            </button>
-            <ul class="dropdown-menu">
-                <li><a href="#">Dropdown link</a></li>
-            </ul>
-        </div>
-    #}    
     {{ "kiliktable.showing_entries"|transchoice(table.filteredRows,{"%firstRow%": table.firstRow,"%lastRow%": table.lastRow,"%filteredRows%":table.filteredRows})|capitalize }}
-    {% if table.filteredRows != table.totalRows %}
-        ({{ "kiliktable.filtered_from"|trans({"%totalRows%":table.totalRows})|capitalize }})
+    {% if table.filteredRows != table.totalRows and table.totalRows > 0%}
+        ({{ "kiliktable.filtered_from"|transchoice(table.totalRows,{"%totalRows%":table.totalRows})|capitalize }})
     {% endif %}
 {% endif %}
