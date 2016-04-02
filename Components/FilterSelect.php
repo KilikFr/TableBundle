@@ -22,7 +22,7 @@ class FilterSelect extends Filter
      * 
      * @var string
      */
-    private $placeholder="test";
+    private $placeholder;
 
     /**
      * Set the choices
