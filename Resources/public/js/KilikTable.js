@@ -179,11 +179,11 @@ function KilikTable(id, path, options) {
      * Load filters and sorts from localStorage
      */
     this.loadFromLocalStorage = function () {
+        console.log("loadFromLocalStorage");
         var options = $.parseJSON(localStorage.getItem(this.getLocalStorageName()));
         if (options) {
             // clear all checkbox
             $(":checkbox, #" + this.getFormName()).removeProp("checked");
-
             this.page = options.page;
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
@@ -196,7 +196,7 @@ function KilikTable(id, path, options) {
                     $("input[name='" + key + "']").prop("checked", true);
                 }
             }
-            $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "'").prop("selected", true);
+            $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
         }
     }
 
