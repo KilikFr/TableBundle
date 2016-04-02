@@ -111,7 +111,7 @@ class TableService
                     $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, ["required"=>false]);
                     break;
                 case FilterSelect::FILTER_TYPE:
-                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, ["required"=>false,"choices"=>$filter->getChoices(),"placeholder"=>$filter->getPlaceholder()]);
+                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, ["required"=>false, "choices"=>$filter->getChoices(), "placeholder"=>$filter->getPlaceholder()]);
                     break;
                 case Filter::FILTER_TYPE:
                 default:
@@ -194,6 +194,9 @@ class TableService
             foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
                 if (is_object($object)) {
                     $objects[$object->getId()] = $object;
+                }
+                else if (isset($object[0]) && is_object($object[0])) {
+                    $objects[$object[0]->getId()] = $object[0];
                 }
             }
         }
