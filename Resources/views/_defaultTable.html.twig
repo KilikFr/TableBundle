@@ -54,7 +54,7 @@
                                 {% for column in table.columns %}
                                     <td>
                                         {% if column.filter is not null %}
-                                            {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup"} }) }}
+                                            {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup refreshOnChange"} }) }}
                                         {% endif %}
                                     </td>
                                 {% endfor %}
@@ -82,7 +82,7 @@
             </tbody>
         </table>
     </div>        
-    <div class="panel-foot">        
+    <div class="panel-footer">        
         {% block tableStats %}
             <div id="{{ table.id }}_stats">
                 {% block tableStatsAjax %}

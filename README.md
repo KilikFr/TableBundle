@@ -18,6 +18,7 @@ Working features:
 - show ordered column (normal and reverse)
 - max items per page selector (customizable)
 - delay on keyup events (to prevent multiple reloads)
+- checkbox and select filter
 
 Planned features:
 - more translations
@@ -25,7 +26,6 @@ Planned features:
 - clean/reset filters in local storage browser
 - add advanced templates
 - loading image waiting ajax response
-- new filters (checkbox, etc...)
 - new column display types (now: only raw text value)
 - column display callback
 - multiple lists on one page (binding jquery functions on good scopes, perhaps it's already working ?)

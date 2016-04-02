@@ -181,12 +181,20 @@ function KilikTable(id, path, options) {
     this.loadFromLocalStorage = function () {
         var options = $.parseJSON(localStorage.getItem(this.getLocalStorageName()));
         if (options) {
+            // clear all checkbox
+            $(":checkbox, #" + this.getFormName()).removeProp("checked");
+
             this.page = options.page;
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
             this.sortReverse = options.sortReverse;
             for (var key in options.filters) {
-                $("[name='" + key + "'").val(options.filters[key]);
+                $("[name='" + key + "']").val(options.filters[key]);
+
+                // for checkbox (@todo: do this only for checkbox)
+                if (options.filters[key] == 1) {
+                    $("input[name='" + key + "']").prop("checked", true);
+                }
             }
             $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "'").prop("selected", true);
         }

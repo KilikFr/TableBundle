@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\Filter;
+use Kilik\TableBundle\Components\FilterCheckbox;
+use Kilik\TableBundle\Components\FilterSelect;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -104,7 +106,14 @@ class TableService
         //$this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
             // selon le type de filtre
-            switch ($filter->getType()) {
+            switch ($filter::FILTER_TYPE) {
+                case FilterCheckbox::FILTER_TYPE:
+                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, ["required"=>false]);
+                    break;
+                case FilterSelect::FILTER_TYPE:
+                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, ["required"=>false,"choices"=>$filter->getChoices(),"placeholder"=>$filter->getPlaceholder()]);
+                    break;
+                case Filter::FILTER_TYPE:
                 default:
                     $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\TextType::class, ["required"=>false]);
                     break;

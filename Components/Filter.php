@@ -5,6 +5,14 @@ namespace Kilik\TableBundle\Components;
 class Filter
 {
 
+    /**
+     * Type d'input
+     */
+    const FILTER_TYPE = "text";
+
+    /**
+     * Type de filtre
+     */
     // WHERE field LIKE '%value%'
     const TYPE_LIKE             = "like";
     // WHERE field NOT LIKE '%value%'
