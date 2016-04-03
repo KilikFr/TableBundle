@@ -552,4 +552,16 @@ class Table
         }
     }
 
+    /**
+     * Get table options (for javascript)
+     * 
+     * @return array
+     */
+    public function getOptions()
+    {
+        return [
+            "rowsPerPage"=>$this->rowsPerPage,
+        ];
+    }
+
 }

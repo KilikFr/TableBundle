@@ -35,6 +35,9 @@ function KilikTable(id, path, options) {
             case "askForReloadDelay":
                 this.askForReloadDelay = options[optionKey];
                 break;
+            case "rowsPerPage":
+                this.rowsPerPage = options[optionKey];
+                break;
         }
     }
 
