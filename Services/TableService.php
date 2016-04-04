@@ -53,7 +53,7 @@ class TableService
             if (isset($queryParams[$filter->getName()])) {
                 $searchParamRaw = trim($queryParams[$filter->getName()]);
                 list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
-                if ($searchParam != false) {
+                if ((string)$searchParam != "") {
                     $formatedSearch = $filter->getFormatedInput($searchParam);
 
                     $sql = false;
