@@ -182,7 +182,6 @@ function KilikTable(id, path, options) {
      * Load filters and sorts from localStorage
      */
     this.loadFromLocalStorage = function () {
-        console.log("loadFromLocalStorage");
         var options = $.parseJSON(localStorage.getItem(this.getLocalStorageName()));
         if (options) {
             // clear all checkbox
