@@ -87,6 +87,13 @@ class Column
     private $displayCallback = null;
 
     /**
+     * mode raw ?
+     * 
+     * @var bool
+     */
+    private $raw = false;
+
+    /**
      * 
      * @param Filter $filter
      * @return static
@@ -291,6 +298,29 @@ class Column
     public function getDisplayFormat()
     {
         return $this->displayFormat;
+    }
+
+    /**
+     * Set the raw option (for raw twig rendering)
+     * 
+     * @param bool $raw
+     * @return static
+     */
+    public function setRaw($raw)
+    {
+        $this->raw = $raw;
+
+        return $this;
+    }
+
+    /**
+     * Get the raw option
+     * 
+     * @return bool
+     */
+    public function getRaw()
+    {
+        return $this->raw;
     }
 
     /**

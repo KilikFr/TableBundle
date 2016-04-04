@@ -71,7 +71,12 @@
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
                                         <td>
-                                            {{ table.value(column,row,rows) | raw }}
+                                            {% set cellHtml=table.value(column,row) %}
+                                            {% if column.raw %}
+                                                {{ cellHtml | raw }}
+                                            {% else %}
+                                                {{ cellHtml }}
+                                            {% endif %}
                                         </td>
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}
