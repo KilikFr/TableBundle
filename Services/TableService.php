@@ -48,12 +48,12 @@ class TableService
     private function addSearch(Table $table, Request $request, \Doctrine\ORM\QueryBuilder $queryBuilder)
     {
         $queryParams = $request->get($table->getFormId());
-        // @todo gérer les différents types de filtre
+        // @todo handle all kind of filters
         foreach ($table->getAllFilters() as $filter) {
             if (isset($queryParams[$filter->getName()])) {
                 $searchParamRaw = trim($queryParams[$filter->getName()]);
                 list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
-                if ((string)$searchParam != "") {
+                if ((string) $searchParam != "") {
                     $formatedSearch = $filter->getFormatedInput($searchParam);
 
                     $sql = false;
@@ -135,40 +135,49 @@ class TableService
     }
 
     /**
+     * Handle the user request and return an array of all elements
+     * 
      * @param Table $table
      * @param Request $request
+     * @param bool $paginate : limit selections with pagination mecanism
+     * @param bool $getObjetcs : get objects (else, only scalar results)
      * @return Response
+     * 
+     * table attributes are modified (if paginate=true)
      */
-    public function handleRequest(Table $table, Request $request)
+    public function getRows(Table $table, Request $request, $paginate = true, $getObjetcs = true)
     {
         $table->setRowsPerPage($request->get("rowsPerPage", 10));
         $table->setPage($request->get("page", 1));
 
         $qb = $table->getQueryBuilder();
 
-        // count total rows (without filters)
-        $qbtr           = clone $qb;
-        $paginatorTotal = new Paginator($qbtr->getQuery());
-        $table->setTotalRows($paginatorTotal->count());
+        if ($paginate) {
+            // count total rows (without filters)
+            $qbtr           = clone $qb;
+            $paginatorTotal = new Paginator($qbtr->getQuery());
+            $table->setTotalRows($paginatorTotal->count());
 
-        // count filtered rows (with filters this time)
-        $qbfr = clone $qb;
-        $this->addSearch($table, $request, $qbfr);
+            // count filtered rows (with filters this time)
+            $qbfr = clone $qb;
+            $this->addSearch($table, $request, $qbfr);
 
-        $paginatorFiltered = new Paginator($qbfr->getQuery());
-        $table->setFilteredRows($paginatorFiltered->count());
+            $paginatorFiltered = new Paginator($qbfr->getQuery());
+            $table->setFilteredRows($paginatorFiltered->count());
 
-        // compute last page and floor curent page
-        $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
+            // compute last page and floor curent page
+            $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
 
-        if ($table->getPage() > $table->getLastPage()) {
-            $table->setPage($table->getLastPage());
+            if ($table->getPage() > $table->getLastPage()) {
+                $table->setPage($table->getLastPage());
+            }
+
+            $qb->setMaxResults($table->getRowsPerPage());
+            $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
         }
 
-        // gets results
+        // add filters
         $this->addSearch($table, $request, $qb);
-        $qb->setMaxResults($table->getRowsPerPage());
-        $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
 
         // handle ordering
         $sortColumn = $request->get("sortColumn");
@@ -185,31 +194,93 @@ class TableService
             }
         }
 
+        // force a final ordering by id
         $qb->addOrderBy($table->getAlias().".id", "asc");
         $query = $qb->getQuery();
 
-        if (!is_null($qb->getDQLPart("groupBy"))) {
-            // results as objects
-            $objects = [];
-            foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
-                if (is_object($object)) {
-                    $objects[$object->getId()] = $object;
-                }
-                else if (isset($object[0]) && is_object($object[0])) {
-                    $objects[$object[0]->getId()] = $object[0];
+        // if we need to get objects
+        if ($getObjetcs) {
+            // @todo: change the method to get objects from SCALAR selection, in place of a second query....
+            if (!is_null($qb->getDQLPart("groupBy"))) {
+                // results as objects
+                $objects = [];
+                foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
+                    if (is_object($object)) {
+                        $objects[$object->getId()] = $object;
+                    }
+                    // when results are mixed with objects and scalar
+                    else if (isset($object[0]) && is_object($object[0])) {
+                        $objects[$object[0]->getId()] = $object[0];
+                    }
                 }
             }
         }
+
         $rows = $query->getResult(Query::HYDRATE_SCALAR);
 
-        // results as scalar
-        foreach ($rows as &$row) {
-            if (isset($objects[$row[$table->getAlias()."_id"]])) {
-                $row["object"] = $objects[$row[$table->getAlias()."_id"]];
+        // if we need to get objects
+        if ($getObjetcs) {
+            // results as scalar
+            foreach ($rows as &$row) {
+                if (isset($objects[$row[$table->getAlias()."_id"]])) {
+                    $row["object"] = $objects[$row[$table->getAlias()."_id"]];
+                }
             }
         }
 
-        // prépare response
+        return $rows;
+    }
+
+    /**
+     * Export (selection by filters) as a CSV file
+     * 
+     * @param Table $table
+     * @param Request $request
+     * @param string $filename
+     * @return Response
+     */
+    public function exportAsCsv(Table $table, Request $request)
+    {
+        // execute query with filters, without pagination, only scalar results
+        $rows = $this->getRows($table, $request, false, false);
+
+        $buffer = "";
+        // first line: keys
+        if (count($rows) > 0) {
+            foreach ($rows[0] as $key=> $notused) {
+                $buffer.=$key.";";
+            }
+            $buffer.="\n";
+        }
+
+        foreach ($rows as $row) {
+            foreach ($row as $key=> $value) {
+                if (is_object($value) && get_class($value) == "DateTime") {
+                    $buffer.=$value->format("Y-m-d H:i").";";
+                }
+                else {
+                    $buffer.=$value.";";
+                }
+            }
+            $buffer.="\n";
+        }
+
+        return $buffer;
+    }
+
+    /**
+     * Handle the user request and return the JSON response (with pagination)
+     * 
+     * @param Table $table
+     * @param Request $request
+     * @return Response
+     */
+    public function handleRequest(Table $table, Request $request)
+    {
+        // execute query with filters
+        $rows = $this->getRows($table, $request);
+
+        // params for twig parts
         $twigParams = [
             "table"=>$table,
             "rows"=>$rows,
