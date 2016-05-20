@@ -19,6 +19,7 @@ Working features:
 - max items per page selector (customizable)
 - delay on keyup events (to prevent multiple reloads)
 - checkbox and select filter
+- CSV export of filtered rows
 
 Planned features:
 - more translations
@@ -29,4 +30,3 @@ Planned features:
 - new column display types (now: only raw text value)
 - column display callback
 - multiple lists on one page (binding jquery functions on good scopes, perhaps it's already working ?)
-- easy export of filtered rows
