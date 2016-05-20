@@ -87,6 +87,13 @@ class Column
     private $displayCallback = null;
 
     /**
+     * callback for a custom export method 
+     * 
+     * @var mixed
+     */
+    private $exportCallback = null;
+
+    /**
      * mode raw ?
      * 
      * @var bool
@@ -370,6 +377,29 @@ class Column
     }
 
     /**
+     * Set export callback method
+     * 
+     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values, rows)
+     * @return static
+     */
+    public function setExportCallback($callback)
+    {
+        $this->exportCallback = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Get export callback method
+     * 
+     * @return mixed
+     */
+    public function getExportCallback()
+    {
+        return $this->exportCallback;
+    }
+
+    /**
      * Callback sample
      * 
      * @param mixed $value : the column value (the object or a field)
@@ -421,7 +451,66 @@ class Column
                         break;
                     case static::FORMAT_TEXT:
                     default:
-                        return $rawValue;
+                        if (is_array($rawValue)) {
+                            return implode(",", $rawValue);
+                        }
+                        else {
+                            return $rawValue;
+                        }
+                        break;
+                }
+            }
+        }
+        else {
+            return "";
+        }
+    }
+
+    /**
+     * Get the formatted value to export (used by CSV export)
+     * 
+     * priority formatter methods:
+     * - callback
+     * - known formats
+     * - default (raw text)
+     * 
+     * @param array $row : the row to display
+     * @param array $rows : all the rows of the page (optionnal)
+     */
+    public function getExportValue($row, $rows = [])
+    {
+        if (isset($row[$this->getName()])) {
+            $rawValue = $row[$this->getName()];
+            // if a callback is set
+            $callback = $this->getExportCallback();
+            if (!is_null($callback)) {
+                if (!is_callable($callback)) {
+                    throw new Exception("exportCallback is not callable");
+                }
+                return $callback($rawValue, $row, $rows);
+            }
+            else {
+                switch ($this->getDisplayFormat()) {
+                    case static::FORMAT_DATE:
+                        $formatParams = $this->getDisplayFormatParams();
+                        if (is_null($formatParams)) {
+                            $formatParams = "Y-m-d H:i:s";
+                        }
+                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
+                            return $rawValue->format($formatParams);
+                        }
+                        else {
+                            return "bad argument";
+                        }
+                        break;
+                    case static::FORMAT_TEXT:
+                    default:
+                        if (is_array($rawValue)) {
+                            return implode(",", $rawValue);
+                        }
+                        else {
+                            return $rawValue;
+                        }
                         break;
                 }
             }

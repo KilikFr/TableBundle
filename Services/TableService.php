@@ -185,7 +185,7 @@ class TableService
 
         // handle ordering
         $queryParams = $request->get($table->getFormId());
-        
+
         if (isset($queryParams["sortColumn"]) && $queryParams["sortColumn"] != "") {
             $column = $table->getColumnByName($queryParams["sortColumn"]);
             // if column exists
@@ -258,20 +258,15 @@ class TableService
         $buffer = "";
         // first line: keys
         if (count($rows) > 0) {
-            foreach ($rows[0] as $key=> $notused) {
-                $buffer.=$key.";";
+            foreach ($table->getColumns() as $column) {
+                $buffer.=$column->getName().";";
             }
             $buffer.="\n";
         }
 
         foreach ($rows as $row) {
-            foreach ($row as $key=> $value) {
-                if (is_object($value) && get_class($value) == "DateTime") {
-                    $buffer.=$value->format("Y-m-d H:i").";";
-                }
-                else {
-                    $buffer.=$value.";";
-                }
+            foreach ($table->getColumns() as $column) {
+                $buffer.=$column->getExportValue($row, $rows).";";
             }
             $buffer.="\n";
         }
