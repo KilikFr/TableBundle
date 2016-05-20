@@ -120,6 +120,10 @@ class TableService
             }
         }
 
+        // append special inputs (used for export csv for exemple)
+        $form->add("sortColumn", \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ["required"=>false]);
+        $form->add("sortReverse", \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ["required"=>false]);
+
         return $form->getForm()->createView();
     }
 
@@ -180,14 +184,21 @@ class TableService
         $this->addSearch($table, $request, $qb);
 
         // handle ordering
-        $sortColumn = $request->get("sortColumn");
-        if ($sortColumn != "") {
-            $column = $table->getColumnByName($sortColumn);
+        $queryParams = $request->get($table->getFormId());
+        
+        if (isset($queryParams["sortColumn"]) && $queryParams["sortColumn"] != "") {
+            $column = $table->getColumnByName($queryParams["sortColumn"]);
             // if column exists
             if (!is_null($column)) {
                 if (!is_null($column->getSort())) {
                     $qb->resetDQLPart("orderBy");
-                    foreach ($column->getAutoSort($request->get("sortReverse")) as $sortField=> $sortOrder) {
+                    if (isset($queryParams["sortReverse"])) {
+                        $sortReverse = $queryParams["sortReverse"];
+                    }
+                    else {
+                        $sortReverse = false;
+                    }
+                    foreach ($column->getAutoSort($sortReverse) as $sortField=> $sortOrder) {
                         $qb->addOrderBy($sortField, $sortOrder);
                     }
                 }

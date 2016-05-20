@@ -98,6 +98,8 @@ function KilikTable(id, path, options) {
                 table.sortColumn = sortColumn;
                 table.sortReverse = false;
             }
+            $("input[name='" + table.getFormName() + "\[sortColumn\]'], #" + table.getFormName()).val(table.sortColumn);
+            $("input[name='" + table.getFormName() + "\[sortReverse\]'], #" + table.getFormName()).val(table.sortReverse ? 1 : 0);
             table.applyColumnSort();
             table.doReload();
         });
@@ -198,6 +200,10 @@ function KilikTable(id, path, options) {
                     $("input[name='" + key + "']").prop("checked", true);
                 }
             }
+            // bind specials inputs (used for csv export for exemple)
+            $("input[name='" + this.getFormName() + "\[sortColumn\]']").val(this.sortColumn);
+            $("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
+
             $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
         }
     }
@@ -252,8 +258,6 @@ function KilikTable(id, path, options) {
         var postData = $("form[name=" + id + "_form]").serializeArray();
         postData.push({"name": "page", "value": table.page, });
         postData.push({"name": "rowsPerPage", "value": table.rowsPerPage, });
-        postData.push({"name": "sortColumn", "value": table.sortColumn, });
-        postData.push({"name": "sortReverse", "value": table.sortReverse ? 1 : 0, });
 
         // save data to localstorage
         table.saveToLocalStorage();
