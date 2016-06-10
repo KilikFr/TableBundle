@@ -259,7 +259,11 @@ function KilikTable(id, path, options) {
 
             $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
 
-            this.hiddenColumns = options.hiddenColumns;
+            if (typeof options.hiddenColumns === "undefined") {
+                this.hiddenColumns = [];
+            } else {
+                this.hiddenColumns = options.hiddenColumns;
+            }
 
         } else {
             this.hiddenColumns = this.defaultHiddenColumns;
