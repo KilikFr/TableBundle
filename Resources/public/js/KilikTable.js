@@ -176,22 +176,27 @@ function KilikTable(id, path, options) {
             checked = input.prop("checked");
             name = input.attr("data-column");
 
-            // ih checked, column is not hidden
+            // if hidding
             if (checked) {
                 table.hiddenColumns.splice($.inArray(name, table.hiddenColumns), 1);
+            } else {
+                table.hiddenColumns.push(name);
+                // when hidding column, disable filters on hidden columns
+                $("input[data-column='" + name + "'], #" + id).val("");
+                $("select[data-column='" + name + "'] option, #" + id).removeAttr("selected");
+            }
+
+            // reload (before hide or show columns names)
+            table.doReload();
+
+            // if checked, column is not hidden
+            if (checked) {
                 $("th[data-column='" + name + "'], #" + id).show();
                 $("td[data-column='" + name + "'], #" + id).show();
             } else {
-                table.hiddenColumns.push(name);
                 $("th[data-column='" + name + "'], #" + id).hide();
                 $("td[data-column='" + name + "'], #" + id).hide();
-
-                // when hidding column, disable filter @todo...
-                $("input[data-column='" + name + "'], #" + id).val("");
-                $("select[data-column='" + name + "'], #" + id).removeAttr("selected");
             }
-
-            table.doReload();
 
         });
     }

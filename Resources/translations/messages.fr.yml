@@ -5,3 +5,4 @@ kiliktable:
     next: suivant
     show: afficher
     rows_per_page: éléments par page
+    setup: configuration
