@@ -262,8 +262,6 @@ function KilikTable(id, path, options) {
             $("input[name='" + this.getFormName() + "\[sortColumn\]']").val(this.sortColumn);
             $("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
 
-            $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
-
             if (typeof options.hiddenColumns === "undefined") {
                 this.hiddenColumns = [];
             } else {
@@ -273,6 +271,7 @@ function KilikTable(id, path, options) {
         } else {
             this.hiddenColumns = this.defaultHiddenColumns;
         }
+        $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
     }
 
     /**
