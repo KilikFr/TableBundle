@@ -1,0 +1,11 @@
+{# KilikTableBundle::_columnCell.html.twig #}
+{% if not column.hidden %}
+    <td>
+        {% set cellHtml=table.value(column,row) %}
+        {% if column.raw %}
+            {{ cellHtml | raw }}
+        {% else %}
+            {{ cellHtml }}
+        {% endif %}
+    </td>
+{% endif %}

@@ -154,6 +154,13 @@ class TableService
         $table->setRowsPerPage($request->get("rowsPerPage", 10));
         $table->setPage($request->get("page", 1));
 
+        foreach ($request->get("hiddenColumns", []) as $hiddenColumnName=> $notUsed) {
+            $column = $table->getColumnByName($hiddenColumnName);
+            if (!is_null($column)) {
+                $column->setHidden(true);
+            }
+        }
+
         $qb = $table->getQueryBuilder();
 
         if ($paginate) {

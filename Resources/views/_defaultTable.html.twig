@@ -1,4 +1,5 @@
-{# src/Kilik/TableBundle/Resources/views/_defaultTable.html.twig #}
+{# KilikTableBundle::_defaultTable.html.twig #}
+
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
@@ -25,26 +26,7 @@
                     <tr>
                         {% block tableHeadStdColumns %}
                             {% for column in table.columns %}
-                                {% if column.sortable %}
-                                    <th class="columnSortable" data-sort-column="{{ column.name }}">
-                                        <a href="#">
-                                            {% if column.translateLabel %}
-                                                {{ column.label|trans }}
-                                            {% else %}
-                                                {{ column.label }}
-                                            {% endif %}
-                                        </a>
-                                        <span class="glyphicon columnSortableIcon"></span>
-                                    </th>
-                                {% else %}
-                                    <th>
-                                        {% if column.translateLabel %}
-                                            {{ column.label|trans }}
-                                        {% else %}
-                                            {{ column.label }}
-                                        {% endif %}
-                                    </th>
-                                {% endif %}
+                                {% include "KilikTableBundle::_columnName.html.twig" %}
                             {% endfor %}
                         {% endblock tableHeadStdColumns %}
                     </tr>
@@ -52,11 +34,7 @@
                         <tr>
                             {% block tableHeadStdFilters %}
                                 {% for column in table.columns %}
-                                    <td>
-                                        {% if column.filter is not null %}
-                                            {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup refreshOnChange"} }) }}
-                                        {% endif %}
-                                    </td>
+                                    {% include "KilikTableBundle::_columnFilter.html.twig" %}
                                 {% endfor %}
                             {% endblock tableHeadStdFilters %}
                         </tr>
@@ -70,14 +48,7 @@
                             <tr>
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
-                                        <td>
-                                            {% set cellHtml=table.value(column,row) %}
-                                            {% if column.raw %}
-                                                {{ cellHtml | raw }}
-                                            {% else %}
-                                                {{ cellHtml }}
-                                            {% endif %}
-                                        </td>
+                                        {% include "KilikTableBundle::_columnCell.html.twig" %}
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}
                             </tr>

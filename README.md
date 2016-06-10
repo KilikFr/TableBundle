@@ -20,13 +20,13 @@ Working features:
 - delay on keyup events (to prevent multiple reloads)
 - checkbox and select filter
 - CSV export of filtered rows
+- customization of visible columns (hide/show checkboxes)
+- column display callback
+- multiple lists on one page
 
 Planned features:
 - more translations
-- customize visibles colums (hide/show checkboxes)
 - clean/reset filters in local storage browser
 - add advanced templates
 - loading image waiting ajax response
 - new column display types (now: only raw text value)
-- column display callback
-- multiple lists on one page (binding jquery functions on good scopes, perhaps it's already working ?)

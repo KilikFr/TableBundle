@@ -1,0 +1,27 @@
+{# KilikTableBundle::_setup.html.twig #}
+
+<div class="dropdown">
+    <a href="#" class="glyphicon glyphicon-cog dropdown-toggle" id="dropdownSetup_{{ table.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></a>
+    <ul class="dropdown-menu" aria-labelledby="{{ table.id }}_setup">
+        {#{{ dump(table.columns.0) }}#}
+        {% for column in table.columns %}
+            <li>
+                <a>
+                    <input type="checkbox" data-column="{{ column.name }}" class="input"></input> {{ column.label }}
+                </a>
+            </li>
+        {% endfor %}
+        <li role="separator" class="divider"></li>
+        <li>
+            <a>
+                {#{{ "kiliktable.show" |trans }}:#}
+                <select id="{{ table.id }}_rows_per_page" class="input-sm">
+                    {% for rowsPerPage in table.rowsPerPageOptions %}
+                        <option value="{{ rowsPerPage }}">{{ rowsPerPage }}</option>
+                    {% endfor %}
+                </select>
+                {{ "kiliktable.rows_per_page" |trans }}
+            </a>
+        </li>
+    </ul>                
+</div>

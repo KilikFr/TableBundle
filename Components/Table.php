@@ -110,6 +110,13 @@ class Table
     private $columns;
 
     /**
+     * custom options
+     * 
+     * @var array
+     */
+    private $customOptions = [];
+
+    /**
      * Constructeur
      */
     public function __construct()
@@ -553,15 +560,59 @@ class Table
     }
 
     /**
+     * Add a custom option
+     * 
+     * @param string $option
+     * @param mixed $value
+     * 
+     * @return static
+     */
+    public function addCustomOption($option, $value)
+    {
+        $this->customOptions[$option] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Get custom options
+     * 
+     * @return array
+     */
+    public function getCustomOptions()
+    {
+        return $this->customOptions;
+    }
+
+    /**
+     * Get hidden columns names
+     * 
+     * @return array
+     */
+    public function getHiddenColumnsNames()
+    {
+        $hiddenColumns = [];
+
+        foreach ($this->columns as $column) {
+            if ($column->getHiddenByDefault()) {
+                $hiddenColumns[] = $column->getName();
+            }
+        }
+
+        return $hiddenColumns;
+    }
+
+    /**
      * Get table options (for javascript)
      * 
      * @return array
      */
     public function getOptions()
     {
-        return [
+        return array_merge($this->customOptions, [
             "rowsPerPage"=>$this->rowsPerPage,
-        ];
+            "defaultHiddenColumns"=>$this->getHiddenColumnsNames(),
+        ]);
     }
 
 }

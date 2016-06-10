@@ -1,4 +1,5 @@
-{# src/Kilik/TableBundle/Resources/views/_defaultTableAlt.html.twig #}
+{# KilikTableBundle::_defaultTableAlt.html.twig #}
+
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
@@ -10,55 +11,29 @@
                 Default title
             {% endblock tableTitle %}
         </div>
-        <span> 
-            {{ "kiliktable.show" |trans }}:
-            <select id="{{ table.id }}_rows_per_page" class="input-sm">
-                {% for rowsPerPage in table.rowsPerPageOptions %}
-                    <option value="{{ rowsPerPage }}">{{ rowsPerPage }}</option>
-                {% endfor %}
-            </select>
-            {{ "kiliktable.rows_per_page" |trans }}
-        </span>
+
+        {# setup of the list: hidden columns, rows per page ... #}
+        {% include "KilikTableBundle::_setup.html.twig" %}
+
     </div>        
     <div class="panel-body">        
         <table class="table table-responsive table-hover table-striped table-bordered">
             <thead>
                 {% block tableHead %}
                     <tr>
+                        {# columns names #}
                         {% block tableHeadStdColumns %}
                             {% for column in table.columns %}
-                                {% if column.sortable %}
-                                    <th class="columnSortable" data-sort-column="{{ column.name }}">
-                                        <a href="#">
-                                            {% if column.translateLabel %}
-                                                {{ column.label|trans }}
-                                            {% else %}
-                                                {{ column.label }}
-                                            {% endif %}
-                                        </a>
-                                        <span class="glyphicon columnSortableIcon"></span>
-                                    </th>
-                                {% else %}
-                                    <th>
-                                        {% if column.translateLabel %}
-                                            {{ column.label|trans }}
-                                        {% else %}
-                                            {{ column.label }}
-                                        {% endif %}
-                                    </th>
-                                {% endif %}
+                                {% include "KilikTableBundle::_columnName.html.twig" %}
                             {% endfor %}
                         {% endblock tableHeadStdColumns %}
                     </tr>
+                    {# columns filters #}
                     {% if table.columns|length > 0 %}
                         <tr>
                             {% block tableHeadStdFilters %}
                                 {% for column in table.columns %}
-                                    <td>
-                                        {% if column.filter is not null %}
-                                            {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup"} }) }}
-                                        {% endif %}
-                                    </td>
+                                    {% include "KilikTableBundle::_columnFilter.html.twig" %}
                                 {% endfor %}
                             {% endblock tableHeadStdFilters %}
                         </tr>
@@ -72,9 +47,7 @@
                             <tr>
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
-                                        <td>
-                                            {{ table.value(column,row,rows) | raw }}
-                                        </td>
+                                        {% include "KilikTableBundle::_columnCell.html.twig" %}
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}
                             </tr>

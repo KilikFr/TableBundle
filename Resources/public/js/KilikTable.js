@@ -20,6 +20,9 @@ function KilikTable(id, path, options) {
     this.sortColumnClassSorted = "glyphicon-sort-by-alphabet";
     this.sortColumnClassSortedReverse = "glyphicon-sort-by-alphabet-alt";
 
+    this.hiddenColumns = [];
+    this.defaultHiddenColumns = [];
+
     // for each option
     for (optionKey in options) {
         switch (optionKey) {
@@ -37,6 +40,9 @@ function KilikTable(id, path, options) {
                 break;
             case "rowsPerPage":
                 this.rowsPerPage = options[optionKey];
+                break;
+            case "defaultHiddenColumns":
+                this.defaultHiddenColumns = options[optionKey];
                 break;
         }
     }
@@ -116,6 +122,9 @@ function KilikTable(id, path, options) {
         // update sorted columns
         this.applyColumnSort();
 
+        // apply hide columns form
+        this.applyHideColumnsForm();
+
         // on actualise maintenant
         this.doReload();
     };
@@ -144,6 +153,49 @@ function KilikTable(id, path, options) {
             }
         });
     }
+
+    /**
+     * Pre - check hidden columns form
+     */
+    this.applyHideColumnsForm = function () {
+        table = this;
+        // check all columns
+        $(":checkbox, #" + id + "_setup").prop("checked", true);
+        // uncheck hidden columns
+        for (key in this.hiddenColumns) {
+            hiddenColumn = this.hiddenColumns[key];
+            $("*[data-column='" + hiddenColumn + "']:input, #" + id + "_setup").prop("checked", false);
+
+            // hide column name and filter
+            $("th[data-column='" + hiddenColumn + "'], #" + id).hide();
+            $("td[data-column='" + hiddenColumn + "'], #" + id).hide();
+        }
+        // bind change
+        $(":checkbox, #" + id + "_setup").change(function () {
+            var input = $(this);
+            checked = input.prop("checked");
+            name = input.attr("data-column");
+
+            // ih checked, column is not hidden
+            if (checked) {
+                table.hiddenColumns.splice($.inArray(name, table.hiddenColumns), 1);
+                $("th[data-column='" + name + "'], #" + id).show();
+                $("td[data-column='" + name + "'], #" + id).show();
+            } else {
+                table.hiddenColumns.push(name);
+                $("th[data-column='" + name + "'], #" + id).hide();
+                $("td[data-column='" + name + "'], #" + id).hide();
+
+                // when hidding column, disable filter @todo...
+                $("input[data-column='" + name + "'], #" + id).val("");
+                $("select[data-column='" + name + "'], #" + id).removeAttr("selected");
+            }
+
+            table.doReload();
+
+        });
+    }
+
 
     /**
      * Get form name
@@ -176,6 +228,7 @@ function KilikTable(id, path, options) {
                 obj[item.name] = item.value;
                 return obj;
             }, {}),
+            "hiddenColumns": this.hiddenColumns,
         };
         localStorage.setItem(this.getLocalStorageName(), JSON.stringify(options));
     }
@@ -205,6 +258,11 @@ function KilikTable(id, path, options) {
             $("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
 
             $("#" + id + "_rows_per_page option[value='" + this.rowsPerPage + "']").prop("selected", true);
+
+            this.hiddenColumns = options.hiddenColumns;
+
+        } else {
+            this.hiddenColumns = this.defaultHiddenColumns;
         }
     }
 
@@ -258,6 +316,10 @@ function KilikTable(id, path, options) {
         var postData = $("form[name=" + id + "_form]").serializeArray();
         postData.push({"name": "page", "value": table.page, });
         postData.push({"name": "rowsPerPage", "value": table.rowsPerPage, });
+        for (key in table.hiddenColumns) {
+            postData.push({"name": "hiddenColumns[" + table.hiddenColumns[key] + "]", "value": 1, });
+        }
+        //postData.push({"name": "hiddenColumns", "value": table.hiddenColumns.serializeArray(), });
 
         // save data to localstorage
         table.saveToLocalStorage();

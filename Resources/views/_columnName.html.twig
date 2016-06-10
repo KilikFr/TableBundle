@@ -1,0 +1,22 @@
+{# KilikTableBundle::_columnName.html.twig #}
+{% if column.sortable %}
+    <th class="columnSortable" data-column="{{ column.name }}" data-sort-column="{{ column.name }}">
+        <a href="#">
+            {% if column.translateLabel %}
+                {{ column.label|trans }}
+            {% else %}
+                {{ column.label }}
+            {% endif %}
+        </a>
+        <span class="glyphicon columnSortableIcon"></span>
+    </th>
+{% else %}
+    <th data-column="{{ column.name }}">
+        {% if column.translateLabel %}
+            {{ column.label|trans }}
+        {% else %}
+            {{ column.label }}
+        {% endif %}
+    </th>
+{% endif %}
+

@@ -101,6 +101,20 @@ class Column
     private $raw = false;
 
     /**
+     * hidden by default ?
+     * 
+     * @var bool
+     */
+    private $hiddenByDefault = false;
+
+    /**
+     * hidden ?
+     * 
+     * @var bool
+     */
+    private $hidden = false;
+
+    /**
      * 
      * @param Filter $filter
      * @return static
@@ -410,6 +424,52 @@ class Column
     {
         // this sample juste return the value, but could do many more
         return (string) $value;
+    }
+
+    /**
+     * Set hidden by default
+     * 
+     * @param bool $hidden
+     * @return static
+     */
+    public function setHiddenByDefault($hidden)
+    {
+        $this->hiddenByDefault = $hidden;
+
+        return $this;
+    }
+
+    /**
+     * Get hidden by default
+     * 
+     * @return bool
+     */
+    public function getHiddenByDefault()
+    {
+        return $this->hiddenByDefault;
+    }
+
+    /**
+     * Set hidden 
+     * 
+     * @param bool $hidden
+     * @return static
+     */
+    public function setHidden($hidden)
+    {
+        $this->hidden = $hidden;
+
+        return $this;
+    }
+
+    /**
+     * Get hidden
+     * 
+     * @return bool
+     */
+    public function getHidden()
+    {
+        return $this->hidden;
     }
 
     /**
