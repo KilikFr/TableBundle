@@ -160,18 +160,18 @@ function KilikTable(id, path, options) {
     this.applyHideColumnsForm = function () {
         table = this;
         // check all columns
-        $(":checkbox, #" + id + "_setup").prop("checked", true);
+        $("*[data-setup='" + id + "']:input").prop("checked", true);
         // uncheck hidden columns
         for (key in this.hiddenColumns) {
             hiddenColumn = this.hiddenColumns[key];
-            $("*[data-column='" + hiddenColumn + "']:input, #" + id + "_setup").prop("checked", false);
+            $("*[data-column='" + hiddenColumn + "'][data-setup='" + id + "']:input").prop("checked", false);
 
             // hide column name and filter
-            $("th[data-column='" + hiddenColumn + "'], #" + id).hide();
-            $("td[data-column='" + hiddenColumn + "'], #" + id).hide();
+            $("th[data-column='" + hiddenColumn + "']").hide();
+            $("td[data-column='" + hiddenColumn + "']").hide();
         }
         // bind change
-        $(":checkbox, #" + id + "_setup").change(function () {
+        $("*[data-setup='" + id + "']:input").change(function () {
             var input = $(this);
             checked = input.prop("checked");
             name = input.attr("data-column");
@@ -182,8 +182,8 @@ function KilikTable(id, path, options) {
             } else {
                 table.hiddenColumns.push(name);
                 // when hidding column, disable filters on hidden columns
-                $("input[data-column='" + name + "'], #" + id).val("");
-                $("select[data-column='" + name + "'] option, #" + id).removeAttr("selected");
+                $("#" + id).find("input[data-column='" + name + "']").val("");
+                $("#" + id).find("select[data-column='" + name + "'] option").removeAttr("selected");
             }
 
             // reload (before hide or show columns names)
@@ -191,11 +191,11 @@ function KilikTable(id, path, options) {
 
             // if checked, column is not hidden
             if (checked) {
-                $("th[data-column='" + name + "'], #" + id).show();
-                $("td[data-column='" + name + "'], #" + id).show();
+                $("#" + id).find("th[data-column='" + name + "']").show();
+                $("#" + id).find("td[data-column='" + name + "']").show();
             } else {
-                $("th[data-column='" + name + "'], #" + id).hide();
-                $("td[data-column='" + name + "'], #" + id).hide();
+                $("#" + id).find("th[data-column='" + name + "']").hide();
+                $("#" + id).find("td[data-column='" + name + "']").hide();
             }
 
         });
@@ -245,22 +245,22 @@ function KilikTable(id, path, options) {
         var options = $.parseJSON(localStorage.getItem(this.getLocalStorageName()));
         if (options) {
             // clear all checkbox
-            $(":checkbox, #" + this.getFormName()).removeProp("checked");
+            $("form[name='" + this.getFormName() + "']").find("checkbox").removeProp("checked");
             this.page = options.page;
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
             this.sortReverse = options.sortReverse;
             for (var key in options.filters) {
-                $("[name='" + key + "']").val(options.filters[key]);
+                $("form[name='" + this.getFormName() + "']").find("[name='" + key + "']").val(options.filters[key]);
 
                 // for checkbox (@todo: do this only for checkbox)
                 if (options.filters[key] == 1) {
-                    $("input[name='" + key + "']").prop("checked", true);
+                    $("form[name='" + this.getFormName() + "']").find("input[name='" + key + "']").prop("checked", true);
                 }
             }
             // bind specials inputs (used for csv export for exemple)
-            $("input[name='" + this.getFormName() + "\[sortColumn\]']").val(this.sortColumn);
-            $("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
+            $("form[name='" + this.getFormName() + "']").find("input[name='" + this.getFormName() + "\[sortColumn\]']").val(this.sortColumn);
+            $("form[name='" + this.getFormName() + "']").find("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
 
             if (typeof options.hiddenColumns === "undefined") {
                 this.hiddenColumns = [];
@@ -349,7 +349,7 @@ function KilikTable(id, path, options) {
                     table.lastPage = data.lastPage;
 
                     // rebind click on pagination buttons
-                    $(".tablePaginationButton", "#" + id + "_pagination").click(function () {
+                    $("#" + id + "_pagination .tablePaginationButton").click(function () {
                         var button = $(this);
                         table.page = button.attr("data-table-page");
                         table.doReload();
