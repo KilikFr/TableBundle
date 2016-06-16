@@ -51,50 +51,50 @@ function KilikTable(id, path, options) {
         var table = this;
 
         // bouton pour forcer une actualisation
-        $("#" + id + "_submit, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find("#" + id + "_submit").click(function () {
             table.doReload();
         });
 
         // boutons pour la pagination
         // bouton début
-        $("#" + id + "_pagination_start, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find("#" + id + "_pagination_start").click(function () {
             table.page = 1;
             table.doReload();
         });
         // bouton précedent
-        $("#" + id + "_pagination_previous, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find("#" + id + "_pagination_previous").click(function () {
             if (table.page > 1) {
                 table.page--;
             }
             table.doReload();
         });
         // bouton suivant
-        $("#" + id + "_pagination_next, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find("#" + id + "_pagination_next").click(function () {
             table.page++;
             table.doReload();
         });
         // bouton fin
-        $("#" + id + "_pagination_end, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find("#" + id + "_pagination_end").click(function () {
             table.page = table.lastPage;
             table.doReload();
         });
 
         // filtering
-        $(".refreshOnChange, #" + this.getFormName()).change(function () {
+        $("#" + this.id).find(".refreshOnChange").change(function () {
             table.doReload();
         });
-        $(".refreshOnKeyup, #" + this.getFormName()).keyup(function () {
+        $("#" + this.id).find(".refreshOnKeyup").keyup(function () {
             // delayed reload
             table.askForReload();
         });
 
         // force reload (on click)
-        $(".refreshOnClick, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find(".refreshOnClick").click(function () {
             table.doReload();
         });
 
         // ordering binding
-        $(".columnSortable, #" + this.getFormName()).click(function () {
+        $("#" + this.id).find(".columnSortable").click(function () {
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
             // if same column, inverse order
@@ -104,8 +104,8 @@ function KilikTable(id, path, options) {
                 table.sortColumn = sortColumn;
                 table.sortReverse = false;
             }
-            $("input[name='" + table.getFormName() + "\[sortColumn\]'], #" + table.getFormName()).val(table.sortColumn);
-            $("input[name='" + table.getFormName() + "\[sortReverse\]'], #" + table.getFormName()).val(table.sortReverse ? 1 : 0);
+            $("input[name='" + table.getFormName() + "\[sortColumn\]']").val(table.sortColumn);
+            $("input[name='" + table.getFormName() + "\[sortReverse\]']").val(table.sortReverse ? 1 : 0);
             table.applyColumnSort();
             table.doReload();
         });
@@ -135,7 +135,7 @@ function KilikTable(id, path, options) {
     this.applyColumnSort = function () {
         var table = this;
         // update icons sort order
-        $(".columnSortableIcon, #" + table.getFormName()).each(function () {
+        $("#" + this.id).find(".columnSortableIcon").each(function () {
             var pColumn = $(this);
             var pSortColumn = pColumn.parent().attr("data-sort-column");
             pColumn.removeClass(table.sortColumnClassSorted);
