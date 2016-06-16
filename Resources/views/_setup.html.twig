@@ -6,7 +6,7 @@
         {% for column in table.columns %}
             <li>
                 <a>
-                    <input type="checkbox" data-column="{{ column.name }}" class="input"></input> {{ column.label | trans }}
+                    <input type="checkbox" data-column="{{ column.name }}" data-setup="{{ table.id }}" class="input"></input> {{ column.label | trans }}
                 </a>
             </li>
         {% endfor %}
