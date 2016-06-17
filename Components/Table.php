@@ -2,89 +2,79 @@
 
 namespace Kilik\TableBundle\Components;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Form\FormBuilder;
-use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
-use Twig_Environment;
 
 class Table
 {
-
     /**
-     * Identifiant de la table
+     * Identifiant de la table.
      * 
-     * @var string 
+     * @var string
      */
     private $id;
 
     /**
-     * Chemin pour les appels ajax
+     * Chemin pour les appels ajax.
      * 
-     * @var string 
+     * @var string
      */
     private $path;
 
     /**
-     * Filtres applicables sur la table
+     * Filtres applicables sur la table.
      * 
      * @var array|Filter
      */
     private $filters;
 
     /**
-     * Rows per page
+     * Rows per page.
      * 
      * @var int
      */
     private $rowsPerPage = 10;
 
     /**
-     * Rows per page (options)
+     * Rows per page (options).
      * 
      * @var array|int
      */
     private $rowsPerPageOptions = [5, 10, 20, 50, 100];
 
     /**
-     * Générateur de requêtes
+     * Générateur de requêtes.
      * 
-     * @var QueryBuilder 
+     * @var QueryBuilder
      */
     private $queryBuilder;
 
     /**
-     * Alias de l'entité principale
+     * Alias de l'entité principale.
      * 
-     * @var type 
+     * @var string
      */
     private $alias;
 
     /**
-     * Template for table and lines
+     * Template for table and lines.
      * 
-     * @var type 
+     * @var string
      */
-    private $template = "KilikTableBundle::_defaultTable.html.twig";
+    private $template = 'KilikTableBundle::_defaultTable.html.twig';
 
     /**
-     * Params to pass to twig (when rendering the template)
+     * Params to pass to twig (when rendering the template).
      * 
      * @var array
      */
     private $templateParams = [];
 
     /**
-     * 
-     * 
      * @var int
      */
     private $page;
 
     /**
-     * 
-     * 
      * @var int
      */
     private $lastPage;
@@ -100,7 +90,7 @@ class Table
     private $filteredRows;
 
     /**
-     * @var type
+     * @var string
      */
     private $formView;
 
@@ -110,14 +100,14 @@ class Table
     private $columns;
 
     /**
-     * custom options
+     * custom options.
      * 
      * @var array
      */
     private $customOptions = [];
 
     /**
-     * Constructeur
+     * Constructeur.
      */
     public function __construct()
     {
@@ -126,9 +116,10 @@ class Table
     }
 
     /**
-     * Définir l'identifiant de la table
+     * Définir l'identifiant de la table.
      * 
-     * @param type $id
+     * @param string $id
+     *
      * @return static
      */
     public function setId($id)
@@ -139,9 +130,10 @@ class Table
     }
 
     /**
-     * Définir le chemin pour les appels ajax
+     * Définir le chemin pour les appels ajax.
      * 
-     * @param type $path
+     * @param string $path
+     *
      * @return static
      */
     public function setPath($path)
@@ -152,21 +144,20 @@ class Table
     }
 
     /**
-     * 
      * @param QueryBuilder $queryBuilder
-     * @param string $alias
+     * @param string       $alias
+     *
      * @return static
      */
     public function setQueryBuilder(QueryBuilder $queryBuilder, $alias)
     {
         $this->queryBuilder = $queryBuilder;
-        $this->alias        = $alias;
+        $this->alias = $alias;
 
         return $this;
     }
 
     /**
-     * 
      * @return QueryBuilder
      */
     public function getQueryBuilder()
@@ -175,7 +166,6 @@ class Table
     }
 
     /**
-     * 
      * @return string
      */
     public function getAlias()
@@ -184,8 +174,8 @@ class Table
     }
 
     /**
-     * 
      * @param string $template
+     *
      * @return static
      */
     public function setTemplate($template)
@@ -196,7 +186,6 @@ class Table
     }
 
     /**
-     * 
      * @return string
      */
     public function getTemplate()
@@ -205,9 +194,10 @@ class Table
     }
 
     /**
-     * Set template params
+     * Set template params.
      * 
      * @param array $templateParams
+     *
      * @return static
      */
     public function setTemplateParams($templateParams)
@@ -218,7 +208,7 @@ class Table
     }
 
     /**
-     * Get template params
+     * Get template params.
      * 
      * @return array
      */
@@ -228,7 +218,7 @@ class Table
     }
 
     /**
-     * Get Table ID
+     * Get Table ID.
      * 
      * @return string
      */
@@ -238,7 +228,7 @@ class Table
     }
 
     /**
-     * Get Table path
+     * Get Table path.
      * 
      * @return string
      */
@@ -248,9 +238,10 @@ class Table
     }
 
     /**
-     * Set Rows per page
+     * Set Rows per page.
      * 
      * @param int $rowsPerPage
+     *
      * @return static
      */
     public function setRowsPerPage($rowsPerPage)
@@ -261,7 +252,7 @@ class Table
     }
 
     /**
-     * Get rows per page
+     * Get rows per page.
      * 
      * @return int
      */
@@ -271,12 +262,13 @@ class Table
     }
 
     /**
-     * Set rows per page options (selectable)
+     * Set rows per page options (selectable).
      * 
      * @param array|int $rowsPerPageOptions
+     *
      * @return static
      */
-    public function setRowsPerPageOptions($rowsPerPage)
+    public function setRowsPerPageOptions($rowsPerPageOptions)
     {
         $this->rowsPerPageOptions = $rowsPerPageOptions;
 
@@ -284,7 +276,7 @@ class Table
     }
 
     /**
-     * Get rows per page options (selectable)
+     * Get rows per page options (selectable).
      * 
      * @return int
      */
@@ -294,8 +286,8 @@ class Table
     }
 
     /**
-     * 
      * @param int $page
+     *
      * @return static
      */
     public function setPage($page)
@@ -306,7 +298,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getPage()
@@ -315,7 +306,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getPreviousPage()
@@ -324,7 +314,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getNextPage()
@@ -333,8 +322,8 @@ class Table
     }
 
     /**
-     * 
      * @param int $page
+     *
      * @return static
      */
     public function setLastPage($page)
@@ -345,7 +334,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getLastPage()
@@ -354,8 +342,8 @@ class Table
     }
 
     /**
-     * 
      * @param int $totalRows
+     *
      * @return static
      */
     public function setTotalRows($totalRows)
@@ -366,7 +354,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getTotalRows()
@@ -375,8 +362,8 @@ class Table
     }
 
     /**
-     * 
      * @param int $filteredRows
+     *
      * @return static
      */
     public function setFilteredRows($filteredRows)
@@ -387,7 +374,6 @@ class Table
     }
 
     /**
-     * 
      * @return int
      */
     public function getFilteredRows()
@@ -396,7 +382,7 @@ class Table
     }
 
     /**
-     * Ajouter un filtre
+     * Ajouter un filtre.
      * 
      * @param Filter $filter
      */
@@ -416,7 +402,7 @@ class Table
     }
 
     /**
-     * Get all filters (filters + column filters)
+     * Get all filters (filters + column filters).
      * 
      * @return array|Filter
      */
@@ -428,11 +414,12 @@ class Table
                 $filters[] = $column->getFilter();
             }
         }
+
         return $filters;
     }
 
     /**
-     * Formulaire
+     * Formulaire.
      * 
      * @param type $formView
      */
@@ -444,7 +431,7 @@ class Table
     }
 
     /**
-     * Formulaire
+     * Formulaire.
      * 
      * @return
      */
@@ -454,7 +441,7 @@ class Table
     }
 
     /**
-     * Ajouter une colonne
+     * Ajouter une colonne.
      * 
      * @param Column $column
      */
@@ -474,9 +461,10 @@ class Table
     }
 
     /**
-     * Get a column by its name
+     * Get a column by its name.
      * 
      * @param string $name
+     *
      * @return Column
      */
     public function getColumnByName($name)
@@ -489,41 +477,41 @@ class Table
         }
 
         // if not found
-        return null;
+        return;
     }
 
     /**
-     * Get the table body id
+     * Get the table body id.
      * 
      * @return string
      */
     public function getBodyId()
     {
-        return $this->id."_body";
+        return $this->id.'_body';
     }
 
     /**
-     * Get the table foot id
+     * Get the table foot id.
      * 
      * @return string
      */
     public function getFootId()
     {
-        return $this->id."_foot";
+        return $this->id.'_foot';
     }
 
     /**
-     * Get the form id
+     * Get the form id.
      * 
      * @return string
      */
     public function getFormId()
     {
-        return $this->id."_form";
+        return $this->id.'_form';
     }
 
     /**
-     * Get the first row rank
+     * Get the first row rank.
      * 
      * @return int
      */
@@ -533,7 +521,7 @@ class Table
     }
 
     /**
-     * Get the last row rank
+     * Get the last row rank.
      * 
      * @return int
      */
@@ -543,27 +531,24 @@ class Table
     }
 
     /**
-     * Get the formatted value to display
+     * Get the formatted value to display.
      * 
      * @param Column $column
-     * @param array $row : the row to display
-     * @param array $rows : all the rows of the page (optionnal)
+     * @param array  $row    : the row to display
+     * @param array  $rows   : all the rows of the page (optionnal)
      */
     public function getValue(Column $column, $row, $rows = [])
     {
         if (!is_null($column->getName())) {
             return $column->getValue($row, $rows);
         }
-        else {
-            return "";
-        }
     }
 
     /**
-     * Add a custom option
+     * Add a custom option.
      * 
      * @param string $option
-     * @param mixed $value
+     * @param mixed  $value
      * 
      * @return static
      */
@@ -575,7 +560,7 @@ class Table
     }
 
     /**
-     * Get custom options
+     * Get custom options.
      * 
      * @return array
      */
@@ -585,7 +570,7 @@ class Table
     }
 
     /**
-     * Get hidden columns names
+     * Get hidden columns names.
      * 
      * @return array
      */
@@ -603,16 +588,15 @@ class Table
     }
 
     /**
-     * Get table options (for javascript)
+     * Get table options (for javascript).
      * 
      * @return array
      */
     public function getOptions()
     {
         return array_merge($this->customOptions, [
-            "rowsPerPage"=>$this->rowsPerPage,
-            "defaultHiddenColumns"=>$this->getHiddenColumnsNames(),
+            'rowsPerPage' => $this->rowsPerPage,
+            'defaultHiddenColumns' => $this->getHiddenColumnsNames(),
         ]);
     }
-
 }
