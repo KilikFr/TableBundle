@@ -80,16 +80,16 @@ function KilikTable(id, path, options) {
         });
 
         // filtering
-        $("#" + this.id).find(".refreshOnChange").change(function () {
+        $("form[name='" + this.getFormName() + "']").find(".refreshOnChange").change(function () {
             table.doReload();
         });
-        $("#" + this.id).find(".refreshOnKeyup").keyup(function () {
+        $("form[name='" + this.getFormName() + "']").find(".refreshOnKeyup").keyup(function () {
             // delayed reload
             table.askForReload();
         });
 
         // force reload (on click)
-        $("#" + this.id).find(".refreshOnClick").click(function () {
+        $("form[name='" + this.getFormName() + "']").find(".refreshOnClick").click(function () {
             table.doReload();
         });
 
