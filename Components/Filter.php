@@ -213,6 +213,7 @@ class Filter
             case Filter::TYPE_GREATER_OR_EQUAL:
             case Filter::TYPE_LESS:
             case Filter::TYPE_LESS_OR_EQUAL:
+            case Filter::TYPE_NOT_LIKE:
             case Filter::TYPE_LIKE:
             case Filter::TYPE_NOT_EQUAL:
             case Filter::TYPE_EQUAL_STRICT:
