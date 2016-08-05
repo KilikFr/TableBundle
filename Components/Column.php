@@ -269,7 +269,7 @@ class Column
      */
     public function sortable()
     {
-        return !is_null($this->sort) || is_null($this->sortReverse);
+        return !is_null($this->sort) || !is_null($this->sortReverse);
     }
 
     /**
