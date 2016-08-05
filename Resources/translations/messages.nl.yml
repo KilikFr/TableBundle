@@ -1,0 +1,9 @@
+kiliktable:
+    showing_entries: "{0} geen records die overeenstemmen | {1} toont 1 gefilterde entiteit |]1,Inf[ laten zien %firstRow% tot %lastRow% van %filteredRows% inzendingen"
+    filtered_from: "gefilterd van %totalRows% in totaal inzendingen"
+    previous: voorgaand
+    next: volgende
+    show: tonen
+    rows_per_page: rijen per pagina
+    setup: configureren
+
