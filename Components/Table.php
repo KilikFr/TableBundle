@@ -7,64 +7,71 @@ use Doctrine\ORM\QueryBuilder;
 class Table
 {
     /**
-     * Identifiant de la table.
-     * 
+     * Table id.
+     *
      * @var string
      */
     private $id;
 
     /**
-     * Chemin pour les appels ajax.
-     * 
+     * URL for ajax call.
+     *
      * @var string
      */
     private $path;
 
     /**
-     * Filtres applicables sur la table.
-     * 
+     * Filters applied on the table.
+     *
      * @var array|Filter
      */
     private $filters;
 
     /**
      * Rows per page.
-     * 
+     *
      * @var int
      */
     private $rowsPerPage = 10;
 
     /**
      * Rows per page (options).
-     * 
+     *
      * @var array|int
      */
     private $rowsPerPageOptions = [5, 10, 20, 50, 100];
 
     /**
-     * Générateur de requêtes.
-     * 
      * @var QueryBuilder
      */
     private $queryBuilder;
 
     /**
-     * Alias de l'entité principale.
-     * 
+     * Root entity alias.
+     *
      * @var string
      */
     private $alias;
 
     /**
+     * Identifier fields used to run count queries.
+     * If is null a classical 'COUNT(*) FROM (query)' will be done.
+     * Be aware no to use this option with GROUP BY query.
+     *
+     * @var string|void
+     */
+    private $identifierFieldNames = null;
+
+    /**
      * Template for table and lines.
-     * 
+     *
      * @var string
      */
     private $template = 'KilikTableBundle::_defaultTable.html.twig';
 
     /**
      * Params to pass to twig (when rendering the template).
-     * 
+     *
      * @var array
      */
     private $templateParams = [];
@@ -101,13 +108,13 @@ class Table
 
     /**
      * custom options.
-     * 
+     *
      * @var array
      */
     private $customOptions = [];
 
     /**
-     * Constructeur.
+     * Table constructor.
      */
     public function __construct()
     {
@@ -116,8 +123,8 @@ class Table
     }
 
     /**
-     * Définir l'identifiant de la table.
-     * 
+     * Set table identifiant.
+     *
      * @param string $id
      *
      * @return static
@@ -130,8 +137,8 @@ class Table
     }
 
     /**
-     * Définir le chemin pour les appels ajax.
-     * 
+     * Set URL for ajax call.
+     *
      * @param string $path
      *
      * @return static
@@ -158,6 +165,28 @@ class Table
     }
 
     /**
+     * Defines default identifiers from query builder in order to optimize count queries.
+     *
+     * @return $this
+     *
+     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     */
+    public function setDefaultIdentifierFieldNames()
+    {
+        //Default identifier for table rows
+        $rootEntity = $this->queryBuilder->getRootEntities()[0];
+        $metadata = $this->queryBuilder->getEntityManager()->getMetadataFactory()->getMetadataFor($rootEntity);
+        $identifiers = array();
+        foreach ($metadata->getIdentifierFieldNames() as $identifierFieldName) {
+            $identifiers[] = $this->getAlias().'.'.$identifierFieldName;
+        }
+        $rootEntityIdentifier = implode(',', $identifiers);
+        $this->setIdentifierFieldNames($rootEntityIdentifier ?: null);
+
+        return $this;
+    }
+
+    /**
      * @return QueryBuilder
      */
     public function getQueryBuilder()
@@ -171,6 +200,26 @@ class Table
     public function getAlias()
     {
         return $this->alias;
+    }
+
+    /**
+     * @param string|null $identifierFieldNames
+     *
+     * @return static
+     */
+    public function setIdentifierFieldNames($identifierFieldNames = null)
+    {
+        $this->identifierFieldNames = $identifierFieldNames;
+
+        return $this;
+    }
+
+    /**
+     * @return string|void
+     */
+    public function getIdentifierFieldNames()
+    {
+        return $this->identifierFieldNames;
     }
 
     /**
@@ -195,7 +244,7 @@ class Table
 
     /**
      * Set template params.
-     * 
+     *
      * @param array $templateParams
      *
      * @return static
@@ -209,7 +258,7 @@ class Table
 
     /**
      * Get template params.
-     * 
+     *
      * @return array
      */
     public function getTemplateParams()
@@ -219,7 +268,7 @@ class Table
 
     /**
      * Get Table ID.
-     * 
+     *
      * @return string
      */
     public function getId()
@@ -229,7 +278,7 @@ class Table
 
     /**
      * Get Table path.
-     * 
+     *
      * @return string
      */
     public function getPath()
@@ -239,7 +288,7 @@ class Table
 
     /**
      * Set Rows per page.
-     * 
+     *
      * @param int $rowsPerPage
      *
      * @return static
@@ -253,7 +302,7 @@ class Table
 
     /**
      * Get rows per page.
-     * 
+     *
      * @return int
      */
     public function getRowsPerPage()
@@ -263,7 +312,7 @@ class Table
 
     /**
      * Set rows per page options (selectable).
-     * 
+     *
      * @param array|int $rowsPerPageOptions
      *
      * @return static
@@ -277,7 +326,7 @@ class Table
 
     /**
      * Get rows per page options (selectable).
-     * 
+     *
      * @return int
      */
     public function getRowsPerPageOptions()
@@ -382,9 +431,9 @@ class Table
     }
 
     /**
-     * Ajouter un filtre.
-     * 
      * @param Filter $filter
+     *
+     * @return $this
      */
     public function addFilter(Filter $filter)
     {
@@ -403,7 +452,7 @@ class Table
 
     /**
      * Get all filters (filters + column filters).
-     * 
+     *
      * @return array|Filter
      */
     public function getAllFilters()
@@ -419,9 +468,9 @@ class Table
     }
 
     /**
-     * Formulaire.
-     * 
-     * @param type $formView
+     * @param string $formView
+     *
+     * @return static
      */
     public function setFormView($formView)
     {
@@ -431,9 +480,7 @@ class Table
     }
 
     /**
-     * Formulaire.
-     * 
-     * @return
+     * @return string
      */
     public function getFormView()
     {
@@ -441,9 +488,9 @@ class Table
     }
 
     /**
-     * Ajouter une colonne.
-     * 
      * @param Column $column
+     *
+     * @return $this
      */
     public function addColumn(Column $column)
     {
@@ -453,7 +500,7 @@ class Table
     }
 
     /**
-     * @return array|Column
+     * @return Column[]
      */
     public function getColumns()
     {
@@ -462,10 +509,10 @@ class Table
 
     /**
      * Get a column by its name.
-     * 
+     *
      * @param string $name
      *
-     * @return Column
+     * @return Column|void
      */
     public function getColumnByName($name)
     {
@@ -482,7 +529,7 @@ class Table
 
     /**
      * Get the table body id.
-     * 
+     *
      * @return string
      */
     public function getBodyId()
@@ -492,7 +539,7 @@ class Table
 
     /**
      * Get the table foot id.
-     * 
+     *
      * @return string
      */
     public function getFootId()
@@ -502,7 +549,7 @@ class Table
 
     /**
      * Get the form id.
-     * 
+     *
      * @return string
      */
     public function getFormId()
@@ -512,7 +559,7 @@ class Table
 
     /**
      * Get the first row rank.
-     * 
+     *
      * @return int
      */
     public function getFirstRow()
@@ -522,7 +569,7 @@ class Table
 
     /**
      * Get the last row rank.
-     * 
+     *
      * @return int
      */
     public function getLastRow()
@@ -532,24 +579,28 @@ class Table
 
     /**
      * Get the formatted value to display.
-     * 
+     *
      * @param Column $column
-     * @param array  $row    : the row to display
-     * @param array  $rows   : all the rows of the page (optionnal)
+     * @param array  $row
+     * @param array  $rows
+     *
+     * @return string|void
      */
-    public function getValue(Column $column, $row, $rows = [])
+    public function getValue(Column $column, array $row, array $rows = [])
     {
         if (!is_null($column->getName())) {
             return $column->getValue($row, $rows);
         }
+
+        return;
     }
 
     /**
      * Add a custom option.
-     * 
+     *
      * @param string $option
      * @param mixed  $value
-     * 
+     *
      * @return static
      */
     public function addCustomOption($option, $value)
@@ -561,7 +612,7 @@ class Table
 
     /**
      * Get custom options.
-     * 
+     *
      * @return array
      */
     public function getCustomOptions()
@@ -571,7 +622,7 @@ class Table
 
     /**
      * Get hidden columns names.
-     * 
+     *
      * @return array
      */
     public function getHiddenColumnsNames()
@@ -589,7 +640,7 @@ class Table
 
     /**
      * Get table options (for javascript).
-     * 
+     *
      * @return array
      */
     public function getOptions()
