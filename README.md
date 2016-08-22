@@ -1,13 +1,20 @@
+README
+======
+
+What's KilikTableBundle ?
+--------------------------
 KilikTableBundle is a fast, modern, and easy-to-use way to manipulate paginated 
 information, with filtering and ordering features, with ajax queries.
 
 This bundle is a work in progress.
 
 Links:
+------
 - [Live demo](http://tabledemo.kilik.fr/)
 - [KilikTableDemoBundle](https://github.com/KilikFr/TableDemoBundle)
 
 Working features:
+-----------------
 - pagination
 - basic filtering (like %...%)
 - advanced filtering (<,>,<=,>=,=,!,!=)
@@ -25,6 +32,7 @@ Working features:
 - multiple lists on one page
 
 Planned features:
+------------------
 - more translations
 - clean/reset filters in local storage browser
 - add advanced templates

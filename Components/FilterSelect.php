@@ -4,30 +4,30 @@ namespace Kilik\TableBundle\Components;
 
 class FilterSelect extends Filter
 {
-
     /**
-     * Type d'input
+     * Type d'input.
      */
-    const FILTER_TYPE = "select";
+    const FILTER_TYPE = 'select';
 
     /**
-     * Liste des valeurs du select
+     * Liste des valeurs du select.
      * 
      * @var array
      */
     private $choices;
 
     /**
-     * Placeholder
+     * Placeholder.
      * 
      * @var string
      */
     private $placeholder;
 
     /**
-     * Set the choices
+     * Set the choices.
      * 
      * @param array $choices
+     *
      * @return static
      */
     public function setChoices($choices)
@@ -38,7 +38,7 @@ class FilterSelect extends Filter
     }
 
     /**
-     * Get the choices
+     * Get the choices.
      * 
      * @return array
      */
@@ -48,20 +48,21 @@ class FilterSelect extends Filter
     }
 
     /**
-     * Set the placeholder
+     * Set the placeholder.
      * 
      * @param string $placeholder
+     *
      * @return static
      */
     public function setPlaceholder($placeholder)
     {
         $this->placeholder = $placeholder;
-        
+
         return $this;
     }
-    
+
     /**
-     * Get the placeholder
+     * Get the placeholder.
      * 
      * @return string
      */
@@ -69,5 +70,4 @@ class FilterSelect extends Filter
     {
         return $this->placeholder;
     }
-
 }

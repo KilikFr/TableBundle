@@ -4,119 +4,117 @@ namespace Kilik\TableBundle\Components;
 
 class Column
 {
-
-    const TYPE_DEFAULT = "text";
-    const TYPE_TEXT    = "text";
-    const TYPES        = [self::TYPE_TEXT];
+    const TYPE_DEFAULT = 'text';
+    const TYPE_TEXT = 'text';
+    const TYPES = [self::TYPE_TEXT];
 
     /**
-     * display formats
+     * display formats.
      */
-    const FORMAT_DATE    = "date";
-    const FORMAT_TEXT    = "text";
+    const FORMAT_DATE = 'date';
+    const FORMAT_TEXT = 'text';
     const FORMAT_DEFAULT = self::FORMAT_TEXT;
-    const FORMATS        = [self::FORMAT_DATE, self::FORMAT_TEXT];
+    const FORMATS = [self::FORMAT_DATE, self::FORMAT_TEXT];
 
     /**
      * filter on this column ?
-     * 
+     *
      * @var Filter
      */
     private $filter;
 
     /**
-     * Label of the column
-     * 
-     * @var string 
+     * Label of the column.
+     *
+     * @var string
      */
     private $label;
 
     /**
-     * Sort
-     * 
-     * @var array 
+     * Sort.
+     *
+     * @var array
      */
     private $sort;
 
     /**
-     * Reverse sort
-     * 
-     * @var array 
+     * Reverse sort.
+     *
+     * @var array
      */
     private $sortReverse;
 
     /**
-     * Wich type (for default display transco)
-     * 
+     * Wich type (for default display transco).
+     *
      * @var string
      */
     private $type = self::TYPE_DEFAULT;
 
     /**
-     *
-     * @var string 
+     * @var string
      */
     private $name;
 
     /**
      * Activate label translation ?
-     * 
-     * @var bool 
+     *
+     * @var bool
      */
     private $translateLabel = false;
 
     /**
      * custom display method ?
-     * 
+     *
      * @var string
      */
     private $displayFormat = self::FORMAT_DEFAULT;
 
     /**
      * custom display params ?
-     * 
+     *
      * @var mixed
      */
     private $displayFormatParams = null;
 
     /**
-     * callback for a custom display method 
-     * 
+     * callback for a custom display method.
+     *
      * @var mixed
      */
     private $displayCallback = null;
 
     /**
-     * callback for a custom export method 
-     * 
+     * callback for a custom export method.
+     *
      * @var mixed
      */
     private $exportCallback = null;
 
     /**
      * mode raw ?
-     * 
+     *
      * @var bool
      */
     private $raw = false;
 
     /**
      * hidden by default ?
-     * 
+     *
      * @var bool
      */
     private $hiddenByDefault = false;
 
     /**
      * hidden ?
-     * 
+     *
      * @var bool
      */
     private $hidden = false;
 
     /**
-     * 
      * @param Filter $filter
+     *
      * @return static
      */
     public function setFilter(Filter $filter)
@@ -130,7 +128,6 @@ class Column
     }
 
     /**
-     * 
      * @return Filter
      */
     public function getFilter()
@@ -139,9 +136,10 @@ class Column
     }
 
     /**
-     * Set column label
-     * 
+     * Set column label.
+     *
      * @param string $label
+     *
      * @return static
      */
     public function setLabel($label)
@@ -152,8 +150,8 @@ class Column
     }
 
     /**
-     * Get column label
-     * 
+     * Get column label.
+     *
      * @return string
      */
     public function getLabel()
@@ -162,9 +160,10 @@ class Column
     }
 
     /**
-     * Set name (scalar field)
-     * 
+     * Set name (scalar field).
+     *
      * @param string $name
+     *
      * @return static
      */
     public function setName($name)
@@ -175,8 +174,8 @@ class Column
     }
 
     /**
-     * Get name (scalar field)
-     * 
+     * Get name (scalar field).
+     *
      * @return string
      */
     public function getName()
@@ -185,9 +184,10 @@ class Column
     }
 
     /**
-     * Set sort fields
-     * 
+     * Set sort fields.
+     *
      * @param array $sort
+     *
      * @return static
      */
     public function setSort($sort)
@@ -198,8 +198,8 @@ class Column
     }
 
     /**
-     * Get sort reversed, or not (if sortReverse is empty, auto revert all sort orders)
-     * 
+     * Get sort reversed, or not (if sortReverse is empty, auto revert all sort orders).
+     *
      * @param bool $reverse
      */
     public function getAutoSort($reverse)
@@ -207,31 +207,32 @@ class Column
         if ($reverse) {
             if (count($this->sortReverse) == 0) {
                 return $this->getAutoInvertedSort();
-            }
-            else {
+            } else {
                 return $this->sortReverse;
             }
         }
+
         return $this->sort;
     }
 
     /**
-     * Get sort, with auto inverted orders
-     * 
+     * Get sort, with auto inverted orders.
+     *
      * @return array
      */
     public function getAutoInvertedSort()
     {
         $result = [];
-        foreach ($this->getSort() as $sort=> $order) {
-            $result[$sort] = ($order == "asc" ? "desc" : "asc");
+        foreach ($this->getSort() as $sort => $order) {
+            $result[$sort] = ($order == 'asc' ? 'desc' : 'asc');
         }
+
         return $result;
     }
 
     /**
-     * Get sort fields
-     * 
+     * Get sort fields.
+     *
      * @return array
      */
     public function getSort()
@@ -240,9 +241,10 @@ class Column
     }
 
     /**
-     * Set reversed sort fields
-     * 
+     * Set reversed sort fields.
+     *
      * @param array $sort
+     *
      * @return static
      */
     public function setSortReverse($sortReverse)
@@ -253,8 +255,8 @@ class Column
     }
 
     /**
-     * Get reversed sort fields
-     * 
+     * Get reversed sort fields.
+     *
      * @return array
      */
     public function getSortReverse()
@@ -264,7 +266,7 @@ class Column
 
     /**
      * Column is sortable ?
-     * 
+     *
      * @return bool
      */
     public function sortable()
@@ -273,9 +275,10 @@ class Column
     }
 
     /**
-     * Set label to translation
-     * 
+     * Set label to translation.
+     *
      * @param bool $translate
+     *
      * @return static
      */
     public function setTranslateLabel($translate)
@@ -287,7 +290,7 @@ class Column
 
     /**
      * Column label should be translated ?
-     * 
+     *
      * @return bool
      */
     public function getTranslateLabel()
@@ -296,9 +299,10 @@ class Column
     }
 
     /**
-     * Set the display format
-     * 
+     * Set the display format.
+     *
      * @param string $displayFormat
+     *
      * @return static
      */
     public function setDisplayFormat($displayFormat)
@@ -312,8 +316,8 @@ class Column
     }
 
     /**
-     * Get the display format 
-     * 
+     * Get the display format.
+     *
      * @return string
      */
     public function getDisplayFormat()
@@ -322,9 +326,10 @@ class Column
     }
 
     /**
-     * Set the raw option (for raw twig rendering)
-     * 
+     * Set the raw option (for raw twig rendering).
+     *
      * @param bool $raw
+     *
      * @return static
      */
     public function setRaw($raw)
@@ -335,8 +340,8 @@ class Column
     }
 
     /**
-     * Get the raw option
-     * 
+     * Get the raw option.
+     *
      * @return bool
      */
     public function getRaw()
@@ -345,9 +350,10 @@ class Column
     }
 
     /**
-     * Set display format parameters
-     * 
+     * Set display format parameters.
+     *
      * @param array $displayFormatParams
+     *
      * @return static
      */
     public function setDisplayFormatParams($displayFormatParams)
@@ -358,8 +364,8 @@ class Column
     }
 
     /**
-     * Get display format parameters
-     * 
+     * Get display format parameters.
+     *
      * @return string
      */
     public function getDisplayFormatParams()
@@ -368,9 +374,11 @@ class Column
     }
 
     /**
-     * Set display callback method
-     * 
-     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values, rows)
+     * Set display callback method.
+     *
+     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values,
+     *                        rows)
+     *
      * @return static
      */
     public function setDisplayCallback($callback)
@@ -381,8 +389,8 @@ class Column
     }
 
     /**
-     * Get display callback method
-     * 
+     * Get display callback method.
+     *
      * @return mixed
      */
     public function getDisplayCallback()
@@ -391,9 +399,11 @@ class Column
     }
 
     /**
-     * Set export callback method
-     * 
-     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values, rows)
+     * Set export callback method.
+     *
+     * @param mixed $callback : the function or [object,method], that accepts 3 parameters (cell value, row values,
+     *                        rows)
+     *
      * @return static
      */
     public function setExportCallback($callback)
@@ -404,8 +414,8 @@ class Column
     }
 
     /**
-     * Get export callback method
-     * 
+     * Get export callback method.
+     *
      * @return mixed
      */
     public function getExportCallback()
@@ -414,11 +424,11 @@ class Column
     }
 
     /**
-     * Callback sample
-     * 
+     * Callback sample.
+     *
      * @param mixed $value : the column value (the object or a field)
-     * @param array $row : the row values
-     * @param array $rows : the rows values (of the page)
+     * @param array $row   : the row values
+     * @param array $rows  : the rows values (of the page)
      */
     public function sampleCallback($value, $row, $rows)
     {
@@ -427,9 +437,10 @@ class Column
     }
 
     /**
-     * Set hidden by default
-     * 
+     * Set hidden by default.
+     *
      * @param bool $hidden
+     *
      * @return static
      */
     public function setHiddenByDefault($hidden)
@@ -440,8 +451,8 @@ class Column
     }
 
     /**
-     * Get hidden by default
-     * 
+     * Get hidden by default.
+     *
      * @return bool
      */
     public function getHiddenByDefault()
@@ -450,9 +461,10 @@ class Column
     }
 
     /**
-     * Set hidden 
-     * 
+     * Set hidden.
+     *
      * @param bool $hidden
+     *
      * @return static
      */
     public function setHidden($hidden)
@@ -463,8 +475,8 @@ class Column
     }
 
     /**
-     * Get hidden
-     * 
+     * Get hidden.
+     *
      * @return bool
      */
     public function getHidden()
@@ -473,17 +485,21 @@ class Column
     }
 
     /**
-     * Get the formatted value to display
-     * 
+     * Get the formatted value to display.
+     *
      * priority formatter methods:
      * - callback
      * - known formats
      * - default (raw text)
-     * 
-     * @param array $row : the row to display
-     * @param array $rows : all the rows of the page (optionnal)
+     *
+     * @param       $row
+     * @param array $rows
+     *
+     * @return string
+     *
+     * @throws Exception
      */
-    public function getValue($row, $rows = [])
+    public function getValue(array $row, array $rows = [])
     {
         if (isset($row[$this->getName()])) {
             $rawValue = $row[$this->getName()];
@@ -491,53 +507,54 @@ class Column
             $callback = $this->getDisplayCallback();
             if (!is_null($callback)) {
                 if (!is_callable($callback)) {
-                    throw new Exception("displayCallback is not callable");
+                    throw new Exception('displayCallback is not callable');
                 }
+
                 return $callback($rawValue, $row, $rows);
-            }
-            else {
+            } else {
                 switch ($this->getDisplayFormat()) {
                     case static::FORMAT_DATE:
                         $formatParams = $this->getDisplayFormatParams();
                         if (is_null($formatParams)) {
-                            $formatParams = "Y-m-d H:i:s";
+                            $formatParams = 'Y-m-d H:i:s';
                         }
-                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
+                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
                             return $rawValue->format($formatParams);
-                        }
-                        else {
-                            return "bad argument";
+                        } else {
+                            return 'bad argument';
                         }
                         break;
                     case static::FORMAT_TEXT:
                     default:
                         if (is_array($rawValue)) {
-                            return implode(",", $rawValue);
-                        }
-                        else {
+                            return implode(',', $rawValue);
+                        } else {
                             return $rawValue;
                         }
                         break;
                 }
             }
-        }
-        else {
-            return "";
+        } else {
+            return '';
         }
     }
 
     /**
-     * Get the formatted value to export (used by CSV export)
-     * 
+     *  Get the formatted value to export (used by CSV export).
+     *
      * priority formatter methods:
      * - callback
      * - known formats
      * - default (raw text)
-     * 
-     * @param array $row : the row to display
-     * @param array $rows : all the rows of the page (optionnal)
+     *
+     * @param array $row
+     * @param array $rows
+     *
+     * @return string
+     *
+     * @throws Exception
      */
-    public function getExportValue($row, $rows = [])
+    public function getExportValue(array $row, array $rows = [])
     {
         if (isset($row[$this->getName()])) {
             $rawValue = $row[$this->getName()];
@@ -545,39 +562,35 @@ class Column
             $callback = $this->getExportCallback();
             if (!is_null($callback)) {
                 if (!is_callable($callback)) {
-                    throw new Exception("exportCallback is not callable");
+                    throw new Exception('exportCallback is not callable');
                 }
+
                 return $callback($rawValue, $row, $rows);
-            }
-            else {
+            } else {
                 switch ($this->getDisplayFormat()) {
                     case static::FORMAT_DATE:
                         $formatParams = $this->getDisplayFormatParams();
                         if (is_null($formatParams)) {
-                            $formatParams = "Y-m-d H:i:s";
+                            $formatParams = 'Y-m-d H:i:s';
                         }
-                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == "DateTime") {
+                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
                             return $rawValue->format($formatParams);
-                        }
-                        else {
-                            return "bad argument";
+                        } else {
+                            return 'bad argument';
                         }
                         break;
                     case static::FORMAT_TEXT:
                     default:
                         if (is_array($rawValue)) {
-                            return implode(",", $rawValue);
-                        }
-                        else {
+                            return implode(',', $rawValue);
+                        } else {
                             return $rawValue;
                         }
                         break;
                 }
             }
-        }
-        else {
-            return "";
+        } else {
+            return '';
         }
     }
-
 }
