@@ -86,6 +86,11 @@ function KilikTable(id, path, options) {
         $("form[name='" + this.getFormName() + "']").find(".refreshOnKeyup").keyup(function () {
             // delayed reload
             table.askForReload();
+        }).keydown(function (e) {
+            // prevent reload on press enter (for configuration dropdown)
+            if (e.keyCode == 13) {
+                return false;
+            }
         });
 
         // force reload (on click)
@@ -204,7 +209,7 @@ function KilikTable(id, path, options) {
 
     /**
      * Get form name
-     * 
+     *
      * @returns String
      */
     this.getFormName = function () {
@@ -213,7 +218,7 @@ function KilikTable(id, path, options) {
 
     /**
      * Get Local Storage item name
-     * 
+     *
      * @returns String
      */
     this.getLocalStorageName = function () {
@@ -322,10 +327,10 @@ function KilikTable(id, path, options) {
     this.doReload = function () {
         var table = this;
         var postData = $("form[name=" + id + "_form]").serializeArray();
-        postData.push({"name": "page", "value": table.page, });
-        postData.push({"name": "rowsPerPage", "value": table.rowsPerPage, });
+        postData.push({"name": "page", "value": table.page,});
+        postData.push({"name": "rowsPerPage", "value": table.rowsPerPage,});
         for (key in table.hiddenColumns) {
-            postData.push({"name": "hiddenColumns[" + table.hiddenColumns[key] + "]", "value": 1, });
+            postData.push({"name": "hiddenColumns[" + table.hiddenColumns[key] + "]", "value": 1,});
         }
         //postData.push({"name": "hiddenColumns", "value": table.hiddenColumns.serializeArray(), });
 
@@ -337,25 +342,25 @@ function KilikTable(id, path, options) {
 
         // and send the query
         $.post(this.path, postData,
-                function (dataRaw) {
-                    var data = $.parseJSON(dataRaw);
-                    $("#" + id + "_body").html(data.tableBody);
-                    //$("#" + id + "_foot").html(data.tableFoot);
-                    $("#" + id + "_stats").html(data.tableStats);
-                    $("#" + id + "_pagination").html(data.tablePagination);
-                    table.totalRows = data.totalRows;
-                    table.totalFilteredRows = data.totalFilteredRows;
-                    table.page = data.page;
-                    table.lastPage = data.lastPage;
+            function (dataRaw) {
+                var data = $.parseJSON(dataRaw);
+                $("#" + id + "_body").html(data.tableBody);
+                //$("#" + id + "_foot").html(data.tableFoot);
+                $("#" + id + "_stats").html(data.tableStats);
+                $("#" + id + "_pagination").html(data.tablePagination);
+                table.totalRows = data.totalRows;
+                table.totalFilteredRows = data.totalFilteredRows;
+                table.page = data.page;
+                table.lastPage = data.lastPage;
 
-                    // rebind click on pagination buttons
-                    $("#" + id + "_pagination .tablePaginationButton").click(function () {
-                        var button = $(this);
-                        table.page = button.attr("data-table-page");
-                        table.doReload();
-                    });
+                // rebind click on pagination buttons
+                $("#" + id + "_pagination .tablePaginationButton").click(function () {
+                    var button = $(this);
+                    table.page = button.attr("data-table-page");
+                    table.doReload();
+                });
 
-                }
+            }
         ).done(function (data) {
             // callback
             table.afterReload();
@@ -368,7 +373,6 @@ function KilikTable(id, path, options) {
     this.afterReload = function () {
         // could be overridden
     }
-
 
 
 }
