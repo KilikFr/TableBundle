@@ -503,39 +503,39 @@ class Column
     {
         if (isset($row[$this->getName()])) {
             $rawValue = $row[$this->getName()];
-            // if a callback is set
-            $callback = $this->getDisplayCallback();
-            if (!is_null($callback)) {
-                if (!is_callable($callback)) {
-                    throw new Exception('displayCallback is not callable');
-                }
-
-                return $callback($rawValue, $row, $rows);
-            } else {
-                switch ($this->getDisplayFormat()) {
-                    case static::FORMAT_DATE:
-                        $formatParams = $this->getDisplayFormatParams();
-                        if (is_null($formatParams)) {
-                            $formatParams = 'Y-m-d H:i:s';
-                        }
-                        if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
-                            return $rawValue->format($formatParams);
-                        } else {
-                            return 'bad argument';
-                        }
-                        break;
-                    case static::FORMAT_TEXT:
-                    default:
-                        if (is_array($rawValue)) {
-                            return implode(',', $rawValue);
-                        } else {
-                            return $rawValue;
-                        }
-                        break;
-                }
-            }
         } else {
-            return '';
+            $rawValue = null;
+        }
+        // if a callback is set
+        $callback = $this->getDisplayCallback();
+        if (!is_null($callback)) {
+            if (!is_callable($callback)) {
+                throw new Exception('displayCallback is not callable');
+            }
+
+            return $callback($rawValue, $row, $rows);
+        } else {
+            switch ($this->getDisplayFormat()) {
+                case static::FORMAT_DATE:
+                    $formatParams = $this->getDisplayFormatParams();
+                    if (is_null($formatParams)) {
+                        $formatParams = 'Y-m-d H:i:s';
+                    }
+                    if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
+                        return $rawValue->format($formatParams);
+                    } else {
+                        return 'bad argument';
+                    }
+                    break;
+                case static::FORMAT_TEXT:
+                default:
+                    if (is_array($rawValue)) {
+                        return implode(',', $rawValue);
+                    } else {
+                        return $rawValue;
+                    }
+                    break;
+            }
         }
     }
 

@@ -10,7 +10,7 @@ class Filter
     const FILTER_TYPE = 'text';
 
 /**
- * Type de filtre.
+ * Filter type.
  */
     // WHERE field LIKE '%value%'
     const TYPE_LIKE = 'like';
@@ -32,8 +32,24 @@ class Filter
     const TYPE_LESS_OR_EQUAL = '<=';
     // use input to apply arithmetic comparators, then filter the results
     const TYPE_AUTO = 'auto';
-    const TYPES = [self::TYPE_LIKE, self::TYPE_NOT_LIKE, self::TYPE_EQUAL, self::TYPE_NOT_EQUAL, self::TYPE_EQUAL_STRICT, self::TYPE_GREATER, self::TYPE_GREATER_OR_EQUAL, self::TYPE_LESS, self::TYPE_LESS_OR_EQUAL, self::TYPE_AUTO];
+    const TYPES = [
+        self::TYPE_LIKE,
+        self::TYPE_NOT_LIKE,
+        self::TYPE_EQUAL,
+        self::TYPE_NOT_EQUAL,
+        self::TYPE_EQUAL_STRICT,
+        self::TYPE_GREATER,
+        self::TYPE_GREATER_OR_EQUAL,
+        self::TYPE_LESS,
+        self::TYPE_LESS_OR_EQUAL,
+        self::TYPE_AUTO,
+    ];
     const TYPE_DEFAULT = self::TYPE_AUTO;
+    // specials types:
+    const TYPE_NULL = 'null';
+    const TYPE_NOT_NULL = 'not_null';
+    const TYPE_IN = 'in';
+    const TYPE_NOT_IN = 'not_in';
 
     /**
      * data formats.
@@ -45,7 +61,7 @@ class Filter
 
     /**
      * Filter name.
-     * 
+     *
      * @var string
      */
     private $name;
@@ -59,28 +75,37 @@ class Filter
 
     /**
      * This filter is a HAVING constraint ?
-     * 
+     *
      * @var bool
      */
     private $having = false;
 
     /**
      * Filter type.
-     * 
+     *
      * @var string
      */
     private $type = self::TYPE_DEFAULT;
 
     /**
      * Data format.
-     * 
+     *
      * @var string
      */
     private $dataFormat = self::FORMAT_DEFAULT;
 
     /**
+     * Custom inputFormatter.
+     *
+     * @var callable
+     *
+     * prototype (Filter,$defaultOperator,$value)
+     */
+    private $inputFormatter = null;
+
+    /**
      * Set the filter name.
-     * 
+     *
      * @param string $name
      *
      * @return static
@@ -94,7 +119,7 @@ class Filter
 
     /**
      * Get the filter name.
-     * 
+     *
      * @return string
      */
     public function getName()
@@ -104,7 +129,7 @@ class Filter
 
     /**
      * Set the filter field (used in a query).
-     * 
+     *
      * @param string $field
      *
      * @return static
@@ -117,8 +142,8 @@ class Filter
     }
 
     /**
-     * Get the fielter field (user in a query).
-     * 
+     * Get the filter field (user in a query).
+     *
      * @return string
      */
     public function getField()
@@ -128,7 +153,7 @@ class Filter
 
     /**
      * Set the filter type.
-     * 
+     *
      * @param string $type
      *
      * @return static
@@ -145,7 +170,7 @@ class Filter
 
     /**
      * Get the filter type.
-     * 
+     *
      * @return string
      */
     public function getType()
@@ -155,7 +180,7 @@ class Filter
 
     /**
      * Set if this filter is working on a HAVING clause, or not.
-     * 
+     *
      * @param bool $having
      *
      * @return static
@@ -169,7 +194,7 @@ class Filter
 
     /**
      * Get if this filter is working on a HAVING clause, or not.
-     * 
+     *
      * @return string
      */
     public function getHaving()
@@ -179,7 +204,7 @@ class Filter
 
     /**
      * Set the data format converter (from user input to sql value).
-     * 
+     *
      * @param string $dataFormat
      *
      * @return static
@@ -196,7 +221,7 @@ class Filter
 
     /**
      * Get the data format.
-     * 
+     *
      * @return string
      */
     public function getDataFormat()
@@ -206,7 +231,7 @@ class Filter
 
     /**
      * Get the operator and the value of an input string.
-     * 
+     *
      * @param string $input
      *
      * @return array [string operator,string value]
@@ -228,7 +253,7 @@ class Filter
                 if ($input != false) {
                     $simpleOperator = substr($input, 0, 1);
                     $doubleOperator = substr($input, 0, 2);
-                    // if start with operators            
+                    // if start with operators
                     switch ($doubleOperator) {
                         case self::TYPE_GREATER_OR_EQUAL:
                         case self::TYPE_LESS_OR_EQUAL:
@@ -258,53 +283,85 @@ class Filter
     }
 
     /**
-     * Get formated input.
-     * 
+     * Set the custom formatter input.
+     *
+     * @param callable $formatter
+     *
+     * @return static
+     */
+    public function setInputFormatter($formatter)
+    {
+        $this->inputFormatter = $formatter;
+
+        return $this;
+    }
+
+    /**
+     * Get formatted input.
+     *
+     * @param string $operator
      * @param string $input
      *
-     * @return string formated input
+     * @return array searchOperator, formatted input
      */
-    public function getFormatedInput($input)
+    public function getFormattedInput($operator, $input)
     {
-        switch ($this->getDataFormat()) {
-            // date/time format dd/mm/YYYY HH:ii:ss
-            case self::FORMAT_DATE:
-                $params = explode('/', str_replace(['-', ' '], '/', $input));
-                // only year ?
-                if (count($params) == 1) {
-                    $fInput = $params[0];
-                }
-                // month/year ?
-                elseif (count($params) == 2) {
-                    $fInput = sprintf('%04d-%02d', $params[1], $params[0]);
-                }
-                // day/month/year ?
-                elseif (count($params) == 3) {
-                    $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
-                }
-                // day/month/year hour ?
-                elseif (count($params) == 4) {
-                    $fInput = sprintf('%04d-%02d-%02d %02d', $params[3], $params[2], $params[1], $params[0]);
-                }
-                // day/month/year hour:minute ?
-                elseif (count($params) == 5) {
-                    $fInput = sprintf('%04d-%02d-%02d %02d:%02d', $params[4], $params[3], $params[2], $params[1], $params[0]);
-                }
-                // day/month/year hour:minute ?
-                elseif (count($params) == 6) {
-                    $fInput = sprintf('%04d-%02d-%02d %02d:%02d:%02d', $params[5], $params[4], $params[3], $params[2], $params[1], $params[0]);
-                }
-                // default, same has raw value
-                else {
+        // if we use custom formatter
+        if (is_callable($this->inputFormatter)) {
+            $function = $this->inputFormatter;
+
+            return $function($this, $operator, $input);
+        } // else, use standard input converter
+        else {
+            switch ($this->getDataFormat()) {
+                // date/time format dd/mm/YYYY HH:ii:ss
+                case self::FORMAT_DATE:
+                    $params = explode('/', str_replace(['-', ' '], '/', $input));
+                    // only year ?
+                    if (count($params) == 1) {
+                        $fInput = $params[0];
+                    } // month/year ?
+                    elseif (count($params) == 2) {
+                        $fInput = sprintf('%04d-%02d', $params[1], $params[0]);
+                    } // day/month/year ?
+                    elseif (count($params) == 3) {
+                        $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
+                    } // day/month/year hour ?
+                    elseif (count($params) == 4) {
+                        $fInput = sprintf('%04d-%02d-%02d %02d', $params[3], $params[2], $params[1], $params[0]);
+                    } // day/month/year hour:minute ?
+                    elseif (count($params) == 5) {
+                        $fInput = sprintf(
+                            '%04d-%02d-%02d %02d:%02d',
+                            $params[4],
+                            $params[3],
+                            $params[2],
+                            $params[1],
+                            $params[0]
+                        );
+                    } // day/month/year hour:minute ?
+                    elseif (count($params) == 6) {
+                        $fInput = sprintf(
+                            '%04d-%02d-%02d %02d:%02d:%02d',
+                            $params[5],
+                            $params[4],
+                            $params[3],
+                            $params[2],
+                            $params[1],
+                            $params[0]
+                        );
+                    } // default, same has raw value
+                    else {
+                        $fInput = $input;
+                    }
+                    break;
+                case self::FORMAT_TEXT:
+                default:
                     $fInput = $input;
-                }
-                break;
-            case self::FORMAT_TEXT:
-            default:
-                $fInput = $input;
-                break;
+                    break;
+            }
         }
 
-        return $fInput;
+        return [$operator, $fInput];
     }
 }

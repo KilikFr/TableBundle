@@ -443,7 +443,7 @@ class Table
     }
 
     /**
-     * @return array|Filter
+     * @return Filter[]
      */
     public function getFilters()
     {
@@ -453,7 +453,7 @@ class Table
     /**
      * Get all filters (filters + column filters).
      *
-     * @return array|Filter
+     * @return Filter[]
      */
     public function getAllFilters()
     {

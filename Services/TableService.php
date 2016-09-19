@@ -2,6 +2,7 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Symfony\Component\Form\FormView;
 use Twig_Environment;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,36 +56,52 @@ class TableService
                 $searchParamRaw = trim($queryParams[$filter->getName()]);
                 list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
                 if ((string) $searchParam != '') {
-                    $formatedSearch = $filter->getFormatedInput($searchParam);
+                    list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
 
                     $sql = false;
-                    // selon le type de filtre
-                    switch ($operator) {
+
+                    // depending on operator
+                    switch ($searchOperator) {
                         case Filter::TYPE_GREATER:
                         case Filter::TYPE_GREATER_OR_EQUAL:
                         case Filter::TYPE_LESS:
                         case Filter::TYPE_LESS_OR_EQUAL:
                         case Filter::TYPE_NOT_EQUAL:
-                            $sql = $filter->getField()." {$operator} :filter_".$filter->getName();
-                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formatedSearch);
+                            $sql = $filter->getField()." {$searchOperator} :filter_".$filter->getName();
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
                             break;
                         case Filter::TYPE_EQUAL_STRICT:
                             $sql = $filter->getField().' = :filter_'.$filter->getName();
-                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formatedSearch);
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
                             break;
                         case Filter::TYPE_EQUAL:
                             $sql = $filter->getField().' like :filter_'.$filter->getName();
-                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formatedSearch);
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
                             break;
                         case Filter::TYPE_NOT_LIKE:
                             $sql = $filter->getField().' not like :filter_'.$filter->getName();
-                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formatedSearch.'%');
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                            break;
+                        case Filter::TYPE_NULL:
+                            $sql = $filter->getField().' IS NULL';
+                            break;
+                        case Filter::TYPE_NOT_NULL:
+                            $sql = $filter->getField().' IS NOT NULL';
+                            break;
+                        case Filter::TYPE_IN:
+                            $sql = $filter->getField().' IN (:filter_'.$filter->getName().')';
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                            break;
+                        case Filter::TYPE_NOT_IN:
+                            $sql = $filter->getField().' NOT IN (:filter_'.$filter->getName().')';
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
                             break;
                         default:
                         case Filter::TYPE_LIKE:
                             $sql = $filter->getField().' like :filter_'.$filter->getName();
-                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formatedSearch.'%');
+                            $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
                             break;
+
                     }
                     if (!is_null($sql)) {
                         if ($filter->getHaving()) {
@@ -103,7 +120,7 @@ class TableService
      *
      * @param Table $table
      *
-     * @return
+     * @return FormView
      */
     public function form(Table $table)
     {
@@ -113,14 +130,30 @@ class TableService
             // selon le type de filtre
             switch ($filter::FILTER_TYPE) {
                 case FilterCheckbox::FILTER_TYPE:
-                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, ['required' => false]);
+                    $form->add(
+                        $filter->getName(),
+                        \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class,
+                        ['required' => false]
+                    );
                     break;
                 case FilterSelect::FILTER_TYPE:
-                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, ['required' => false, 'choices' => $filter->getChoices(), 'placeholder' => $filter->getPlaceholder()]);
+                    $form->add(
+                        $filter->getName(),
+                        \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class,
+                        [
+                            'required' => false,
+                            'choices' => $filter->getChoices(),
+                            'placeholder' => $filter->getPlaceholder(),
+                        ]
+                    );
                     break;
                 case Filter::FILTER_TYPE:
                 default:
-                    $form->add($filter->getName(), \Symfony\Component\Form\Extension\Core\Type\TextType::class, ['required' => false]);
+                    $form->add(
+                        $filter->getName(),
+                        \Symfony\Component\Form\Extension\Core\Type\TextType::class,
+                        ['required' => false]
+                    );
                     break;
             }
         }
@@ -161,7 +194,6 @@ class TableService
             $count = $paginatorTotal->count();
         } else {
             $qbtr->select($qbtr->expr()->count($identifiers));
-            dump($qbtr);
             $count = (int) $qbtr->getQuery()->getSingleScalarResult();
         }
 
@@ -199,13 +231,13 @@ class TableService
      * @param Table   $table
      * @param Request $request
      * @param bool    $paginate   : limit selections with pagination mecanism
-     * @param bool    $getObjetcs : get objects (else, only scalar results)
+     * @param bool    $getObjects : get objects (else, only scalar results)
      *
      * @return Response
      *
      * table attributes are modified (if paginate=true)
      */
-    public function getRows(Table $table, Request $request, $paginate = true, $getObjetcs = true)
+    public function getRows(Table $table, Request $request, $paginate = true, $getObjects = true)
     {
         $table->setRowsPerPage($request->get('rowsPerPage', 10));
         $table->setPage($request->get('page', 1));
@@ -264,7 +296,7 @@ class TableService
         $query = $qb->getQuery();
 
         // if we need to get objects
-        if ($getObjetcs) {
+        if ($getObjects) {
             // @todo: change the method to get objects from SCALAR selection, in place of a second query....
             if (!is_null($qb->getDQLPart('groupBy'))) {
                 // results as objects
@@ -283,7 +315,7 @@ class TableService
         $rows = $query->getResult(Query::HYDRATE_SCALAR);
 
         // if we need to get objects
-        if ($getObjetcs) {
+        if ($getObjects) {
             // results as scalar
             foreach ($rows as &$row) {
                 if (isset($objects[$row[$table->getAlias().'_id']])) {
@@ -354,10 +386,19 @@ class TableService
             'totalRows' => $table->getTotalRows(),
             'filteredRows' => $table->getFilteredRows(),
             'lastPage' => $table->getLastPage(),
-            'tableBody' => $template->renderBlock('tableBody', array_merge($twigParams, ['tableRenderBody' => true], $table->getTemplateParams())),
+            'tableBody' => $template->renderBlock(
+                'tableBody',
+                array_merge($twigParams, ['tableRenderBody' => true], $table->getTemplateParams())
+            ),
             //"tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
-            'tableStats' => $template->renderBlock('tableStatsAjax', array_merge($twigParams, ['tableRenderStats' => true])),
-            'tablePagination' => $template->renderBlock('tablePaginationAjax', array_merge($twigParams, ['tableRenderPagination' => true])),
+            'tableStats' => $template->renderBlock(
+                'tableStatsAjax',
+                array_merge($twigParams, ['tableRenderStats' => true])
+            ),
+            'tablePagination' => $template->renderBlock(
+                'tablePaginationAjax',
+                array_merge($twigParams, ['tableRenderPagination' => true])
+            ),
         ];
 
         // encode response

@@ -11,21 +11,21 @@ class FilterSelect extends Filter
 
     /**
      * Liste des valeurs du select.
-     * 
+     *
      * @var array
      */
     private $choices;
 
     /**
      * Placeholder.
-     * 
+     *
      * @var string
      */
     private $placeholder;
 
     /**
      * Set the choices.
-     * 
+     *
      * @param array $choices
      *
      * @return static
@@ -39,7 +39,7 @@ class FilterSelect extends Filter
 
     /**
      * Get the choices.
-     * 
+     *
      * @return array
      */
     public function getChoices()
@@ -49,7 +49,7 @@ class FilterSelect extends Filter
 
     /**
      * Set the placeholder.
-     * 
+     *
      * @param string $placeholder
      *
      * @return static
@@ -63,7 +63,7 @@ class FilterSelect extends Filter
 
     /**
      * Get the placeholder.
-     * 
+     *
      * @return string
      */
     public function getPlaceholder()
