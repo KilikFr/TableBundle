@@ -99,7 +99,8 @@ function KilikTable(id, path, options) {
         });
 
         // ordering binding
-        $("#" + this.id).find(".columnSortable").click(function () {
+        $("#" + this.id).find(".columnSortable").click(function (event) {
+            event.preventDefault();
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
             // if same column, inverse order
@@ -354,7 +355,8 @@ function KilikTable(id, path, options) {
                 table.lastPage = data.lastPage;
 
                 // rebind click on pagination buttons
-                $("#" + id + "_pagination .tablePaginationButton").click(function () {
+                $("#" + id + "_pagination .tablePaginationButton").click(function (event) {
+                    event.preventDefault();
                     var button = $(this);
                     table.page = button.attr("data-table-page");
                     table.doReload();
