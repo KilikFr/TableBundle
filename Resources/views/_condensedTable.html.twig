@@ -43,7 +43,7 @@
 </table>
 
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-6">
         {% block tableStats %}
             <div id="{{ table.id }}_stats">
                 {% block tableStatsAjax %}
@@ -53,7 +53,7 @@
         {% endblock tableStats %}
     </div>
 
-    <div class="col-sm-4">
+    <div class="col-sm-6">
     {% block tablePagination %}
         <div id="{{ table.id }}_pagination" class="btn-group pull-right">
             {% block tablePaginationAjax %}
