@@ -1,0 +1,8 @@
+kiliktable:
+    showing_entries: "{0} no se encuentra nada guardado |{1} vista de 1 elemento filtrado |]1,Inf[ vista del elemento %firstRow% à %lastRow% de %filteredRows% elementos"
+    filtered_from: "{1} filtrado desde %totalRows% elementos |]1,Inf[ filtrados desde %totalRows% elementos"
+    previous: anterior
+    next: siguiente
+    show: mostrar
+    rows_per_page: elementos por página
+    setup: configuración
