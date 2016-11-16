@@ -57,11 +57,18 @@ class Column
     private $name;
 
     /**
-     * Activate label translation ?
+     * Domain for label translation ?
      *
      * @var bool
      */
-    private $translateLabel = false;
+    private $translateDomain = null;
+
+    /**
+     * Capitalize label ?
+     *
+     * @var bool
+     */
+    private $capitalize = true;
 
     /**
      * custom display method ?
@@ -201,6 +208,8 @@ class Column
      * Get sort reversed, or not (if sortReverse is empty, auto revert all sort orders).
      *
      * @param bool $reverse
+     *
+     * @return string
      */
     public function getAutoSort($reverse)
     {
@@ -243,7 +252,7 @@ class Column
     /**
      * Set reversed sort fields.
      *
-     * @param array $sort
+     * @param array $sortReverse
      *
      * @return static
      */
@@ -283,7 +292,11 @@ class Column
      */
     public function setTranslateLabel($translate)
     {
-        $this->translateLabel = $translate;
+        if ($translate) {
+            $this->translateDomain = 'messages';
+        } else {
+            $this->translateDomain = null;
+        }
 
         return $this;
     }
@@ -295,7 +308,31 @@ class Column
      */
     public function getTranslateLabel()
     {
-        return $this->translateLabel;
+        return !is_null($this->translateDomain);
+    }
+
+    /**
+     * Set label domain translation.
+     *
+     * @param string $domain
+     *
+     * @return static
+     */
+    public function setTranslateDomain($domain)
+    {
+        $this->translateDomain = $domain;
+
+        return $this;
+    }
+
+    /**
+     * Column label translation domain.
+     *
+     * @return bool
+     */
+    public function getTranslateDomain()
+    {
+        return $this->translateDomain;
     }
 
     /**
@@ -592,5 +629,29 @@ class Column
         } else {
             return '';
         }
+    }
+
+    /**
+     * Enable/Disable the capitalize filter.
+     *
+     * @param bool $capitalize
+     *
+     * @return static
+     */
+    public function setCapitalize($capitalize = true)
+    {
+        $this->capitalize = $capitalize;
+
+        return $this;
+    }
+
+    /**
+     * Get the capitalize filter status.
+     *
+     * @return bool
+     */
+    public function getCapitalize()
+    {
+        return $this->capitalize;
     }
 }
