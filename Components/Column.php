@@ -561,7 +561,7 @@ class Column
                     if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
                         return $rawValue->format($formatParams);
                     } else {
-                        return 'bad argument';
+                        return '';
                     }
                     break;
                 case static::FORMAT_TEXT:
@@ -613,7 +613,7 @@ class Column
                         if (!is_null($rawValue) && is_object($rawValue) && get_class($rawValue) == 'DateTime') {
                             return $rawValue->format($formatParams);
                         } else {
-                            return 'bad argument';
+                            return '';
                         }
                         break;
                     case static::FORMAT_TEXT:
