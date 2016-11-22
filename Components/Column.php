@@ -466,10 +466,12 @@ class Column
      * @param mixed $value : the column value (the object or a field)
      * @param array $row   : the row values
      * @param array $rows  : the rows values (of the page)
+     *
+     * @return string
      */
     public function sampleCallback($value, $row, $rows)
     {
-        // this sample juste return the value, but could do many more
+        // this sample just return the value, but could do many more
         return (string) $value;
     }
 
@@ -534,7 +536,7 @@ class Column
      *
      * @return string
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function getValue(array $row, array $rows = [])
     {
@@ -547,7 +549,7 @@ class Column
         $callback = $this->getDisplayCallback();
         if (!is_null($callback)) {
             if (!is_callable($callback)) {
-                throw new Exception('displayCallback is not callable');
+                throw new \Exception('displayCallback is not callable');
             }
 
             return $callback($rawValue, $row, $rows);
@@ -589,7 +591,7 @@ class Column
      *
      * @return string
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function getExportValue(array $row, array $rows = [])
     {
@@ -599,7 +601,7 @@ class Column
             $callback = $this->getExportCallback();
             if (!is_null($callback)) {
                 if (!is_callable($callback)) {
-                    throw new Exception('exportCallback is not callable');
+                    throw new \Exception('exportCallback is not callable');
                 }
 
                 return $callback($rawValue, $row, $rows);
