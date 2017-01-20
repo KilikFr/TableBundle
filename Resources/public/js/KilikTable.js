@@ -164,23 +164,23 @@ function KilikTable(id, path, options) {
      * Pre - check hidden columns form
      */
     this.applyHideColumnsForm = function () {
-        table = this;
+        var table = this;
         // check all columns
         $("*[data-setup='" + id + "']:input").prop("checked", true);
         // uncheck hidden columns
         for (key in this.hiddenColumns) {
-            hiddenColumn = this.hiddenColumns[key];
+            var hiddenColumn = this.hiddenColumns[key];
             $("*[data-column='" + hiddenColumn + "'][data-setup='" + id + "']:input").prop("checked", false);
 
             // hide column name and filter
-            $("th[data-column='" + hiddenColumn + "']").hide();
-            $("td[data-column='" + hiddenColumn + "']").hide();
+            $("#" + id).find("th[data-column='" + hiddenColumn + "']").hide();
+            $("#" + id).find("td[data-column='" + hiddenColumn + "']").hide();
         }
         // bind change
         $("*[data-setup='" + id + "']:input").change(function () {
             var input = $(this);
-            checked = input.prop("checked");
-            name = input.attr("data-column");
+            var checked = input.prop("checked");
+            var name = input.attr("data-column");
 
             // if hidding
             if (checked) {
