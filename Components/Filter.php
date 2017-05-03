@@ -14,6 +14,10 @@ class Filter
  */
     // WHERE field LIKE '%value%'
     const TYPE_LIKE = 'like';
+    // WHERE field LIKE '%value1%' AND field LIKE '%value2%'
+    const TYPE_LIKE_WORDS_AND = 'like_words_and';
+    // WHERE (field LIKE '%value1%' OR field LIKE '%value2%')
+    const TYPE_LIKE_WORDS_OR = 'like_words_or';
     // WHERE field NOT LIKE '%value%'
     const TYPE_NOT_LIKE = '!';
     // WHERE field LIKE 'value'
@@ -43,6 +47,8 @@ class Filter
             self::TYPE_GREATER_OR_EQUAL,
             self::TYPE_LESS,
             self::TYPE_LESS_OR_EQUAL,
+            self::TYPE_LIKE_WORDS_AND,
+            self::TYPE_LIKE_WORDS_OR,
             self::TYPE_AUTO,
         ];
     const TYPE_DEFAULT = self::TYPE_AUTO;
@@ -255,6 +261,8 @@ class Filter
             case self::TYPE_LIKE:
             case self::TYPE_NOT_EQUAL:
             case self::TYPE_EQUAL_STRICT:
+            case self::TYPE_LIKE_WORDS_AND:
+            case self::TYPE_LIKE_WORDS_OR:
                 return [$this->getType(), $input];
             case self::TYPE_AUTO:
             default:
@@ -374,7 +382,7 @@ class Filter
     }
 
     /**
-     * Set Default value
+     * Set Default value.
      *
      * @param string $defaultValue
      *
@@ -388,7 +396,7 @@ class Filter
     }
 
     /**
-     * Get default value
+     * Get default value.
      *
      * @return string
      */

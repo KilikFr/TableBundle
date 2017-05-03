@@ -97,6 +97,37 @@ class TableService
                             $sql = $filter->getField().' NOT IN (:filter_'.$filter->getName().')';
                             $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
                             break;
+                            // when filtering on 'description LIKE WORDS "house red blue"'
+                            // results are: description LIKE '%house%' AND
+                        case Filter::TYPE_LIKE_WORDS_AND:
+                        case Filter::TYPE_LIKE_WORDS_OR:
+                            if($searchOperator==Filter::TYPE_LIKE_WORDS_OR) {
+                                $binaryOperator='OR';
+                            }
+                            else {
+                                $binaryOperator='AND';
+                            }
+                            $words = [];
+                            foreach (explode(' ', trim($formattedSearch)) as $word) {
+                                // add only non blank words
+                                $word = trim($word);
+                                if ($word) {
+                                    $words[] = $word;
+                                }
+                            }
+                            if (count($words) > 0) {
+                                $sql = '(';
+                                foreach ($words as $i => $word) {
+                                    if ($i > 0) {
+                                        $sql .= ' '.$binaryOperator.' '; // AND / OR
+                                    }
+                                    $termKey = 'filter_'.$filter->getName().'_t'.$i;
+                                    $sql .= $filter->getField().' like :'.$termKey;
+                                    $queryBuilder->setParameter($termKey, '%'.$word.'%');
+                                }
+                                $sql .= ')';
+                            }
+                            break;
                         default:
                         case Filter::TYPE_LIKE:
                             $sql = $filter->getField().' like :filter_'.$filter->getName();

@@ -31,6 +31,7 @@ Working features:
 - column display callback
 - multiple lists on one page
 - pre-load default filters and reset local storage filters
+- smart filtering on many words (Filter::TYPE_LIKE_WORDS_AND)
 
 Planned features:
 ------------------
