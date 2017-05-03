@@ -114,6 +114,13 @@ class Table
     private $customOptions = [];
 
     /**
+     * Skip load from local storage.
+     *
+     * @var bool
+     */
+    private $skipLoadFromLocalStorage = false;
+
+    /**
      * Table constructor.
      */
     public function __construct()
@@ -639,15 +646,39 @@ class Table
     }
 
     /**
+     * @param bool $skipLoadFromLocalStorage
+     *
+     * @return static
+     */
+    public function setSkipLoadFromLocalStorage($skipLoadFromLocalStorage)
+    {
+        $this->skipLoadFromLocalStorage = $skipLoadFromLocalStorage;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkipLoadFromLocalStorage()
+    {
+        return $this->skipLoadFromLocalStorage;
+    }
+
+    /**
      * Get table options (for javascript).
      *
      * @return array
      */
     public function getOptions()
     {
-        return array_merge($this->customOptions, [
-            'rowsPerPage' => $this->rowsPerPage,
-            'defaultHiddenColumns' => $this->getHiddenColumnsNames(),
-        ]);
+        return array_merge(
+            $this->customOptions,
+            [
+                'rowsPerPage' => $this->rowsPerPage,
+                'defaultHiddenColumns' => $this->getHiddenColumnsNames(),
+                'skipLoadFromLocalStorage' => $this->skipLoadFromLocalStorage,
+            ]
+        );
     }
 }

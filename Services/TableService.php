@@ -2,6 +2,7 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormView;
 use Twig_Environment;
 use Symfony\Component\Form\FormFactory;
@@ -101,7 +102,6 @@ class TableService
                             $sql = $filter->getField().' like :filter_'.$filter->getName();
                             $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
                             break;
-
                     }
                     if (!is_null($sql)) {
                         if ($filter->getHaving()) {
@@ -124,7 +124,15 @@ class TableService
      */
     public function form(Table $table)
     {
-        $form = $this->formFactory->createNamedBuilder($table->getId().'_form');
+        // prepare defaults values
+        $defaultValues = [];
+        foreach ($table->getAllFilters() as $filter) {
+            if (!is_null($filter->getDefaultValue())) {
+                $defaultValues[$filter->getName()] = $filter->getDefaultValue();
+            }
+        }
+
+        $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $defaultValues);
         //$this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
             // selon le type de filtre
@@ -152,7 +160,9 @@ class TableService
                     $form->add(
                         $filter->getName(),
                         \Symfony\Component\Form\Extension\Core\Type\TextType::class,
-                        ['required' => false]
+                        [
+                            'required' => false,
+                        ]
                     );
                     break;
             }

@@ -32,18 +32,19 @@ class Filter
     const TYPE_LESS_OR_EQUAL = '<=';
     // use input to apply arithmetic comparators, then filter the results
     const TYPE_AUTO = 'auto';
-    const TYPES = [
-        self::TYPE_LIKE,
-        self::TYPE_NOT_LIKE,
-        self::TYPE_EQUAL,
-        self::TYPE_NOT_EQUAL,
-        self::TYPE_EQUAL_STRICT,
-        self::TYPE_GREATER,
-        self::TYPE_GREATER_OR_EQUAL,
-        self::TYPE_LESS,
-        self::TYPE_LESS_OR_EQUAL,
-        self::TYPE_AUTO,
-    ];
+    const TYPES
+        = [
+            self::TYPE_LIKE,
+            self::TYPE_NOT_LIKE,
+            self::TYPE_EQUAL,
+            self::TYPE_NOT_EQUAL,
+            self::TYPE_EQUAL_STRICT,
+            self::TYPE_GREATER,
+            self::TYPE_GREATER_OR_EQUAL,
+            self::TYPE_LESS,
+            self::TYPE_LESS_OR_EQUAL,
+            self::TYPE_AUTO,
+        ];
     const TYPE_DEFAULT = self::TYPE_AUTO;
     // specials types:
     const TYPE_NULL = 'null';
@@ -102,6 +103,13 @@ class Filter
      * prototype (Filter,$defaultOperator,$value)
      */
     private $inputFormatter = null;
+
+    /**
+     * Default filter value (forced from GET VARS for example).
+     *
+     * @var string
+     */
+    private $defaultValue = null;
 
     /**
      * Set the filter name.
@@ -363,5 +371,29 @@ class Filter
         }
 
         return [$operator, $fInput];
+    }
+
+    /**
+     * Set Default value
+     *
+     * @param string $defaultValue
+     *
+     * @return static
+     */
+    public function setDefaultValue($defaultValue)
+    {
+        $this->defaultValue = $defaultValue;
+
+        return $this;
+    }
+
+    /**
+     * Get default value
+     *
+     * @return string
+     */
+    public function getDefaultValue()
+    {
+        return $this->defaultValue;
     }
 }

@@ -22,6 +22,7 @@ function KilikTable(id, path, options) {
 
     this.hiddenColumns = [];
     this.defaultHiddenColumns = [];
+    this.skipLoadFromLocalStorage = false;
 
     // for each option
     for (optionKey in options) {
@@ -43,6 +44,9 @@ function KilikTable(id, path, options) {
                 break;
             case "defaultHiddenColumns":
                 this.defaultHiddenColumns = options[optionKey];
+                break;
+            case "skipLoadFromLocalStorage":
+                this.skipLoadFromLocalStorage = options[optionKey];
                 break;
         }
     }
@@ -123,7 +127,10 @@ function KilikTable(id, path, options) {
         });
 
         // load previous filters
-        this.loadFromLocalStorage();
+
+        if (!table.skipLoadFromLocalStorage) {
+            this.loadFromLocalStorage();
+        }
 
         // update sorted columns
         this.applyColumnSort();
