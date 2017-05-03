@@ -30,11 +30,11 @@ Working features:
 - customization of visible columns (hide/show checkboxes)
 - column display callback
 - multiple lists on one page
+- pre-load default filters and reset local storage filters
 
 Planned features:
 ------------------
 - more translations
-- clean/reset filters in local storage browser
 - add advanced templates
 - loading image waiting ajax response
 - new column display types (now: only raw text value)
