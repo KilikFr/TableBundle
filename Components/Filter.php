@@ -118,6 +118,13 @@ class Filter
     private $defaultValue = null;
 
     /**
+     * Custom query part builder handler.
+     *
+     * @var callable
+     */
+    private $queryPartBuilder = null;
+
+    /**
      * Set the filter name.
      *
      * @param string $name
@@ -403,5 +410,25 @@ class Filter
     public function getDefaultValue()
     {
         return $this->defaultValue;
+    }
+
+    /**
+     * @param callable $queryPartBuilder (Filter $filter, Table $table, \Doctrine\ORM\QueryBuilder $queryBuilder, mixed $value)
+     *
+     * @return static
+     */
+    public function setQueryPartBuilder($queryPartBuilder)
+    {
+        $this->queryPartBuilder = $queryPartBuilder;
+
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getQueryPartBuilder()
+    {
+        return $this->queryPartBuilder;
     }
 }
