@@ -24,6 +24,27 @@ class FilterSelect extends Filter
     private $placeholder;
 
     /**
+     * Choice Label Select callback (@see http://symfony.com/doc/current/reference/forms/types/choice.html#choice-label).
+     *
+     * @var callable
+     */
+    private $choiceLabel;
+
+    /**
+     * Choice Value Select callback (@see http://symfony.com/doc/current/reference/forms/types/choice.html#choice-value).
+     *
+     * @var callable
+     */
+    private $choiceValue;
+
+    /**
+     * Group By Select callback (@see http://symfony.com/doc/current/reference/forms/types/choice.html#group-by).
+     *
+     * @var callable
+     */
+    private $choicesGroupBy;
+
+    /**
      * Set the choices.
      *
      * @param array $choices
@@ -69,5 +90,65 @@ class FilterSelect extends Filter
     public function getPlaceholder()
     {
         return $this->placeholder;
+    }
+
+    /**
+     * @param callable $choiceLabel
+     *
+     * @return static
+     */
+    public function setChoiceLabel($choiceLabel)
+    {
+        $this->choiceLabel = $choiceLabel;
+
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getChoiceLabel()
+    {
+        return $this->choiceLabel;
+    }
+
+    /**
+     * @param callable $choiceValue
+     *
+     * @return static
+     */
+    public function setChoiceValue($choiceValue)
+    {
+        $this->choiceValue = $choiceValue;
+
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getChoiceValue()
+    {
+        return $this->choiceValue;
+    }
+
+    /**
+     * @param callable|null $choicesGroupBy
+     *
+     * @return static
+     */
+    public function setChoicesGroupBy($choicesGroupBy)
+    {
+        $this->choicesGroupBy = $choicesGroupBy;
+
+        return $this;
+    }
+
+    /**
+     * @return callable|null
+     */
+    public function getChoicesGroupBy()
+    {
+        return $this->choicesGroupBy;
     }
 }

@@ -179,6 +179,7 @@ class TableService
                     );
                     break;
                 case FilterSelect::FILTER_TYPE:
+                    /** @var FilterSelect $filter */
                     $form->add(
                         $filter->getName(),
                         \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class,
@@ -186,6 +187,9 @@ class TableService
                             'required' => false,
                             'choices' => $filter->getChoices(),
                             'placeholder' => $filter->getPlaceholder(),
+                            'group_by'=>$filter->getChoicesGroupBy(),
+                            'choice_label'=>$filter->getChoiceLabel(),
+                            'choice_value'=>$filter->getChoiceValue(),
                         ]
                     );
                     break;
