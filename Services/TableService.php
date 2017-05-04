@@ -56,7 +56,8 @@ class TableService
             if (isset($queryParams[$filter->getName()])) {
                 $searchParamRaw = trim($queryParams[$filter->getName()]);
                 if (is_callable($filter->getQueryPartBuilder())) {
-                    $filter->getQueryPartBuilder()($filter, $table, $queryBuilder, $searchParamRaw);
+                    $callback = $filter->getQueryPartBuilder();
+                    $callback($filter, $table, $queryBuilder, $searchParamRaw);
                 } else {
                     list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
                     if ((string) $searchParam != '') {
@@ -179,7 +180,7 @@ class TableService
                     );
                     break;
                 case FilterSelect::FILTER_TYPE:
-                    /** @var FilterSelect $filter */
+                    /* @var FilterSelect $filter */
                     $form->add(
                         $filter->getName(),
                         \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class,
@@ -187,9 +188,9 @@ class TableService
                             'required' => false,
                             'choices' => $filter->getChoices(),
                             'placeholder' => $filter->getPlaceholder(),
-                            'group_by'=>$filter->getChoicesGroupBy(),
-                            'choice_label'=>$filter->getChoiceLabel(),
-                            'choice_value'=>$filter->getChoiceValue(),
+                            'group_by' => $filter->getChoicesGroupBy(),
+                            'choice_label' => $filter->getChoiceLabel(),
+                            'choice_value' => $filter->getChoiceValue(),
                         ]
                     );
                     break;
