@@ -1,7 +1,7 @@
 {
     "name": "kilik/table",
-    "description": "Symfony2 Ajax Datagrid Bundle for doctrine2 entities",
-    "keywords": ["symfony2","jquery","table"],
+    "description": "Symfony Ajax Datagrid Bundle for doctrine entities",
+    "keywords": ["symfony","jquery","table"],
     "homepage": "https://github.com/KilikFr/TableBundle",
     "license": "MIT",
     "type": "library",
