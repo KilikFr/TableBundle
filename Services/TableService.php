@@ -2,6 +2,7 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormView;
 use Twig_Environment;
@@ -44,11 +45,11 @@ class TableService
     }
 
     /**
-     * @param Table                      $table
-     * @param Request                    $request
-     * @param \Doctrine\ORM\QueryBuilder $queryBuilder
+     * @param Table        $table
+     * @param Request      $request
+     * @param QueryBuilder $queryBuilder
      */
-    private function addSearch(Table $table, Request $request, \Doctrine\ORM\QueryBuilder $queryBuilder)
+    private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder)
     {
         $queryParams = $request->get($table->getFormId());
 
@@ -95,11 +96,23 @@ class TableService
                                 break;
                             case Filter::TYPE_IN:
                                 $sql = $filter->getField().' IN (:filter_'.$filter->getName().')';
-                                $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                                // $formattedSearch is like 'new,cancelled'
+                                if (is_array($formattedSearch)) {
+                                    $values = $formattedSearch;
+                                } else {
+                                    $values = explode(',', $formattedSearch);
+                                }
+                                $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
                                 break;
                             case Filter::TYPE_NOT_IN:
                                 $sql = $filter->getField().' NOT IN (:filter_'.$filter->getName().')';
-                                $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                                // $formattedSearch is like 'new,cancelled'
+                                if (is_array($formattedSearch)) {
+                                    $values = $formattedSearch;
+                                } else {
+                                    $values = explode(',', $formattedSearch);
+                                }
+                                $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
                                 break;
                             // when filtering on 'description LIKE WORDS "house red blue"'
                             // results are: description LIKE '%house%' AND
