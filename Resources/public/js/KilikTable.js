@@ -24,6 +24,17 @@ function KilikTable(id, path, options) {
     this.defaultHiddenColumns = [];
     this.skipLoadFromLocalStorage = false;
 
+    // small hack to prevent safari bug in private mode
+    if (typeof localStorage === 'object') {
+        try {
+            localStorage.setItem('localStorage', 1);
+            localStorage.removeItem('localStorage');
+        } catch (e) {
+            Storage.prototype._setItem = Storage.prototype.setItem;
+            Storage.prototype.setItem = function() {};
+        }
+    }
+
     // for each option
     for (optionKey in options) {
         switch (optionKey) {
