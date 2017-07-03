@@ -120,6 +120,13 @@ class Column
     private $hidden = false;
 
     /**
+     * CSS Class.
+     *
+     * @var string
+     */
+    private $displayClass;
+
+    /**
      * @param Filter $filter
      *
      * @return static
@@ -655,5 +662,25 @@ class Column
     public function getCapitalize()
     {
         return $this->capitalize;
+    }
+
+    /**
+     * @param string $displayClass
+     *
+     * @return static
+     */
+    public function setDisplayClass($displayClass)
+    {
+        $this->displayClass = $displayClass;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayClass()
+    {
+        return $this->displayClass;
     }
 }
