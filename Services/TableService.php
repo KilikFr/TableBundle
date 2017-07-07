@@ -232,7 +232,7 @@ class TableService
      *
      * @param Table $table
      *
-     * @return array
+     * @return Table
      */
     public function createFormView(Table $table)
     {
@@ -357,9 +357,8 @@ class TableService
         $qb->addOrderBy($table->getAlias().'.id', 'asc');
         $query = $qb->getQuery();
 
-        // if we need to get objects
-        if ($getObjects) {
-            // @todo: change the method to get objects from SCALAR selection, in place of a second query....
+        // if we need to get objects, LEGACY mode
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
             if (!is_null($qb->getDQLPart('groupBy'))) {
                 // results as objects
                 $objects = [];
@@ -377,7 +376,65 @@ class TableService
         $rows = $query->getResult(Query::HYDRATE_SCALAR);
 
         // if we need to get objects
-        if ($getObjects) {
+        if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
+            // create entities identifiers list from scalar rows
+            $identifiers = [];
+            // results as scalar
+            foreach ($rows as $row) {
+                // add row identifier to array
+                $identifiers[] = $row[$table->getAlias().'_id'];
+            }
+
+            // if at least one identifier should be used to load entities
+            if (count($identifiers) > 0) {
+
+                // loaded entities
+                $entities = [];
+
+                // if we need to use repository name
+                if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
+                    // if repository name is missing
+                    if (!$table->getEntityLoaderRepository()) {
+                        throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+                    }
+
+                    // load entities from identifiers
+                    $loaderQueryBuilder = $table->getQueryBuilder()
+                        ->getEntityManager()
+                        ->getRepository($table->getEntityLoaderRepository())
+                        ->createQueryBuilder('e')
+                        ->select('e')
+                        ->where('e.id IN (:identifiers)')
+                        ->setParameter('identifiers', $identifiers);
+
+                    $entities = $loaderQueryBuilder->getQuery()->getResult();
+                } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
+                    // if repository callback is missing
+                    if (!is_callable($table->getEntityLoaderCallback())) {
+                        throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
+                    }
+                    // else, load entities from callback method
+                    $callback = $table->getEntityLoaderCallback();
+                    $entities = $callback($identifiers);
+                }
+
+                // associate objects to rows
+                if (count($entities) > 0) {
+                    foreach ($rows as &$row) {
+                        $row['object'] = null;
+                        foreach ($entities as $entity) {
+                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
+                                $row['object'] = $entity;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // if we need to get objects (legacy mode)
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
             // results as scalar
             foreach ($rows as &$row) {
                 if (isset($objects[$row[$table->getAlias().'_id']])) {

@@ -6,6 +6,14 @@ use Doctrine\ORM\QueryBuilder;
 
 class Table
 {
+    const ENTITY_LOADER_NONE = 0;
+    // old entity loader mechanism
+    const ENTITY_LOADER_LEGACY = 1;
+    // entity loader from Repository Name
+    const ENTITY_LOADER_REPOSITORY = 2;
+    // entity loader from custom load method
+    const ENTITY_LOADER_CALLBACK = 3;
+
     /**
      * Table id.
      *
@@ -119,6 +127,27 @@ class Table
      * @var bool
      */
     private $skipLoadFromLocalStorage = false;
+
+    /**
+     * Entity loader method.
+     *
+     * @var string
+     */
+    private $entityLoaderMode = self::ENTITY_LOADER_LEGACY;
+
+    /**
+     * Entity loader repository name (ENTITY_LOADER_REPOSITORY mode).
+     *
+     * @var string
+     */
+    private $entityLoaderRepository = null;
+
+    /**
+     * Entity loader callback (ENTITY_LOADER_METHOD mode).
+     *
+     * @var callable
+     */
+    private $entityLoaderCallback = null;
 
     /**
      * Table constructor.
@@ -680,5 +709,71 @@ class Table
                 'skipLoadFromLocalStorage' => $this->skipLoadFromLocalStorage,
             ]
         );
+    }
+
+    /**
+     * @param int $entityLoaderMode
+     *
+     * @return static
+     */
+    public function setEntityLoaderMode($entityLoaderMode)
+    {
+        $this->entityLoaderMode = $entityLoaderMode;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEntityLoaderMode()
+    {
+        return $this->entityLoaderMode;
+    }
+
+    /**
+     * @param string $entityLoaderRepository
+     *
+     * @return static
+     */
+    public function setEntityLoaderRepository($entityLoaderRepository)
+    {
+        // force mode
+        $this->setEntityLoaderMode(self::ENTITY_LOADER_REPOSITORY);
+
+        $this->entityLoaderRepository = $entityLoaderRepository;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityLoaderRepository()
+    {
+        return $this->entityLoaderRepository;
+    }
+
+    /**
+     * @param callable $entityLoaderCallback
+     *
+     * @return static
+     */
+    public function setEntityLoaderCallback($entityLoaderCallback)
+    {
+        // force mode
+        $this->setEntityLoaderMode(self::ENTITY_LOADER_CALLBACK);
+
+        $this->entityLoaderCallback = $entityLoaderCallback;
+
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getEntityLoaderCallback()
+    {
+        return $this->entityLoaderCallback;
     }
 }
