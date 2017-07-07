@@ -39,3 +39,26 @@ Planned features:
 - add advanced templates
 - loading image waiting ajax response
 - new column display types (now: only raw text value)
+
+Usage
+-----
+
+This documentation need to be completed.
+
+Here, some examples to show latest features.
+
+Optimized version to load entities, from Repository Name:
+
+        $table = (new Table())
+            // ...
+            ->setEntityLoaderRepository("KilikDemoBundle:Product")
+            // ...
+
+Optimized version to load entities, from Callback method:
+
+        $table = (new Table())
+            // ...
+            ->setEntityLoaderCallback(function($ids) {
+                return $this->manager()->getRepository('KilikDemoBundle:Product')->findById($ids);
+            })
+            // ...
