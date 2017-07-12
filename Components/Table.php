@@ -251,7 +251,7 @@ class Table
     }
 
     /**
-     * @return string|void
+     * @return string|null
      */
     public function getIdentifierFieldNames()
     {
