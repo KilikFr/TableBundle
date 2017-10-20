@@ -216,7 +216,7 @@ class Column
      *
      * @param bool $reverse
      *
-     * @return string
+     * @return array
      */
     public function getAutoSort($reverse)
     {
