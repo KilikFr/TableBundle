@@ -32,6 +32,7 @@ Working features:
 - multiple lists on one page
 - pre-load default filters and reset local storage filters
 - smart filtering on many words (Filter::TYPE_LIKE_WORDS_AND)
+- (beta) support api calls to load resources via web services
 
 Planned features:
 ------------------
