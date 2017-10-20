@@ -3,47 +3,15 @@
 namespace Kilik\TableBundle\Services;
 
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\FormView;
-use Twig_Environment;
-use Symfony\Component\Form\FormFactory;
+use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\Filter;
-use Kilik\TableBundle\Components\FilterCheckbox;
-use Kilik\TableBundle\Components\FilterSelect;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
-class TableService
+class TableService extends AbstractTableService
 {
-    /**
-     * Twig Service.
-     *
-     * @var Twig_Environment
-     */
-    private $twig;
-
-    /**
-     * FormFactory Service.
-     *
-     * @var FormFactory
-     */
-    private $formFactory;
-
-    /**
-     * TableService constructor.
-     *
-     * @param Twig_Environment $twig
-     * @param FormFactory      $formFactory
-     */
-    public function __construct(Twig_Environment $twig, FormFactory $formFactory)
-    {
-        $this->twig = $twig;
-        $this->formFactory = $formFactory;
-    }
-
     /**
      * @param Table        $table
      * @param Request      $request
@@ -164,87 +132,11 @@ class TableService
     }
 
     /**
-     * Get the form (for filtering).
-     *
-     * @param Table $table
-     *
-     * @return FormView
-     */
-    public function form(Table $table)
-    {
-        // prepare defaults values
-        $defaultValues = [];
-        foreach ($table->getAllFilters() as $filter) {
-            if (!is_null($filter->getDefaultValue())) {
-                $defaultValues[$filter->getName()] = $filter->getDefaultValue();
-            }
-        }
-
-        $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $defaultValues);
-        //$this->formBuilder->set
-        foreach ($table->getAllFilters() as $filter) {
-            // selon le type de filtre
-            switch ($filter::FILTER_TYPE) {
-                case FilterCheckbox::FILTER_TYPE:
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class,
-                        ['required' => false]
-                    );
-                    break;
-                case FilterSelect::FILTER_TYPE:
-                    /* @var FilterSelect $filter */
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class,
-                        [
-                            'required' => false,
-                            'choices' => $filter->getChoices(),
-                            'placeholder' => $filter->getPlaceholder(),
-                            'group_by' => $filter->getChoicesGroupBy(),
-                            'choice_label' => $filter->getChoiceLabel(),
-                            'choice_value' => $filter->getChoiceValue(),
-                        ]
-                    );
-                    break;
-                case Filter::FILTER_TYPE:
-                default:
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\TextType::class,
-                        [
-                            'required' => false,
-                        ]
-                    );
-                    break;
-            }
-        }
-
-        // append special inputs (used for export csv for exemple)
-        $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
-        $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
-
-        return $form->getForm()->createView();
-    }
-
-    /**
-     * Build filter form and get twig params for main view.
-     *
-     * @param Table $table
-     *
-     * @return Table
-     */
-    public function createFormView(Table $table)
-    {
-        return $table->setFormView($this->form($table));
-    }
-
-    /**
      * Set total rows count without filters.
      *
      * @param Table $table
      */
-    private function setTotalRows(Table $table)
+    protected function setTotalRows(Table $table)
     {
         $qb = $table->getQueryBuilder();
         $qbtr = clone $qb;
@@ -288,18 +180,9 @@ class TableService
     }
 
     /**
-     * Handle the user request and return an array of all elements.
-     *
-     * @param Table   $table
-     * @param Request $request
-     * @param bool    $paginate   : limit selections with pagination mecanism
-     * @param bool    $getObjects : get objects (else, only scalar results)
-     *
-     * @return Response
-     *
-     * table attributes are modified (if paginate=true)
+     * {@inheritdoc}
      */
-    public function getRows(Table $table, Request $request, $paginate = true, $getObjects = true)
+    public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
         $table->setRowsPerPage($request->get('rowsPerPage', 10));
         $table->setPage($request->get('page', 1));
@@ -444,85 +327,5 @@ class TableService
         }
 
         return $rows;
-    }
-
-    /**
-     * Export (selection by filters) as a CSV buffer.
-     *
-     * @param Table   $table
-     * @param Request $request
-     *
-     * @return string
-     */
-    public function exportAsCsv(Table $table, Request $request)
-    {
-        // execute query with filters, without pagination, only scalar results
-        $rows = $this->getRows($table, $request, false, false);
-
-        $buffer = '';
-        // first line: keys
-        if (count($rows) > 0) {
-            foreach ($table->getColumns() as $column) {
-                $buffer .= $column->getName().';';
-            }
-            $buffer .= "\n";
-        }
-
-        foreach ($rows as $row) {
-            foreach ($table->getColumns() as $column) {
-                $buffer .= $column->getExportValue($row, $rows).';';
-            }
-            $buffer .= "\n";
-        }
-
-        return $buffer;
-    }
-
-    /**
-     * Handle the user request and return the JSON response (with pagination).
-     *
-     * @param Table   $table
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function handleRequest(Table $table, Request $request)
-    {
-        // execute query with filters
-        $rows = $this->getRows($table, $request);
-
-        // params for twig parts
-        $twigParams = [
-            'table' => $table,
-            'rows' => $rows,
-        ];
-
-        $template = $this->twig->loadTemplate($table->getTemplate());
-
-        $responseParams = [
-            'page' => $table->getPage(),
-            'rowsPerPage' => $table->getRowsPerPage(),
-            'totalRows' => $table->getTotalRows(),
-            'filteredRows' => $table->getFilteredRows(),
-            'lastPage' => $table->getLastPage(),
-            'tableBody' => $template->renderBlock(
-                'tableBody',
-                array_merge($twigParams, ['tableRenderBody' => true], $table->getTemplateParams())
-            ),
-            //"tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
-            'tableStats' => $template->renderBlock(
-                'tableStatsAjax',
-                array_merge($twigParams, ['tableRenderStats' => true])
-            ),
-            'tablePagination' => $template->renderBlock(
-                'tablePaginationAjax',
-                array_merge($twigParams, ['tableRenderPagination' => true])
-            ),
-        ];
-
-        // encode response
-        $response = new Response(json_encode($responseParams));
-
-        return $response;
     }
 }
