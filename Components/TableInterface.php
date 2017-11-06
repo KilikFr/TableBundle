@@ -294,4 +294,13 @@ interface TableInterface
      * @return array
      */
     public function getOptions();
+
+    /**
+     * Get filter by name
+     *
+     * @param string $filterName
+     *
+     * @return Filter
+     */
+    public function getFilterByName($filterName);
 }

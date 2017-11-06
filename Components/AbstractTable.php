@@ -21,7 +21,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * Filters applied on the table.
      *
-     * @var array|Filter
+     * @var Filter[]
      */
     protected $filters;
 
@@ -237,7 +237,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getRowsPerPageOptions()
     {
@@ -245,7 +245,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setPage($page)
     {
@@ -255,7 +255,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPage()
     {
@@ -263,7 +263,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPreviousPage()
     {
@@ -271,7 +271,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getNextPage()
     {
@@ -279,7 +279,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setLastPage($page)
     {
@@ -289,7 +289,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLastPage()
     {
@@ -297,7 +297,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setTotalRows($totalRows)
     {
@@ -307,7 +307,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTotalRows()
     {
@@ -315,7 +315,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setFilteredRows($filteredRows)
     {
@@ -325,7 +325,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFilteredRows()
     {
@@ -333,7 +333,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addFilter(Filter $filter)
     {
@@ -343,7 +343,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFilters()
     {
@@ -351,7 +351,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getAllFilters()
     {
@@ -366,7 +366,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setFormView($formView)
     {
@@ -376,7 +376,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFormView()
     {
@@ -384,7 +384,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addColumn(Column $column)
     {
@@ -394,7 +394,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getColumns()
     {
@@ -402,7 +402,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getColumnByName($name)
     {
@@ -418,7 +418,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getBodyId()
     {
@@ -426,7 +426,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFootId()
     {
@@ -434,7 +434,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFormId()
     {
@@ -442,7 +442,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getFirstRow()
     {
@@ -450,7 +450,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLastRow()
     {
@@ -458,7 +458,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getValue(Column $column, array $row, array $rows = [])
     {
@@ -470,7 +470,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addCustomOption($option, $value)
     {
@@ -480,7 +480,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getCustomOptions()
     {
@@ -488,7 +488,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getHiddenColumnsNames()
     {
@@ -504,7 +504,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setSkipLoadFromLocalStorage($skipLoadFromLocalStorage)
     {
@@ -514,7 +514,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function isSkipLoadFromLocalStorage()
     {
@@ -522,7 +522,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getOptions()
     {
@@ -534,5 +534,19 @@ abstract class AbstractTable implements TableInterface
                 'skipLoadFromLocalStorage' => $this->skipLoadFromLocalStorage,
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFilterByName($filterName)
+    {
+        foreach ($this->getAllFilters() as $filter) {
+            if ($filter->getName() == $filterName) {
+                return $filter;
+            }
+        }
+
+        return;
     }
 }

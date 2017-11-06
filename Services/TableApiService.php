@@ -90,9 +90,10 @@ class TableApiService extends AbstractTableService
 
         // get results with api
         $apiResult = $table->getApi()->load(
+            $table,
             $this->parseFilters($table, $request),
             $this->parseOrderBy($table, $request),
-            $paginate ? $table->getPage() * $table->getRowsPerPage() : null,
+            $paginate ? $table->getPage() : null,
             $paginate ? $table->getRowsPerPage() : null
         );
 
