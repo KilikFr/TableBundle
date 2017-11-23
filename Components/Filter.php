@@ -4,14 +4,15 @@ namespace Kilik\TableBundle\Components;
 
 class Filter
 {
+
     /**
      * Type d'input.
      */
     const FILTER_TYPE = 'text';
 
-/**
- * Filter type.
- */
+    /**
+     * Filter type.
+     */
     // WHERE field LIKE '%value%'
     const TYPE_LIKE = 'like';
     // WHERE field LIKE '%value1%' AND field LIKE '%value2%'
@@ -273,7 +274,8 @@ class Filter
                 return [$this->getType(), $input];
             case self::TYPE_AUTO:
             default:
-                if ($input != false) {
+                // handle blank search is different to search 0 value
+                if ((string)$input != '') {
                     $simpleOperator = substr($input, 0, 1);
                     $doubleOperator = substr($input, 0, 2);
                     // if start with operators
