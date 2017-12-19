@@ -1,0 +1,59 @@
+{# Alternative display (without table) #}
+{# @param Kilik\Components\Table table #}
+{{ form_start(table.formView) }}
+{% block tableBeforePanel %}
+{% endblock tableBeforePanel %}
+<div class="row">
+    <div class="col-xs-12 col-sm-4" id="{{ table.id }}">
+        {% block tableHead %}
+            {% for column in table.columns %}
+                {% include "KilikTableBundle::_columnNameNoTable.html.twig" %}
+                {% include "KilikTableBundle::_columnFilterNoTable.html.twig" %}
+            {% endfor %}
+        {% endblock tableHead %}
+    </div>
+    <div class="col-xs-12 col-sm-8">
+        {% block tableTitle %}
+            Default title
+        {% endblock tableTitle %}
+
+        <div id="{{ table.bodyId }}">
+            {% block tableBody %}
+                {# table body should always be overridden in this template #}
+                {% if tableRenderBody is defined %}
+                    {% for row in rows %}
+                        <div class="row">
+                            {% block tableBodyStdColumns %}
+                                {% for column in table.columns %}
+                                    <div class="col-xs-6 col-sm-3">
+                                        {% include "KilikTableBundle::_columnCellNoTable.html.twig" %}
+                                    </div>
+                                {% endfor %}
+                            {% endblock tableBodyStdColumns %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endblock tableBody %}
+        </div>
+
+        {% block tableStats %}
+            <div id="{{ table.id }}_stats">
+                {% block tableStatsAjax %}
+                    {% include "KilikTableBundle::_stats.html.twig" %}
+                {% endblock tableStatsAjax %}
+            </div>
+        {% endblock tableStats %}
+
+        {% block tablePagination %}
+            <div id="{{ table.id }}_pagination" class="btn-group">
+                {% block tablePaginationAjax %}
+                    {% include "KilikTableBundle::_paginationNumbersIcons.html.twig" %}
+                {% endblock tablePaginationAjax %}
+            </div>
+        {% endblock tablePagination %}
+    </div>
+</div>
+
+{% block tableAfterPanel %}
+{% endblock tableAfterPanel %}
+{{ form_end(table.formView) }}
