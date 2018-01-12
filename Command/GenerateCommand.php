@@ -125,7 +125,7 @@ class GenerateCommand extends GeneratorCommand
             array(
                 '',
                 'Determine the entity name.',
-                'ex: AppBundle/Entity/MyEntity',
+                'ex: AppBundle/MyEntity',
                 '',
             )
         );
