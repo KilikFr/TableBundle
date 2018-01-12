@@ -63,6 +63,11 @@ class AppKernel extends Kernel
 }    
 ```
 
+Install assets
+```sh
+./bin/console assets:install --symlink
+```
+
 And create your first list: 
 ```sh
 ./bin/console kilik:table:generate
