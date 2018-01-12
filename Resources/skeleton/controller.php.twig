@@ -1,0 +1,113 @@
+<?php
+
+namespace {{ namespace }}\Controller;
+
+{% block use_statements %}
+use Kilik\TableBundle\Components\Column;
+use Kilik\TableBundle\Components\Filter;
+use Kilik\TableBundle\Components\Table;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+{% endblock use_statements %}
+
+{% block class_definition %}
+/**
+ * @Route("/{{ controller | lower }}")
+ */
+class {{ controller }}Controller extends Controller
+{% endblock class_definition %}
+{
+{% block table %}
+  /**
+   * Get table object
+   *
+   * @return Table
+   */
+    protected function getTable()
+    {
+        $queryBuilder = $this->getDoctrine()->getRepository('{{ entity }}')->createQueryBuilder('q')->select('q');
+        $table = (new Table())
+            ->setId('{{ route }}')
+            ->setPath($this->generateUrl('{{ route }}_ajax'))
+            ->setQueryBuilder($queryBuilder, 'q')
+            ->setTemplate('{{ bundle }}:{{ controller }}:_list.html.twig')
+            ->setEntityLoaderRepository('{{ entity }}');
+
+        {% for field,fieldType in fields -%}
+            /**
+             * field: {{ field }}
+             * type: {{ fieldType }}
+             */
+            {% if fieldType=="string" or fieldType=="int" %}
+                $table->addColumn(
+                (new Column())
+                ->setLabel('{{ field }}')
+                ->setSort(['q.{{ field }}' => 'asc'])
+                ->setFilter(
+                (new Filter())
+                ->setField('q.{{ field }}')
+                ->setName('q_{{ field }}')
+                )
+                );
+            {% elseif fieldType=="datetime" or fieldType=="date" %}
+                $table->addColumn(
+                (new Column())
+                ->setLabel('{{ field }}')
+                ->setSort(['q.{{ field }}' => 'asc'])
+                ->setDisplayFormat(Column::FORMAT_DATE)
+                ->setDisplayFormatParams('d/m/Y')
+                ->setFilter(
+                (new Filter())
+                ->setField('q.{{ field }}')
+                ->setName('q_{{ field }}')
+                ->setDataFormat(Filter::FORMAT_DATE)
+                )
+                );
+            {% endif %}
+
+        {%- endfor %}
+
+        return $table;
+    }
+{% endblock %}
+{% block list %}
+    /**
+    * @Route("{{ uri }}", name="{{ route }}")
+    * @Template()
+    */
+    public function listAction(Request $request)
+    {
+        // get kilik table
+        $table=$this->getTable();
+        return ['table' => $this->get('kilik_table')->createFormView($table)];
+    }
+{% endblock %}
+
+{% block list_ajax %}
+    /**
+    * @Route("{{ uri }}/ajax", name="{{ route }}_ajax")
+    */
+    public function _listAction(Request $request)
+    {
+        return $this->get('kilik_table')->handleRequest($this->getTable(), $request);
+    }
+{% endblock %}
+{% block list_export %}
+    /**
+    * Export standard CSV data (results of the list).
+    *
+    * @Route("{{ uri }}/export", name="{{ route }}_export")
+    */
+    public function listExportAction(Request $request)
+    {
+        $response = new Response($this->get('kilik_table')->exportAsCsv($this->getTable(), $request));
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="{{ route }}.csv"');
+
+        return $response;
+    }
+{% endblock %}
+}
