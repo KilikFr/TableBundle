@@ -41,6 +41,35 @@ Planned features:
 - loading image waiting ajax response
 - new column display types (now: only raw text value)
 
+Installation
+------------
+```sh
+composer require kilik/table
+```
+
+Patch your AppKernel.php:
+```php
+class AppKernel extends Kernel
+{
+    public function registerBundles()
+    {
+        $bundles = [
+            // ...
+            new \Kilik\TableBundle\KilikTableBundle(),
+        ];
+        
+        // ...
+    }
+}    
+```
+
+And create your first list: 
+```sh
+./bin/console kilik:table:generate
+```
+
+(With default parameters, your list is available here http://localhost/yourcontroller/list)
+
 Usage
 -----
 
@@ -50,16 +79,20 @@ Here, some examples to show latest features.
 
 Optimized version to load entities, from Repository Name:
 
-        $table = (new Table())
-            // ...
-            ->setEntityLoaderRepository("KilikDemoBundle:Product")
-            // ...
+```php
+$table = (new Table())
+    // ...
+    ->setEntityLoaderRepository("KilikDemoBundle:Product")
+    // ...
+```
 
-Optimized version to load entities, from Callback method:
+Optimized version to load entities, from Callback method (Eager loading):
 
-        $table = (new Table())
-            // ...
-            ->setEntityLoaderCallback(function($ids) {
-                return $this->manager()->getRepository('KilikDemoBundle:Product')->findById($ids);
-            })
-            // ...
+```php
+$table = (new Table())
+    // ...
+    ->setEntityLoaderCallback(function($ids) {
+        return $this->manager()->getRepository('KilikDemoBundle:Product')->findById($ids);
+    })
+// ...
+```

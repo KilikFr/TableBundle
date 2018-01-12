@@ -33,7 +33,8 @@ class {{ controller }}Controller extends Controller
             ->setId('{{ route }}')
             ->setPath($this->generateUrl('{{ route }}_ajax'))
             ->setQueryBuilder($queryBuilder, 'q')
-            ->setTemplate('{{ bundle }}:{{ controller }}:_list.html.twig');
+            ->setTemplate('{{ bundle }}:{{ controller }}:_list.html.twig')
+            ->setEntityLoaderRepository('{{ entity }}');
 
         {% for field,fieldType in fields -%}
             /**

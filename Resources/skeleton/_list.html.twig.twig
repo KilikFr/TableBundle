@@ -1,0 +1,24 @@
+{{ "{% extends 'KilikTableBundle::_defaultTableAlt.html.twig' %}" }}
+
+{{ "{# add a column to the left #}" }}
+{{ "{% block tableHeadStdColumns %}" }}
+    <th>
+        &nbsp;
+    </th>
+{{ "    {{ parent() }}" }}
+{{ "{% endblock tableHeadStdColumns %}" }}
+
+{{ "{% block tableHeadStdFilters %}" }}
+    <td>
+        &nbsp;
+    </td>
+{{ "    {{ parent() }}" }}
+{{ "{% endblock tableHeadStdFilters %}" }}
+
+{{ "{% block tableBodyStdColumns %}" }}
+    <td>
+        {{ "{# add a link to view the row result - replace href  and use row.object.id for primary key #}" }}
+        <a href="#"><span class="glyphicon glyphicon-search"></span></a>
+    </td>
+{{ "    {{ parent() }}" }}
+{{ "{% endblock tableBodyStdColumns %}" }}
