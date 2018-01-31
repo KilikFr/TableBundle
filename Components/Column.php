@@ -127,6 +127,13 @@ class Column
     private $displayClass;
 
     /**
+     * CSS Class.
+     *
+     * @var string
+     */
+    private $headerClass;
+
+    /**
      * @param Filter $filter
      *
      * @return static
@@ -682,5 +689,25 @@ class Column
     public function getDisplayClass()
     {
         return $this->displayClass;
+    }
+
+    /**
+     * @param string $headerClass
+     *
+     * @return static
+     */
+    public function setHeaderClass($headerClass)
+    {
+        $this->headerClass = $headerClass;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeaderClass()
+    {
+        return $this->headerClass;
     }
 }
