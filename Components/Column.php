@@ -134,6 +134,13 @@ class Column
     private $headerClass;
 
     /**
+     * CSS Class.
+     *
+     * @var string
+     */
+    private $filterClass;
+
+    /**
      * @param Filter $filter
      *
      * @return static
@@ -709,5 +716,25 @@ class Column
     public function getHeaderClass()
     {
         return $this->headerClass;
+    }
+
+    /**
+     * @param string $filterClass
+     *
+     * @return static
+     */
+    public function setFilterClass($filterClass)
+    {
+        $this->filterClass = $filterClass;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilterClass()
+    {
+        return $this->filterClass;
     }
 }
