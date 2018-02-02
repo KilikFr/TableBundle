@@ -8,7 +8,7 @@
 {% endif %}
 
 {% if column.sortable %}
-    <th class="columnSortable" data-column="{{ column.name }}" data-sort-column="{{ column.name }}">
+    <th class="columnSortable{% if column.headerClass is not null %} {{ column.headerClass }}{% endif %}" data-column="{{ column.name }}" data-sort-column="{{ column.name }}">
         <a href="#">
             {{ label }}
         </a>
