@@ -64,6 +64,7 @@ function KilikTable(id, path, options) {
 
     this.init = function () {
         var table = this;
+        var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
         // bouton pour forcer une actualisation
         $("#" + this.id).find("#" + id + "_submit").click(function () {
@@ -151,6 +152,10 @@ function KilikTable(id, path, options) {
 
         // on actualise maintenant
         this.doReload();
+
+        $buttonCheckAll.on('click', function() {
+            table.checkAll($(this).prop('checked'));
+        });
     };
 
     /**
@@ -403,7 +408,6 @@ function KilikTable(id, path, options) {
         var $table = $('#' + table.id);
         var form = $('form[name=' + table.id + '_form]');
         var massActions = $('[data-mass-action]', $table);
-        var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
         massActions.each(function() {
             var checked = $('[name="kilik_' + table.id + '_selected[]"]').val(),
@@ -421,10 +425,6 @@ function KilikTable(id, path, options) {
                     $table.trigger('massAction',  [eventDetails]);
                 }
             });
-        });
-
-        $buttonCheckAll.on('click', function() {
-            table.checkAll($(this).prop('checked'));
         });
     };
 
