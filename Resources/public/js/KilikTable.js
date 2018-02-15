@@ -410,18 +410,23 @@ function KilikTable(id, path, options) {
         var massActions = $('[data-mass-action]', $table);
 
         massActions.each(function() {
-            var checked = $('[name="kilik_' + table.id + '_selected[]"]').val(),
+            var checkedRows = [],
                 event, eventDetails, massActionName, action;
 
             massActionName = $(this).data('name');
             action = $(this).data('mass-action');
 
             $(this).on('click', function () {
+                $('[name="kilik_' + table.id + '_selected[]"]').each(function() {
+                    if ($(this).is(":checked")) {
+                        checkedRows.push($(this).val());
+                    }
+                });
                 if (action !== '') {
                     form.attr("action", action);
                     form.submit();
                 } else {
-                    eventDetails = { 'checked': checked, 'action' : massActionName };
+                    eventDetails = { 'checked': checkedRows, 'action' : massActionName };
                     $table.trigger('massAction',  [eventDetails]);
                 }
             });
