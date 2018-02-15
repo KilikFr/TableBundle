@@ -5,7 +5,6 @@ namespace Kilik\TableBundle\Services;
 use Kilik\TableBundle\Components\ApiTable;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Kilik\TableBundle\Components\Table;
 
 /**
  * Kilik Table Api Service - to handle.
@@ -109,5 +108,13 @@ class TableApiService extends AbstractTableService
         }
 
         return $apiResult->getRows();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function loadRowsById(TableInterface $table, $identifiers)
+    {
+        throw new \Exception('this method should be overridden');
     }
 }

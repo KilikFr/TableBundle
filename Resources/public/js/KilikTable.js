@@ -64,6 +64,7 @@ function KilikTable(id, path, options) {
 
     this.init = function () {
         var table = this;
+        var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
         // bouton pour forcer une actualisation
         $("#" + this.id).find("#" + id + "_submit").click(function () {
@@ -151,6 +152,10 @@ function KilikTable(id, path, options) {
 
         // on actualise maintenant
         this.doReload();
+
+        $buttonCheckAll.on('click', function() {
+            table.checkAll($(this).prop('checked'));
+        });
     };
 
     /**
@@ -382,6 +387,7 @@ function KilikTable(id, path, options) {
 
             }
         ).done(function (data) {
+            table.initMassActions();
             // callback
             table.afterReload();
         });
@@ -394,5 +400,48 @@ function KilikTable(id, path, options) {
         // could be overridden
     }
 
+    /**
+     * Initialize event for mass action
+     */
+    this.initMassActions = function () {
+        var table = this;
+        var $table = $('#' + table.id);
+        var form = $('form[name=' + table.id + '_form]');
+        var massActions = $('[data-mass-action]', $table);
 
+        massActions.each(function() {
+            var checkedRows = [], eventDetails, massActionName, action;
+
+            massActionName = $(this).data('name');
+            action = $(this).data('mass-action');
+
+            $(this).on('click', function () {
+                $('[name="kilik_' + table.id + '_selected[]"]').each(function() {
+                    if ($(this).is(":checked")) {
+                        checkedRows.push($(this).val());
+                    }
+                });
+                if (action !== '') {
+                    form.attr("action", action);
+                    form.submit();
+                } else {
+                    eventDetails = { 'checked': checkedRows, 'action' : massActionName };
+                    $table.trigger('kilik:massAction',  [eventDetails]);
+                }
+            });
+        });
+    };
+
+    /**
+     * Check all items
+     */
+    this.checkAll = function (status) {
+        var tableId = this.id;
+        if (status === undefined) {
+            status = true;
+        }
+        $('[name="kilik_' + tableId + '_selected[]"]').each(function () {
+           $(this).prop('checked', status);
+        });
+    }
 }

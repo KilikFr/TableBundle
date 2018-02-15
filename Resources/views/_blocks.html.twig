@@ -1,0 +1,53 @@
+{% block tableHeadMassActionsColumn %}
+    {% if table.massActions %}
+        <th class="mass-action col-md-1">
+            <div class="input-group btn-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="kilik_{{ table.id }}_mass_check"/>
+                </span>
+                <button type="button" class="btn dropdown-toggle table-action-hide" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% for massAction in table.massActions %}
+                        <li>
+                            <a href="#" id="kilik_{{ table.id }}_btn_mass_{{ massAction.name }}_selected"
+                               data-mass-action="{{ massAction.action }}"
+                               data-name="{{ massAction.name }}"
+                               class="btn-border-success checkbox-action"
+                            >
+                                <b class="success"><i class="{{ massAction.class }}"></i> {{ massAction.label|capitalize }}</b>
+                            </a>
+                        </li>
+                        {% if loop.last == false %}
+                            <li role="separator" class="divider"></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </th>
+    {% endif %}
+{% endblock tableHeadMassActionsColumn %}
+
+{% block tableFilterMassActionsColumn %}
+    {% if table.massActions %}
+        <td class="mass-action"></td>
+    {% endif %}
+{% endblock tableFilterMassActionsColumn %}
+
+{% block tableBodyMassActionsColumn %}
+    {% if table.massActions %}
+        <td class="mass-action">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-{{ row.object.id }}" name="kilik_{{ table.id }}_selected[]" value="{{ row.object.id }}"/>
+                    <label for="checkbox-{{ row.object.id }}"></label>
+                </span>
+            </div>
+        </td>
+    {% endif %}
+{% endblock tableBodyMassActionsColumn %}
+
+
+
+

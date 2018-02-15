@@ -101,3 +101,40 @@ $table = (new Table())
     })
 // ...
 ```
+
+
+Define a mass action for list
+
+```php
+
+$massAction = new MassAction('delete', 'Delete selected items'); 
+// First parameter 'delete' must not contain space or special characters (identifier)
+$massAction->setAction('path/to/my-form-action.php');
+
+$table = (new Table())
+    // ...
+    ->addMassAction($massAction)
+    // ...
+    
+// Then your form action, you can grab selected rows as entities
+$selectedEntities = $this->get('kilik_table')
+    ->getSelectedRows($request, $this->getTable());
+
+foreach ($selectedEntities as $entity) {
+    // ...
+    $entity->doSomething();
+    // ...
+}
+```
+
+If mass action does not have a specified action, a javascript event is fired.
+You can get all rows checked as following :
+
+```javascript
+ $("#table_id").on('kilik:massAction', function (e, detail) {
+    if (detail.checked.length === 0) return false;
+    if (detail.action === 'delete') {
+        //...
+    }
+});
+```

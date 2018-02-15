@@ -1,5 +1,9 @@
 {# KilikTableBundle::_defaultTable.html.twig #}
-
+{% use "KilikTableBundle::_blocks.html.twig" with
+    tableHeadMassActionsColumn as parent_tableHeadMassActionsColumn,
+    tableFilterMassActionsColumn as parent_tableFilterMassActionsColumn,
+    tableBodyMassActionsColumn as parent_tableBodyMassActionsColumn
+%}
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
@@ -24,6 +28,9 @@
             <thead>
                 {% block tableHead %}
                     <tr>
+                        {% block tableHeadMassActionsColumn %}
+                            {{ block('parent_tableHeadMassActionsColumn') }}
+                        {% endblock %}
                         {% block tableHeadStdColumns %}
                             {% for column in table.columns %}
                                 {% include "KilikTableBundle::_columnName.html.twig" %}
@@ -32,6 +39,9 @@
                     </tr>
                     {% if table.columns|length > 0 %}
                         <tr>
+                            {% block tableFilterMassActionsColumn %}
+                                {{ block('parent_tableFilterMassActionsColumn') }}
+                            {% endblock %}
                             {% block tableHeadStdFilters %}
                                 {% for column in table.columns %}
                                     {% include "KilikTableBundle::_columnFilter.html.twig" %}
@@ -46,6 +56,9 @@
                     {% if tableRenderBody is defined %}
                         {% for row in rows %}
                             <tr>
+                                {% block tableBodyMassActionsColumn %}
+                                    {{ block('parent_tableBodyMassActionsColumn') }}
+                                {% endblock %}
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
                                         {% include "KilikTableBundle::_columnCell.html.twig" %}
