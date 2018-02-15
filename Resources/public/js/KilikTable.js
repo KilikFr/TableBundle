@@ -410,8 +410,7 @@ function KilikTable(id, path, options) {
         var massActions = $('[data-mass-action]', $table);
 
         massActions.each(function() {
-            var checkedRows = [],
-                event, eventDetails, massActionName, action;
+            var checkedRows = [], eventDetails, massActionName, action;
 
             massActionName = $(this).data('name');
             action = $(this).data('mass-action');
