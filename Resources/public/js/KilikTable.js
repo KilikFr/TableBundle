@@ -151,11 +151,6 @@ function KilikTable(id, path, options) {
 
         // on actualise maintenant
         this.doReload();
-
-        $(document).ready(function () {
-            // initialize mass action
-            table.initMassActions();
-        });
     };
 
     /**
@@ -387,6 +382,7 @@ function KilikTable(id, path, options) {
 
             }
         ).done(function (data) {
+            table.initMassActions();
             // callback
             table.afterReload();
         });
