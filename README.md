@@ -103,7 +103,7 @@ $table = (new Table())
 ```
 
 
-Define a mass action
+Define a mass action for list
 
 ```php
 
@@ -118,11 +118,23 @@ $table = (new Table())
     
 // Then your form action, you can grab selected rows as entities
 $selectedEntities = $this->get('kilik_table')
-    ->getSelectedFromRequest($request, $this->getTable());
+    ->getSelectedRows($request, $this->getTable());
 
 foreach ($selectedEntities as $entity) {
     // ...
     $entity->doSomething();
     // ...
 }
+```
+
+If mass action does not have a specified action, a javascript event is fired.
+You can get all rows checked as following :
+
+```javascript
+ $("#table_id").on('kilik:massAction', function (e, detail) {
+    if (detail.checked.length === 0) return false;
+    if (detail.action === 'delete') {
+        //...
+    }
+});
 ```

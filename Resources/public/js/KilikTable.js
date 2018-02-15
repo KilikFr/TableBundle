@@ -427,7 +427,7 @@ function KilikTable(id, path, options) {
                     form.submit();
                 } else {
                     eventDetails = { 'checked': checkedRows, 'action' : massActionName };
-                    $table.trigger('massAction',  [eventDetails]);
+                    $table.trigger('kilik:massAction',  [eventDetails]);
                 }
             });
         });
