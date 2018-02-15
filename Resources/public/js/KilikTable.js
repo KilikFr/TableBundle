@@ -407,6 +407,7 @@ function KilikTable(id, path, options) {
         var $table = $('#' + table.id);
         var form = $('form[name=' + table.id + '_form]');
         var massActions = $('[data-mass-action]', $table);
+        var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
         massActions.each(function() {
             var checked = $('[name="kilik_' + table.id + '_selected[]"]').val(),
@@ -425,6 +426,22 @@ function KilikTable(id, path, options) {
                 }
             });
         });
+
+        $buttonCheckAll.on('click', function() {
+            table.checkAll($(this).prop('checked'));
+        });
     };
 
+    /**
+     * Check all items
+     */
+    this.checkAll = function (status) {
+        var tableId = this.id;
+        if (status === undefined) {
+            status = true;
+        }
+        $('[name="kilik_' + tableId + '_selected[]"]').each(function () {
+           $(this).prop('checked', status);
+        });
+    }
 }
