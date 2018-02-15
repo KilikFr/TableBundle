@@ -12,7 +12,11 @@
                 <ul class="dropdown-menu">
                     {% for massAction in table.massActions %}
                         <li>
-                            <a href="#" id="kilik_{{ table.id }}_btn_mass_{{ massAction.name  }}_selected" class="btn-border-success checkbox-action">
+                            <a href="#" id="kilik_{{ table.id }}_btn_mass_{{ massAction.name }}_selected"
+                               data-mass-action="{{ massAction.action }}"
+                               data-name="{{ massAction.name }}"
+                               class="btn-border-success checkbox-action"
+                            >
                                 <b class="success"><i class="{{ massAction.class }}"></i> {{ massAction.label|capitalize }}</b>
                             </a>
                         </li>

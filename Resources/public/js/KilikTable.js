@@ -151,6 +151,11 @@ function KilikTable(id, path, options) {
 
         // on actualise maintenant
         this.doReload();
+
+        $(document).ready(function () {
+            // initialize mass action
+            table.initMassActions();
+        });
     };
 
     /**
@@ -394,5 +399,32 @@ function KilikTable(id, path, options) {
         // could be overridden
     }
 
+    /**
+     * Initialize event for mass action
+     */
+    this.initMassActions = function () {
+        var table = this;
+        var $table = $('#' + table.id);
+        var form = $('form[name=' + table.id + '_form]');
+        var massActions = $('[data-mass-action]', $table);
+
+        massActions.each(function() {
+            var checked = $('[name="kilik_' + table.id + '_selected[]"]').val(),
+                event, eventDetails, massActionName, action;
+
+            massActionName = $(this).data('name');
+            action = $(this).data('mass-action');
+
+            $(this).on('click', function () {
+                if (action !== '') {
+                    form.attr("action", action);
+                    form.submit();
+                } else {
+                    eventDetails = { 'checked': checked, 'action' : massActionName };
+                    $table.trigger('massAction',  [eventDetails]);
+                }
+            });
+        });
+    };
 
 }

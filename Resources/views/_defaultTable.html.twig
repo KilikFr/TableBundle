@@ -100,34 +100,6 @@
                     }
                 }
             }
-
-            document.addEventListener("DOMContentLoaded", function() {
-                var form = document.querySelector('form[name={{ table.id }}_form]');
-                {% for massAction in table.massActions -%}
-                var btn = document.querySelector('#kilik_{{ table.id }}_btn_mass_{{ massAction.name  }}_selected');
-                var table = document.querySelector('#{{ table.id }}');
-                btn.onclick = function () {
-                    {% if massAction.action != '' %}
-                    form.setAttribute("action", "{{ massAction.action }}");
-                    form.submit();
-                    {% else %}
-                    var checkboxes = document.getElementsByName('kilik_{{ table.id }}_selected[]'),
-                        elsChecked = [], event, eventDetails;
-                    for (var i=0; i<checkboxes.length; i++) {
-                        if (checkboxes[i].checked) {
-                            elsChecked.push(checkboxes[i].value);
-                        }
-                    }
-                    eventDetails = { 'checked': elsChecked, 'action' : '{{ massAction.name }}' };
-                    event = new CustomEvent(
-                        'massAction',
-                        { 'detail': eventDetails }
-                    );
-                    table.dispatchEvent(event);
-                    {% endif %}
-                };
-                {% endfor %}
-            });
         </script>
     {% endif %}
 {% endblock %}
