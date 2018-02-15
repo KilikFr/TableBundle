@@ -62,4 +62,12 @@ interface TableServiceInterface
      * @return Response
      */
     public function handleRequest(TableInterface $table, Request $request);
+
+
+    /**
+     * @param TableInterface $table
+     * @param                $identifiers
+     * @return mixed
+     */
+    public function loadRowsById(TableInterface $table, $identifiers);
 }

@@ -272,20 +272,7 @@ class TableService extends AbstractTableService
             if (count($identifiers) > 0) {
 
                 // loaded entities
-                $entities = [];
-
-                // if we need to use repository name
-                if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
-                    $entities = $this->extractObjectsFromIdentifiers($table, $identifiers);
-                } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
-                    // if repository callback is missing
-                    if (!is_callable($table->getEntityLoaderCallback())) {
-                        throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
-                    }
-                    // else, load entities from callback method
-                    $callback = $table->getEntityLoaderCallback();
-                    $entities = $callback($identifiers);
-                }
+                $entities = $this->loadRowsById($table, $identifiers);
 
                 // associate objects to rows
                 if (count($entities) > 0) {
@@ -316,43 +303,44 @@ class TableService extends AbstractTableService
     }
 
     /**
-     * @param TableInterface $table
-     * @param                $identifiers
-     * @return mixed
+     * @inheritdoc
      */
-    private function extractObjectsFromIdentifiers(TableInterface $table, $identifiers)
+    public function loadRowsById(TableInterface $table, $identifiers)
     {
-        // if repository name is missing
-        if (!$table->getEntityLoaderRepository()) {
-            throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+        $entities = [];
+        // if we need to use repository name
+        if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
+            // if repository name is missing
+            if (!$table->getEntityLoaderRepository()) {
+                throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+            }
+
+            // load entities from identifiers
+            $loaderQueryBuilder = $table->getQueryBuilder()
+                ->getEntityManager()
+                ->getRepository($table->getEntityLoaderRepository())
+                ->createQueryBuilder('e')
+                ->select('e')
+                ->where('e.id IN (:identifiers)')
+                ->setParameter('identifiers', $identifiers);
+
+            $entities = $loaderQueryBuilder->getQuery()->getResult();
+
+        } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
+            // if repository callback is missing
+            if (!is_callable($table->getEntityLoaderCallback())) {
+                throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
+            }
+            // else, load entities from callback method
+            $callback = $table->getEntityLoaderCallback();
+            $entities = $callback($identifiers);
+        } else {
+            throw new \InvalidArgumentException('unsupported entity loader mode');
         }
 
-        // load entities from identifiers
-        $loaderQueryBuilder = $table->getQueryBuilder()
-            ->getEntityManager()
-            ->getRepository($table->getEntityLoaderRepository())
-            ->createQueryBuilder('e')
-            ->select('e')
-            ->where('e.id IN (:identifiers)')
-            ->setParameter('identifiers', $identifiers);
-
-        $entities = $loaderQueryBuilder->getQuery()->getResult();
-
         return $entities;
     }
 
 
-    /**
-     * @param Request $request
-     * @param TableInterface $table
-     *
-     * @return mixed
-     */
-    public function getSelectedFromRequest(Request $request, TableInterface $table)
-    {
-        $identifiers = $request->request->get($table->getSelectionFormKey());
-        $entities = $this->extractObjectsFromIdentifiers($table, $identifiers);
 
-        return $entities;
-    }
 }
