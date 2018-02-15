@@ -303,4 +303,11 @@ interface TableInterface
      * @return Filter
      */
     public function getFilterByName($filterName);
+
+    /**
+     * Get form key of row selection
+     *
+     * @return string
+     */
+    public function getSelectionFormKey();
 }

@@ -91,6 +91,11 @@ abstract class AbstractTable implements TableInterface
     private $customOptions = [];
 
     /**
+     * @var array
+     */
+    private $massActions = [];
+
+    /**
      * Skip load from local storage.
      *
      * @var bool
@@ -548,5 +553,33 @@ abstract class AbstractTable implements TableInterface
         }
 
         return;
+    }
+
+    /**
+     * @param MassAction $massAction
+     *
+     * @return static
+     */
+    public function addMassAction(MassAction $massAction)
+    {
+        $this->massActions[] = $massAction;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMassActions()
+    {
+        return $this->massActions;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSelectionFormKey()
+    {
+        return 'kilik_' . $this->getId() . '_selected';
     }
 }

@@ -276,21 +276,7 @@ class TableService extends AbstractTableService
 
                 // if we need to use repository name
                 if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
-                    // if repository name is missing
-                    if (!$table->getEntityLoaderRepository()) {
-                        throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
-                    }
-
-                    // load entities from identifiers
-                    $loaderQueryBuilder = $table->getQueryBuilder()
-                        ->getEntityManager()
-                        ->getRepository($table->getEntityLoaderRepository())
-                        ->createQueryBuilder('e')
-                        ->select('e')
-                        ->where('e.id IN (:identifiers)')
-                        ->setParameter('identifiers', $identifiers);
-
-                    $entities = $loaderQueryBuilder->getQuery()->getResult();
+                    $entities = $this->extractObjectsFromIdentifiers($table, $identifiers);
                 } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
                     // if repository callback is missing
                     if (!is_callable($table->getEntityLoaderCallback())) {
@@ -327,5 +313,46 @@ class TableService extends AbstractTableService
         }
 
         return $rows;
+    }
+
+    /**
+     * @param TableInterface $table
+     * @param                $identifiers
+     * @return mixed
+     */
+    private function extractObjectsFromIdentifiers(TableInterface $table, $identifiers)
+    {
+        // if repository name is missing
+        if (!$table->getEntityLoaderRepository()) {
+            throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+        }
+
+        // load entities from identifiers
+        $loaderQueryBuilder = $table->getQueryBuilder()
+            ->getEntityManager()
+            ->getRepository($table->getEntityLoaderRepository())
+            ->createQueryBuilder('e')
+            ->select('e')
+            ->where('e.id IN (:identifiers)')
+            ->setParameter('identifiers', $identifiers);
+
+        $entities = $loaderQueryBuilder->getQuery()->getResult();
+
+        return $entities;
+    }
+
+
+    /**
+     * @param Request $request
+     * @param TableInterface $table
+     *
+     * @return mixed
+     */
+    public function getSelectedFromRequest(Request $request, TableInterface $table)
+    {
+        $identifiers = $request->request->get($table->getSelectionFormKey());
+        $entities = $this->extractObjectsFromIdentifiers($table, $identifiers);
+
+        return $entities;
     }
 }
