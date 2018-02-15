@@ -91,7 +91,7 @@ abstract class AbstractTable implements TableInterface
     private $customOptions = [];
 
     /**
-     * @var array
+     * @var MassAction[]
      */
     private $massActions = [];
 
@@ -568,7 +568,7 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @return array
+     * @return MassAction[]
      */
     public function getMassActions()
     {
