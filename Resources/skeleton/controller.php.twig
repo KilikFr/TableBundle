@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Controller;
+namespace {{ namespace }}\Controller{% if namespace_path is not null %}\{{ namespace_path }}{% endif %};
 
 {% block use_statements %}
 use Kilik\TableBundle\Components\Column;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 {% block class_definition %}
 /**
- * @Route("/{{ controller | lower }}")
+ * @Route("/{{ controller_dir | lower }}")
  */
 class {{ controller }}Controller extends Controller
 {% endblock class_definition %}
@@ -33,7 +33,7 @@ class {{ controller }}Controller extends Controller
             ->setId('{{ route }}')
             ->setPath($this->generateUrl('{{ route }}_ajax'))
             ->setQueryBuilder($queryBuilder, 'q')
-            ->setTemplate('{{ bundle }}:{{ controller }}:_list.html.twig')
+            ->setTemplate('{{ bundle }}:{{ controller_dir }}:_list.html.twig')
             ->setEntityLoaderRepository('{{ entity }}');
 
         {% for field,fieldType in fields -%}

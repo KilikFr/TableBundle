@@ -4,7 +4,7 @@
 <section class="container">
     <div class="row">
         <div class="sm-12">
-            {{ "{% embed \"" ~ bundle ~ ":" ~ controller}}:_list.html.twig" with {"table": table} %}
+            {{ "{% embed \"" ~ bundle ~ ":" ~ controller_dir }}:_list.html.twig" with {"table": table} %}
             {{ "{% block tableTitle %}" }}
             <b>My Custom List</b>
             <ul class="nav navbar-nav navbar-right">
