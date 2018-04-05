@@ -108,7 +108,8 @@ class GenerateCommand extends GeneratorCommand
             try {
                 $b = $this->getContainer()->get('kernel')->getBundle($bundle);
 
-                if (!file_exists($b->getPath().'/Controller/'.$controller.'Controller.php')) {
+                $controllerPath = str_replace('\\', '/', $controller);
+                if (!file_exists($b->getPath().'/Controller/'.$controllerPath.'Controller.php')) {
                     break;
                 }
 
@@ -125,7 +126,7 @@ class GenerateCommand extends GeneratorCommand
             array(
                 '',
                 'Determine the entity name.',
-                'ex: AppBundle/MyEntity',
+                'ex: AppBundle:MyEntity',
                 '',
             )
         );

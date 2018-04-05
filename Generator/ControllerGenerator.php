@@ -31,13 +31,15 @@ class ControllerGenerator extends Generator
             $fields[$field] = $type;
         }
 
+        // fix slashes
+        $controller = str_replace('\\', '/', $controller);
         $dir = $bundle->getPath();
         $controllerFile = $dir.'/Controller/'.$controller.'Controller.php';
         if (file_exists($controllerFile)) {
             throw new \RuntimeException(sprintf('Controller "%s" already exists', $controller));
         }
-        $templateList=$dir.'/Resources/views/'.$controller.'/list.html.twig';
-        $templateListAjax=$dir.'/Resources/views/'.$controller.'/_list.html.twig';
+        $templateList = $dir.'/Resources/views/'.$controller.'/list.html.twig';
+        $templateListAjax = $dir.'/Resources/views/'.$controller.'/_list.html.twig';
 
         $parameters = array(
             'namespace' => $bundle->getNamespace(),
