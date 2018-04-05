@@ -13,6 +13,9 @@ use Symfony\Component\Console\Question\Question;
 
 class GenerateCommand extends GeneratorCommand
 {
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         $this
@@ -28,6 +31,9 @@ class GenerateCommand extends GeneratorCommand
             );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $questionHelper = $this->getQuestionHelper();
@@ -81,6 +87,9 @@ class GenerateCommand extends GeneratorCommand
         $questionHelper->writeGeneratorSummary($output, array());
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function interact(InputInterface $input, OutputInterface $output)
     {
         $questionHelper = $this->getQuestionHelper();
@@ -121,7 +130,7 @@ class GenerateCommand extends GeneratorCommand
         $input->setOption('controller', $bundle.':'.$controller);
 
         // entity
-        $entity = (null !== $input->getOption('route') ? $input->getOption('route') : 'my_list');
+        $entity = (null !== $input->getOption('entity') ? $input->getOption('entity') : 'AppBundle:MyEntity');
         $output->writeln(
             array(
                 '',
@@ -131,7 +140,7 @@ class GenerateCommand extends GeneratorCommand
             )
         );
 
-        $question = new Question($questionHelper->getQuestion('Entity name', ''));
+        $question = new Question($questionHelper->getQuestion('Entity name', $entity), $entity);
         $question->setValidator(array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'));
         $entity = $questionHelper->ask($input, $output, $question);
         $input->setOption('entity', $entity);
@@ -180,6 +189,9 @@ class GenerateCommand extends GeneratorCommand
         return array(substr($entity, 0, $pos), substr($entity, $pos + 1));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function createGenerator()
     {
         return new ControllerGenerator($this->getContainer()->get('filesystem'));
