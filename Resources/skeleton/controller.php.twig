@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Controller{% if namespace_path is not null %}\{{ namespace_path }}{% endif %};
+namespace {{ namespace }}\Controller{% if namespace_path is not null and namespace_path != "." %}\{{ namespace_path }}{% endif %};
 
 {% block use_statements %}
 use Kilik\TableBundle\Components\Column;
