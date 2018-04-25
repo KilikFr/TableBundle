@@ -4,7 +4,7 @@
     "keywords": ["symfony","jquery","table"],
     "homepage": "https://github.com/KilikFr/TableBundle",
     "license": "MIT",
-    "type": "library",
+    "type": "symfony-bundle",
     "authors": [
         {
             "name": "Michel Naud",
