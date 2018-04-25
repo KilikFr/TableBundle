@@ -69,6 +69,9 @@ Install assets
 ```
 
 And create your first list: 
+
+Feature disabled on 1.0 branch (symfony 4 compatibility WIP)
+
 ```sh
 ./bin/console kilik:table:generate
 ```
