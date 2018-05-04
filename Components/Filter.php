@@ -63,9 +63,10 @@ class Filter
      * data formats.
      */
     const FORMAT_DATE = 'date';
+    const FORMAT_INTEGER = 'integer';
     const FORMAT_TEXT = 'text';
     const FORMAT_DEFAULT = self::FORMAT_TEXT;
-    const FORMATS = [self::FORMAT_DATE, self::FORMAT_TEXT];
+    const FORMATS = [self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT];
 
     /**
      * Filter name.
@@ -378,6 +379,20 @@ class Filter
                     } // default, same has raw value
                     else {
                         $fInput = $input;
+                    }
+                    break;
+                case self::FORMAT_INTEGER:
+                    $fInput = (int) $input;
+                    switch ($operator) {
+                        case self::TYPE_NOT_LIKE:
+                            $operator = self::TYPE_NOT_EQUAL;
+                            break;
+                        case self::TYPE_LIKE:
+                        case self::TYPE_LIKE_WORDS_AND:
+                        case self::TYPE_LIKE_WORDS_OR:
+                        case self::TYPE_AUTO:
+                            $operator = self::TYPE_EQUAL_STRICT;
+                            break;
                     }
                     break;
                 case self::FORMAT_TEXT:
