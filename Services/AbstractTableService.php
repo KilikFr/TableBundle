@@ -16,6 +16,7 @@ use Doctrine\ORM\Query;
 
 abstract class AbstractTableService implements TableServiceInterface
 {
+
     /**
      * Twig Service.
      *
@@ -191,7 +192,7 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * @param Request $request
+     * @param Request        $request
      * @param TableInterface $table
      *
      * @return mixed

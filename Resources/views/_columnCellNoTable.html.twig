@@ -1,4 +1,4 @@
-{# KilikTableBundle::_columnCell.html.twig #}
+{# @KilikTable/_columnCell.html.twig #}
 {% if not column.hidden %}
     <div {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %}>
         {% set cellHtml=table.value(column,row) %}

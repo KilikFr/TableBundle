@@ -1,12 +1,12 @@
-{# KilikTableBundle::_paginationNumbers.html.twig #}
+{# @KilikTable/_paginationNumbers.html.twig #}
 
-{% if tableRenderPagination is defined %}    
+{% if tableRenderPagination is defined %}
     {# previous page #}
     <a href="#" class="btn btn-default tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="{{ table.page-1 }}">
         <span class="glyphicon glyphicon-arrow-left"></span> {{ "kiliktable.previous" |trans }}
     </a>
 
-    {# first page #}       
+    {# first page #}
     {% if table.page > 2 %}
         <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
             1
@@ -22,7 +22,7 @@
         {% else %}
             <a href="#" class="btn btn-default disabled">
                 ...
-            </a>        
+            </a>
         {% endif %}
     {% endif %}
 
@@ -30,7 +30,7 @@
     {% if table.page > 1 %}
         <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.page-1 }}">
             {{ table.page-1 }}
-        </a>        
+        </a>
     {% endif %}
 
     {# page active #}
@@ -42,7 +42,7 @@
     {% if table.lastPage-table.page > 0 %}
         <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.page+1 }}">
             {{ table.page+1 }}
-        </a>        
+        </a>
     {% endif %}
 
     {# page + 2 ? #}
@@ -50,15 +50,15 @@
         {% if table.lastPage-table.page == 3 %}
             <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.page+2 }}">
                 {{ table.page+2 }}
-            </a>        
+            </a>
         {% else %}
             <a href="#" class="btn btn-default disabled">
                 ...
-            </a>        
+            </a>
         {% endif %}
     {% endif %}
 
-    {# last page #}       
+    {# last page #}
     {% if table.lastPage-table.page > 1 %}
         <a href="#" class="btn btn-default tablePaginationButton" data-table-page="{{ table.lastPage }}">
             {{ table.lastPage }}
