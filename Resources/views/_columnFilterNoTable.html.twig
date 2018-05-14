@@ -1,3 +1,4 @@
+{# @KilikTable/_columnFilterNoTable.html.twig #}
 <div data-column="{{ column.name }}">
     {% if column.filter is not null %}
         {{ form_widget(attribute(table.formView,column.filter.name ),{"attr": {"class": "form-control refreshOnKeyup refreshOnChange","data-column": column.name} }) }}

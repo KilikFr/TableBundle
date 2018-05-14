@@ -1,5 +1,5 @@
-{# KilikTableBundle::_defaultTableAlt.html.twig #}
-{% use "KilikTableBundle::_blocks.html.twig" with
+{# @KilikTable/_defaultTableAlt.html.twig #}
+{% use "@KilikTable/_blocks.html.twig" with
     tableHeadMassActionsColumn as parent_tableHeadMassActionsColumn,
     tableFilterMassActionsColumn as parent_tableFilterMassActionsColumn,
     tableBodyMassActionsColumn as parent_tableBodyMassActionsColumn
@@ -17,8 +17,8 @@
         </div>
 
         {# setup of the list: hidden columns, rows per page ... #}
-        {% include "KilikTableBundle::_setup.html.twig" %}
-        {% include "KilikTableBundle::_rowsPerPage.html.twig" %}
+        {% include "@KilikTable/_setup.html.twig" %}
+        {% include "@KilikTable/_rowsPerPage.html.twig" %}
 
     </div>
     <div class="panel-body table-responsive">
@@ -32,7 +32,7 @@
                         {% endblock %}
                         {% block tableHeadStdColumns %}
                             {% for column in table.columns %}
-                                {% include "KilikTableBundle::_columnName.html.twig" %}
+                                {% include "@KilikTable/_columnName.html.twig" %}
                             {% endfor %}
                         {% endblock tableHeadStdColumns %}
                     </tr>
@@ -44,7 +44,7 @@
                             {% endblock %}
                             {% block tableHeadStdFilters %}
                                 {% for column in table.columns %}
-                                    {% include "KilikTableBundle::_columnFilter.html.twig" %}
+                                    {% include "@KilikTable/_columnFilter.html.twig" %}
                                 {% endfor %}
                             {% endblock tableHeadStdFilters %}
                         </tr>
@@ -61,7 +61,7 @@
                                 {% endblock %}
                                 {% block tableBodyStdColumns %}
                                     {% for column in table.columns %}
-                                        {% include "KilikTableBundle::_columnCell.html.twig" %}
+                                        {% include "@KilikTable/_columnCell.html.twig" %}
                                     {% endfor %}
                                 {% endblock tableBodyStdColumns %}
                             </tr>
@@ -76,7 +76,7 @@
     {% block tableStats %}
         <div id="{{ table.id }}_stats">
             {% block tableStatsAjax %}
-                {% include "KilikTableBundle::_stats.html.twig" %}
+                {% include "@KilikTable/_stats.html.twig" %}
             {% endblock tableStatsAjax %}
         </div>
     {% endblock tableStats %}
@@ -86,7 +86,7 @@
         {% block tablePagination %}
             <div id="{{ table.id }}_pagination" class="btn-group">
                 {% block tablePaginationAjax %}
-                    {% include "KilikTableBundle::_paginationNumbers.html.twig" %}
+                    {% include "@KilikTable/_paginationNumbers.html.twig" %}
                 {% endblock tablePaginationAjax %}
             </div>
         {% endblock tablePagination %}

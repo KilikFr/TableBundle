@@ -7,8 +7,8 @@
     <div class="col-xs-12 col-sm-4" id="{{ table.id }}">
         {% block tableHead %}
             {% for column in table.columns %}
-                {% include "KilikTableBundle::_columnNameNoTable.html.twig" %}
-                {% include "KilikTableBundle::_columnFilterNoTable.html.twig" %}
+                {% include "@KilikTable/_columnNameNoTable.html.twig" %}
+                {% include "@KilikTable/_columnFilterNoTable.html.twig" %}
             {% endfor %}
         {% endblock tableHead %}
     </div>
@@ -26,7 +26,7 @@
                             {% block tableBodyStdColumns %}
                                 {% for column in table.columns %}
                                     <div class="col-xs-6 col-sm-3">
-                                        {% include "KilikTableBundle::_columnCellNoTable.html.twig" %}
+                                        {% include "@KilikTable/_columnCellNoTable.html.twig" %}
                                     </div>
                                 {% endfor %}
                             {% endblock tableBodyStdColumns %}
@@ -39,7 +39,7 @@
         {% block tableStats %}
             <div id="{{ table.id }}_stats">
                 {% block tableStatsAjax %}
-                    {% include "KilikTableBundle::_stats.html.twig" %}
+                    {% include "@KilikTable/_stats.html.twig" %}
                 {% endblock tableStatsAjax %}
             </div>
         {% endblock tableStats %}
@@ -47,7 +47,7 @@
         {% block tablePagination %}
             <div id="{{ table.id }}_pagination" class="btn-group">
                 {% block tablePaginationAjax %}
-                    {% include "KilikTableBundle::_paginationNumbersIcons.html.twig" %}
+                    {% include "@KilikTable/_paginationNumbersIcons.html.twig" %}
                 {% endblock tablePaginationAjax %}
             </div>
         {% endblock tablePagination %}

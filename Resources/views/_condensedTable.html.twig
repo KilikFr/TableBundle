@@ -1,4 +1,4 @@
-{# KilikTableBundle::_condensedTable.html.twig #}
+{# @KilikTable/_condensedTable.html.twig #}
 
 {# @param Kilik\Components\Table table #}
 {{ form_start(table.formView) }}
@@ -10,7 +10,7 @@
         <tr>
             {% block tableHeadStdColumns %}
                 {% for column in table.columns %}
-                    {% include "KilikTableBundle::_columnName.html.twig" %}
+                    {% include "@KilikTable/_columnName.html.twig" %}
                 {% endfor %}
             {% endblock tableHeadStdColumns %}
         </tr>
@@ -18,7 +18,7 @@
             <tr>
                 {% block tableHeadStdFilters %}
                     {% for column in table.columns %}
-                        {% include "KilikTableBundle::_columnFilter.html.twig" %}
+                        {% include "@KilikTable/_columnFilter.html.twig" %}
                     {% endfor %}
                 {% endblock tableHeadStdFilters %}
             </tr>
@@ -32,7 +32,7 @@
                 <tr>
                     {% block tableBodyStdColumns %}
                         {% for column in table.columns %}
-                            {% include "KilikTableBundle::_columnCell.html.twig" %}
+                            {% include "@KilikTable/_columnCell.html.twig" %}
                         {% endfor %}
                     {% endblock tableBodyStdColumns %}
                 </tr>
@@ -47,7 +47,7 @@
         {% block tableStats %}
             <div id="{{ table.id }}_stats">
                 {% block tableStatsAjax %}
-                    {% include "KilikTableBundle::_stats.html.twig" %}
+                    {% include "@KilikTable/_stats.html.twig" %}
                 {% endblock tableStatsAjax %}
             </div>
         {% endblock tableStats %}
@@ -57,7 +57,7 @@
     {% block tablePagination %}
         <div id="{{ table.id }}_pagination" class="btn-group pull-right">
             {% block tablePaginationAjax %}
-                {% include "KilikTableBundle::_paginationNumbersIcons.html.twig" %}
+                {% include "@KilikTable/_paginationNumbersIcons.html.twig" %}
             {% endblock tablePaginationAjax %}
         </div>
     {% endblock tablePagination %}
