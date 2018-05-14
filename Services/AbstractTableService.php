@@ -59,7 +59,7 @@ abstract class AbstractTableService implements TableServiceInterface
         $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $defaultValues);
         //$this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
-            // selon le type de filtre
+            // type of input filter ?
             switch ($filter::FILTER_TYPE) {
                 case FilterCheckbox::FILTER_TYPE:
                     $form->add(
@@ -80,6 +80,8 @@ abstract class AbstractTableService implements TableServiceInterface
                             'group_by' => $filter->getChoicesGroupBy(),
                             'choice_label' => $filter->getChoiceLabel(),
                             'choice_value' => $filter->getChoiceValue(),
+                            'translation_domain' => $filter->getTranslationDomain(),
+                            'choice_translation_domain' => $filter->getChoiceTranslationDomain(),
                         ]
                     );
                     break;

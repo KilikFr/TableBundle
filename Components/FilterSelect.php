@@ -4,6 +4,7 @@ namespace Kilik\TableBundle\Components;
 
 class FilterSelect extends Filter
 {
+
     /**
      * Type d'input.
      */
@@ -43,6 +44,20 @@ class FilterSelect extends Filter
      * @var callable
      */
     private $choicesGroupBy;
+
+    /**
+     * Domain to translate place holder and values
+     *
+     * @var string
+     */
+    private $translationDomain = 'messages';
+
+    /**
+     * Domain to translate values
+     *
+     * @var string
+     */
+    private $choiceTranslationDomain = 'messages';
 
     /**
      * Set the choices.
@@ -151,4 +166,58 @@ class FilterSelect extends Filter
     {
         return $this->choicesGroupBy;
     }
+
+    /**
+     * @param string|bool $translationDomain
+     *
+     * @return static
+     */
+    public function setTranslationDomain($translationDomain)
+    {
+        $this->translationDomain = $translationDomain;
+
+        return $this;
+    }
+
+    /**
+     * @return string|bool
+     */
+    public function getTranslationDomain()
+    {
+        return $this->translationDomain;
+    }
+
+    /**
+     * @param string|bool $choiceTranslationDomain
+     *
+     * @return static
+     */
+    public function setChoiceTranslationDomain($choiceTranslationDomain)
+    {
+        $this->choiceTranslationDomain = $choiceTranslationDomain;
+
+        return $this;
+    }
+
+    /**
+     * @return string|bool
+     */
+    public function getChoiceTranslationDomain()
+    {
+        return $this->choiceTranslationDomain;
+    }
+
+    /**
+     * Disable translation domains
+     *
+     * @return static
+     */
+    public function disableTranslation()
+    {
+        $this->setTranslationDomain(false);
+        $this->setChoiceTranslationDomain(false);
+
+        return $this;
+    }
+
 }
