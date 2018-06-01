@@ -24,6 +24,8 @@ function KilikTable(id, path, options) {
     this.defaultHiddenColumns = [];
     this.skipLoadFromLocalStorage = false;
 
+    this.xhr = false;
+
     // small hack to prevent safari bug in private mode
     if (typeof localStorage === 'object') {
         try {
@@ -364,8 +366,11 @@ function KilikTable(id, path, options) {
         // callback
         table.beforeReload();
 
+        if (this.xhr) {
+            this.xhr.abort();
+        }
         // and send the query
-        $.post(this.path, postData,
+        this.xhr = $.post(this.path, postData,
             function (dataRaw) {
                 var data = $.parseJSON(dataRaw);
                 $("#" + id + "_body").html(data.tableBody);
