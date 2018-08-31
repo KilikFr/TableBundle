@@ -1,0 +1,87 @@
+{# @param Kilik\Components\Table table #}
+{{ form_start(table.formView) }}
+{% block tableBeforePanel %}
+{% endblock tableBeforePanel %}
+<div class="hpanel hblue">
+    {% block panelHeading %}
+        <div class="panel-heading hbuilt">
+            {% block panelHeadingTools %}
+                <div class="panel-tools">
+                    {% block panelHeadingToolsInner %}
+                    {% endblock panelHeadingToolsInner %}
+                </div>
+            {% endblock %}
+            {% block tableTitle %}
+                Default title
+            {% endblock tableTitle %}
+            {% include "KilikTableBundle::_setup.html.twig" %}
+            {% include "KilikTableBundle::_rowsPerPage.html.twig" %}
+        </div>
+    {% endblock %}
+    <div class="panel-body table-responsive">
+        <table class="table table-hover table-condensed table-striped" id="{{ table.id }}">
+            <thead>
+            {% block tableHead %}
+                <tr>
+                    {# columns names #}
+                    {% block tableHeadStdColumns %}
+                        {% for column in table.columns %}
+                            {% include "KilikTableBundle::_columnName.html.twig" %}
+                        {% endfor %}
+                    {% endblock tableHeadStdColumns %}
+                </tr>
+                {# columns filters #}
+                {% if table.columns|length > 0 %}
+                    <tr>
+                        {% block tableHeadStdFilters %}
+                            {% for column in table.columns %}
+                                {% include "KilikTableBundle::_columnFilter.html.twig" %}
+                            {% endfor %}
+                        {% endblock tableHeadStdFilters %}
+                    </tr>
+                {% endif %}
+            {% endblock tableHead %}
+            </thead>
+            <tbody id="{{ table.bodyId }}">
+            {% block tableBody %}
+                {% if tableRenderBody is defined %}
+                    {% for row in rows %}
+                        <tr>
+                            {% block tableBodyStdColumns %}
+                                {% for column in table.columns %}
+                                    {% include "KilikTableBundle::_columnCell.html.twig" %}
+                                {% endfor %}
+                            {% endblock tableBodyStdColumns %}
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endblock tableBody %}
+            </tbody>
+        </table>
+
+
+        <div class="col-md-6">
+            {% block tableStats %}
+                <div id="{{ table.id }}_stats">
+                    {% block tableStatsAjax %}
+                        {% include "KilikTableBundle::_stats.html.twig" %}
+                    {% endblock tableStatsAjax %}
+                </div>
+            {% endblock tableStats %}
+        </div>
+        <div class="col-md-6">
+    <span class="pull-right">
+        {% block tablePagination %}
+            <div id="{{ table.id }}_pagination" class="btn-group">
+                {% block tablePaginationAjax %}
+                    {% include "KilikTableBundle::_paginationNumbers.html.twig" %}
+                {% endblock tablePaginationAjax %}
+            </div>
+        {% endblock tablePagination %}
+    </span>
+        </div>
+    </div>
+</div>
+{% block tableAfterPanel %}
+{% endblock tableAfterPanel %}
+{{ form_end(table.formView) }}
