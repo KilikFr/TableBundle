@@ -42,7 +42,7 @@ class Column
      *
      * @var array
      */
-    private $sortReverse;
+    private $sortReverse = [];
 
     /**
      * Wich type (for default display transco).
