@@ -2,21 +2,17 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Doctrine\ORM\Query;
+use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Twig_Environment;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Kilik\TableBundle\Components\Table;
-use Kilik\TableBundle\Components\Filter;
-use Kilik\TableBundle\Components\FilterCheckbox;
-use Kilik\TableBundle\Components\FilterSelect;
-use Doctrine\ORM\Query;
+use Twig_Environment;
 
 abstract class AbstractTableService implements TableServiceInterface
 {
-
     /**
      * Twig Service.
      *
@@ -49,9 +45,9 @@ abstract class AbstractTableService implements TableServiceInterface
     public function form(TableInterface $table)
     {
         // prepare defaults values
-        $defaultValues = [];
+        $defaultValues = array();
         foreach ($table->getAllFilters() as $filter) {
-            if (!is_null($filter->getDefaultValue())) {
+            if (null !== $filter->getDefaultValue()) {
                 $defaultValues[$filter->getName()] = $filter->getDefaultValue();
             }
         }
@@ -59,48 +55,16 @@ abstract class AbstractTableService implements TableServiceInterface
         $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $defaultValues);
         //$this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
-            // type of input filter ?
-            switch ($filter::FILTER_TYPE) {
-                case FilterCheckbox::FILTER_TYPE:
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class,
-                        ['required' => false]
-                    );
-                    break;
-                case FilterSelect::FILTER_TYPE:
-                    /* @var FilterSelect $filter */
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class,
-                        [
-                            'required' => false,
-                            'choices' => $filter->getChoices(),
-                            'placeholder' => $filter->getPlaceholder(),
-                            'group_by' => $filter->getChoicesGroupBy(),
-                            'choice_label' => $filter->getChoiceLabel(),
-                            'choice_value' => $filter->getChoiceValue(),
-                            'translation_domain' => $filter->getTranslationDomain(),
-                            'choice_translation_domain' => $filter->getChoiceTranslationDomain(),
-                        ]
-                    );
-                    break;
-                case Filter::FILTER_TYPE:
-                default:
-                    $form->add(
-                        $filter->getName(),
-                        \Symfony\Component\Form\Extension\Core\Type\TextType::class,
-                        [
-                            'required' => false,
-                        ]
-                    );
-                    break;
-            }
+            $form->add(
+                $filter->getName(),
+                $filter->getInput(),
+                $filter->getOptions()
+            );
         }
 
         // append special inputs (used for export csv for exemple)
-        $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
-        $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
+        $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
+        $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
 
         return $form->getForm()->createView();
     }
@@ -159,14 +123,14 @@ abstract class AbstractTableService implements TableServiceInterface
         $rows = $this->getRows($table, $request);
 
         // params for twig parts
-        $twigParams = [
+        $twigParams = array(
             'table' => $table,
             'rows' => $rows,
-        ];
+        );
 
         $template = $this->twig->loadTemplate($table->getTemplate());
 
-        $responseParams = [
+        $responseParams = array(
             'page' => $table->getPage(),
             'rowsPerPage' => $table->getRowsPerPage(),
             'totalRows' => $table->getTotalRows(),
@@ -174,18 +138,18 @@ abstract class AbstractTableService implements TableServiceInterface
             'lastPage' => $table->getLastPage(),
             'tableBody' => $template->renderBlock(
                 'tableBody',
-                array_merge($twigParams, ['tableRenderBody' => true], $table->getTemplateParams())
+                array_merge($twigParams, array('tableRenderBody' => true), $table->getTemplateParams())
             ),
             //"tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
             'tableStats' => $template->renderBlock(
                 'tableStatsAjax',
-                array_merge($twigParams, ['tableRenderStats' => true])
+                array_merge($twigParams, array('tableRenderStats' => true))
             ),
             'tablePagination' => $template->renderBlock(
                 'tablePaginationAjax',
-                array_merge($twigParams, ['tableRenderPagination' => true])
+                array_merge($twigParams, array('tableRenderPagination' => true))
             ),
-        ];
+        );
 
         // encode response
         $response = new Response(json_encode($responseParams));

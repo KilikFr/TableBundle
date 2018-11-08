@@ -2,14 +2,10 @@
 
 namespace Kilik\TableBundle\Components;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class Filter
 {
-
-    /**
-     * Type d'input.
-     */
-    const FILTER_TYPE = 'text';
-
     /**
      * Filter type.
      */
@@ -38,7 +34,7 @@ class Filter
     // use input to apply arithmetic comparators, then filter the results
     const TYPE_AUTO = 'auto';
     const TYPES
-        = [
+        = array(
             self::TYPE_LIKE,
             self::TYPE_NOT_LIKE,
             self::TYPE_EQUAL,
@@ -51,7 +47,7 @@ class Filter
             self::TYPE_LIKE_WORDS_AND,
             self::TYPE_LIKE_WORDS_OR,
             self::TYPE_AUTO,
-        ];
+        );
     const TYPE_DEFAULT = self::TYPE_AUTO;
     // specials types:
     const TYPE_NULL = 'null';
@@ -66,7 +62,23 @@ class Filter
     const FORMAT_INTEGER = 'integer';
     const FORMAT_TEXT = 'text';
     const FORMAT_DEFAULT = self::FORMAT_TEXT;
-    const FORMATS = [self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT];
+    const FORMATS = array(self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT);
+
+    /**
+     * Input type.
+     *
+     * @var string
+     */
+    protected $input = TextType::class;
+
+    /**
+     * Options for input.
+     *
+     * This are the options for the symfony FormType
+     *
+     * @var array
+     */
+    protected $options = array("required" => false);
 
     /**
      * Filter name.
@@ -272,11 +284,11 @@ class Filter
             case self::TYPE_EQUAL_STRICT:
             case self::TYPE_LIKE_WORDS_AND:
             case self::TYPE_LIKE_WORDS_OR:
-                return [$this->getType(), $input];
+                return array($this->getType(), $input);
             case self::TYPE_AUTO:
             default:
                 // handle blank search is different to search 0 value
-                if ((string)$input != '') {
+                if ((string) $input != '') {
                     $simpleOperator = substr($input, 0, 1);
                     $doubleOperator = substr($input, 0, 2);
                     // if start with operators
@@ -285,7 +297,7 @@ class Filter
                         case self::TYPE_LESS_OR_EQUAL:
                         case self::TYPE_NOT_EQUAL:
                         case self::TYPE_EQUAL_STRICT:
-                            return [$doubleOperator, substr($input, 2)];
+                            return array($doubleOperator, substr($input, 2));
                             break;
                         default:
                             switch ($simpleOperator) {
@@ -293,18 +305,18 @@ class Filter
                                 case self::TYPE_LESS:
                                 case self::TYPE_EQUAL:
                                 case self::TYPE_NOT_LIKE:
-                                    return [$simpleOperator, substr($input, 1)];
+                                    return array($simpleOperator, substr($input, 1));
                                     break;
                                 default:
-                                    return [self::TYPE_LIKE, $input];
+                                    return array(self::TYPE_LIKE, $input);
                                     break;
                             }
                             break;
                     }
                     break;
-                } else {
-                    return [self::TYPE_LIKE, false];
                 }
+
+                    return array(self::TYPE_LIKE, false);
         }
     }
 
@@ -338,11 +350,11 @@ class Filter
 
             return $function($this, $operator, $input);
         } // else, use standard input converter
-        else {
+
             switch ($this->getDataFormat()) {
                 // date/time format dd/mm/YYYY HH:ii:ss
                 case self::FORMAT_DATE:
-                    $params = explode('/', str_replace(['-', ' '], '/', $input));
+                    $params = explode('/', str_replace(array('-', ' '), '/', $input));
                     // only year ?
                     if (count($params) == 1) {
                         $fInput = $params[0];
@@ -400,9 +412,8 @@ class Filter
                     $fInput = $input;
                     break;
             }
-        }
 
-        return [$operator, $fInput];
+        return array($operator, $fInput);
     }
 
     /**
@@ -447,5 +458,42 @@ class Filter
     public function getQueryPartBuilder()
     {
         return $this->queryPartBuilder;
+    }
+
+    /**
+     * @param  $input
+     */
+    public function setInput($input)
+    {
+        $this->input = $input;
+
+        return $this;
+    }
+
+    /**
+     * @return
+     */
+    public function getInput()
+    {
+        return $this->input;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions(array $options)
+    {
+        // We do an array_merge_recursive to keep the possibility to overwrite the required option
+        $this->options = array_merge_recursive($this->options,$options);
+
+        return $this;
     }
 }
