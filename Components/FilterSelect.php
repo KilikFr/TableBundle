@@ -2,13 +2,24 @@
 
 namespace Kilik\TableBundle\Components;
 
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
+/**
+ * Class FilterSelect.
+ *
+ * @deprecated since version 1.1 to be removed in 2.0
+ */
 class FilterSelect extends Filter
 {
+    /**
+     * {@inheritDoc}
+     */
+    protected $input = ChoiceType::class;
 
     /**
-     * Type d'input.
+     * {@inheritDoc}
      */
-    const FILTER_TYPE = 'select';
+    protected $options = array();
 
     /**
      * Liste des valeurs du select.
@@ -46,14 +57,14 @@ class FilterSelect extends Filter
     private $choicesGroupBy;
 
     /**
-     * Domain to translate place holder and values
+     * Domain to translate place holder and values.
      *
      * @var string
      */
     private $translationDomain = 'messages';
 
     /**
-     * Domain to translate values
+     * Domain to translate values.
      *
      * @var string
      */
@@ -208,7 +219,7 @@ class FilterSelect extends Filter
     }
 
     /**
-     * Disable translation domains
+     * Disable translation domains.
      *
      * @return static
      */
@@ -220,4 +231,25 @@ class FilterSelect extends Filter
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        $options = array_merge_recursive(
+            array(
+                'required' => false,
+                'choices' => $this->getChoices(),
+                'placeholder' => $this->getPlaceholder(),
+                'group_by' => $this->getChoicesGroupBy(),
+                'choice_label' => $this->getChoiceLabel(),
+                'choice_value' => $this->getChoiceValue(),
+                'translation_domain' => $this->getTranslationDomain(),
+                'choice_translation_domain' => $this->getChoiceTranslationDomain(),
+            ),
+            $this->options
+        );
+
+        return $options;
+    }
 }

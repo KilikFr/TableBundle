@@ -2,10 +2,22 @@
 
 namespace Kilik\TableBundle\Components;
 
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+
+/**
+ * Class FilterCheckbox.
+ *
+ * @deprecated since version 1.1 to be removed in 2.0
+ */
 class FilterCheckbox extends Filter
 {
     /**
-     * Type d'input.
+     * {@inheritDoc}
      */
-    const FILTER_TYPE = 'checkbox';
+    protected $input = CheckboxType::class;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected $options = array('required' => false);
 }
