@@ -78,7 +78,7 @@ class Filter
      *
      * @var array
      */
-    protected $options = array("required" => false);
+    protected $options = array('required' => false);
 
     /**
      * Filter name.
@@ -461,7 +461,9 @@ class Filter
     }
 
     /**
-     * @param  $input
+     * @param string $input
+     *
+     * @return static
      */
     public function setInput($input)
     {
@@ -471,7 +473,7 @@ class Filter
     }
 
     /**
-     * @return
+     * @return string
      */
     public function getInput()
     {
@@ -488,11 +490,13 @@ class Filter
 
     /**
      * @param array $options
+     *
+     * @return static
      */
     public function setOptions(array $options)
     {
-        // We do an array_merge_recursive to keep the possibility to overwrite the required option
-        $this->options = array_merge_recursive($this->options,$options);
+        // We do an array_merge to keep the possibility to overwrite the required option
+        $this->options = array_merge($this->options,$options);
 
         return $this;
     }

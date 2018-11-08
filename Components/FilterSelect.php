@@ -17,11 +17,6 @@ class FilterSelect extends Filter
     protected $input = ChoiceType::class;
 
     /**
-     * {@inheritDoc}
-     */
-    protected $options = array();
-
-    /**
      * Liste des valeurs du select.
      *
      * @var array
@@ -236,7 +231,7 @@ class FilterSelect extends Filter
      */
     public function getOptions()
     {
-        $options = array_merge_recursive(
+        $options = array_merge(
             array(
                 'required' => false,
                 'choices' => $this->getChoices(),

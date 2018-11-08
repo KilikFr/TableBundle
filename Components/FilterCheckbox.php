@@ -15,9 +15,4 @@ class FilterCheckbox extends Filter
      * {@inheritDoc}
      */
     protected $input = CheckboxType::class;
-
-    /**
-     * {@inheritDoc}
-     */
-    protected $options = array('required' => false);
 }
