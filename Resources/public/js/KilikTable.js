@@ -281,17 +281,22 @@ function KilikTable(id, path, options) {
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
             this.sortReverse = options.sortReverse;
-            for (var key in options.filters) {
-                $("form[name='" + this.getFormName() + "']").find("[name='" + key + "']").val(options.filters[key]);
-
-                // for checkbox (@todo: do this only for checkbox)
-                if (options.filters[key] == 1) {
-                    $("form[name='" + this.getFormName() + "']").find("input[name='" + key + "']").prop("checked", true);
+            $("form[name='" + this.getFormName() + "'] [name]").each(function(index, elem)
+            {
+                var name = $(elem).attr("name")
+                if (options.filters[name] !== "") {
+                    var value = options.filters[$(elem).attr("name")]
+                    if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
+                        $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
+                    }
+                    else if ($(elem).is("select")) {
+                        $("select[name='" + name + "'] option[value='" + value + "']").prop("selected", true)
+                    }
+                    else {
+                        $(elem).val(value)
+                    }
                 }
-            }
-            // bind specials inputs (used for csv export for exemple)
-            $("form[name='" + this.getFormName() + "']").find("input[name='" + this.getFormName() + "\[sortColumn\]']").val(this.sortColumn);
-            $("form[name='" + this.getFormName() + "']").find("input[name='" + this.getFormName() + "\[sortReverse\]']").val(this.sortReverse ? 1 : 0);
+            })
 
             if (typeof options.hiddenColumns === "undefined") {
                 this.hiddenColumns = [];
