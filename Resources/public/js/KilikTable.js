@@ -396,17 +396,19 @@ function KilikTable(id, path, options) {
                 });
 
             }
-        ).done(function (data) {
+        ).done(function (dataRaw) {
             table.initMassActions();
             // callback
-            table.afterReload();
+            table.afterReload(dataRaw);
         });
     };
 
     /**
      * Callback after reload
+     *
+     * @param dataRaw : request raw data
      */
-    this.afterReload = function () {
+    this.afterReload = function (dataRaw) {
         // could be overridden
     }
 
