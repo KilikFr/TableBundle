@@ -354,7 +354,8 @@ class Filter
             switch ($this->getDataFormat()) {
                 // date/time format dd/mm/YYYY HH:ii:ss
                 case self::FORMAT_DATE:
-                    $params = explode('/', str_replace(array('-', ' '), '/', $input));
+                    $params = explode('/', str_replace(array('-', ' ',':'), '/', $input));
+                    dump($params);
                     // only year ?
                     if (count($params) == 1) {
                         $fInput = $params[0];
@@ -366,27 +367,27 @@ class Filter
                         $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
                     } // day/month/year hour ?
                     elseif (count($params) == 4) {
-                        $fInput = sprintf('%04d-%02d-%02d %02d', $params[3], $params[2], $params[1], $params[0]);
+                        $fInput = sprintf('%04d-%02d-%02d %02d', $params[2], $params[1], $params[0], $params[3]);
                     } // day/month/year hour:minute ?
                     elseif (count($params) == 5) {
                         $fInput = sprintf(
                             '%04d-%02d-%02d %02d:%02d',
-                            $params[4],
-                            $params[3],
                             $params[2],
                             $params[1],
-                            $params[0]
+                            $params[0],
+                            $params[3],
+                            $params[4]
                         );
                     } // day/month/year hour:minute ?
                     elseif (count($params) == 6) {
                         $fInput = sprintf(
                             '%04d-%02d-%02d %02d:%02d:%02d',
-                            $params[5],
-                            $params[4],
-                            $params[3],
                             $params[2],
                             $params[1],
-                            $params[0]
+                            $params[0],
+                            $params[3],
+                            $params[4],
+                            $params[5]
                         );
                     } // default, same has raw value
                     else {
