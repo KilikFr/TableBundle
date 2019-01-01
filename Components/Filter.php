@@ -355,7 +355,6 @@ class Filter
                 // date/time format dd/mm/YYYY HH:ii:ss
                 case self::FORMAT_DATE:
                     $params = explode('/', str_replace(array('-', ' ',':'), '/', $input));
-                    dump($params);
                     // only year ?
                     if (count($params) == 1) {
                         $fInput = $params[0];
