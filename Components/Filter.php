@@ -377,7 +377,7 @@ class Filter
                             $params[3],
                             $params[4]
                         );
-                    } // day/month/year hour:minute ?
+                    } // day/month/year hour:minute:second ?
                     elseif (count($params) == 6) {
                         $fInput = sprintf(
                             '%04d-%02d-%02d %02d:%02d:%02d',
