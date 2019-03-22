@@ -99,7 +99,7 @@ function KilikTable(id, path, options) {
 
         // filtering
         $("form[name='" + this.getFormName() + "']").find(".refreshOnChange").change(function () {
-            table.doReload();
+            table.askForReload();
         });
         $("form[name='" + this.getFormName() + "']").find(".refreshOnKeyup").keyup(function () {
             // delayed reload
