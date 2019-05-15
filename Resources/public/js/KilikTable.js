@@ -290,7 +290,12 @@ function KilikTable(id, path, options) {
                         $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
                     }
                     else if ($(elem).is("select")) {
-                        $("select[name='" + name + "'] option[value='" + value + "']").prop("selected", true)
+                        $("select[name='" + name + "'] option").each(function () {
+                            if ($(this).val() == value)
+                            {
+                                $(this).prop('selected', true)
+                            }
+                        }, value)
                     }
                     else {
                         $(elem).val(value)
