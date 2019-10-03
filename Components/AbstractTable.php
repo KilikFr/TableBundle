@@ -12,6 +12,11 @@ abstract class AbstractTable implements TableInterface
     protected $id;
 
     /**
+     * @var string
+     */
+    protected $title;
+
+    /**
      * URL for ajax call.
      *
      * @var string
@@ -126,6 +131,20 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
+     * Set table title.
+     *
+     * @param string $id
+     *
+     * @return static
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
      * Set URL for ajax call.
      *
      * @param string $path
@@ -191,6 +210,16 @@ abstract class AbstractTable implements TableInterface
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get Table Title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
     }
 
     /**

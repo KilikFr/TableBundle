@@ -1,6 +1,6 @@
 {# @KilikTable/_columnCell.html.twig #}
 {% if not column.hidden %}
-    <div {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %}>
+    <div {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} data-label="{{column.label}}">
         {% set cellHtml=table.value(column,row) %}
         {% if column.raw %}
             {{ cellHtml | raw }}
