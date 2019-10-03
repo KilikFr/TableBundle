@@ -6,3 +6,5 @@ kiliktable:
     show: mostrar
     rows_per_page: elementos por página
     setup: configuración
+    mass_select: seleccionar todo
+    select: seleccionar

@@ -6,4 +6,6 @@ kiliktable:
     show: tonen
     rows_per_page: rijen per pagina
     setup: configureren
+    mass_select: selecteer alles
+    select: selecteer
 
