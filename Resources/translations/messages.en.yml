@@ -6,4 +6,6 @@ kiliktable:
     show: show
     rows_per_page: rows per page
     setup: setup
+    mass_select: select all
+    select: select
 
