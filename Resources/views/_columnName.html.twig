@@ -8,14 +8,14 @@
 {% endif %}
 
 {% if column.sortable %}
-    <th class="columnSortable{% if column.headerClass is not null %} {{ column.headerClass }}{% endif %}" data-column="{{ column.name }}" data-sort-column="{{ column.name }}">
+    <th class="columnSortable{% if column.headerClass is not null %} {{ column.headerClass }}{% endif %}" data-column="{{ column.name }}" data-sort-column="{{ column.name }}"  data-label="{{column.label}}" scope="col">
         <a href="#">
             {{ label }}
         </a>
         <span class="glyphicon columnSortableIcon"></span>
     </th>
 {% else %}
-    <th data-column="{{ column.name }}">
+    <th data-column="{{ column.name }}" data-label="{{column.label}}" scope="col">
         {{ label }}
     </th>
 {% endif %}
