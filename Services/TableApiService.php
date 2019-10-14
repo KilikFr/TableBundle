@@ -3,6 +3,7 @@
 namespace Kilik\TableBundle\Services;
 
 use Kilik\TableBundle\Components\ApiTable;
+use Kilik\TableBundle\Components\Column;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -96,6 +97,15 @@ class TableApiService extends AbstractTableService
             $paginate ? $table->getRowsPerPage() : null
         );
 
+        $result = [];
+        foreach ($apiResult->getRows() as $row) {
+            $rowData = [];
+            foreach ($table->getColumns() as $column) {
+                $rowData[$column->getName()] =  $table->getValue($column, $row, $apiResult->getRows());
+            }
+            $result[] = $rowData;
+        }
+
         if ($paginate) {
             $table->setTotalRows($apiResult->getNbTotalRows());
             $table->setFilteredRows($apiResult->getNbFilteredRows());
@@ -107,7 +117,7 @@ class TableApiService extends AbstractTableService
             }
         }
 
-        return $apiResult->getRows();
+        return $result;
     }
 
     /**
