@@ -98,7 +98,7 @@ class TableApiService extends AbstractTableService
         );
 
         $result = [];
-        foreach ($apiResult->getRows() as $row) {
+        foreach ($apiResult->getRows() ?? [] as $row) {
             $rowData = [];
             foreach ($table->getColumns() as $column) {
                 $rowData[$column->getName()] =  $table->getValue($column, $row, $apiResult->getRows());
