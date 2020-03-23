@@ -1,0 +1,22 @@
+{# @KilikTable/_columnName.html.twig #}
+{% set label = column.label %}
+{% if column.translateDomain is not null %}
+    {% set label = (column.label | trans({}, column.translateDomain)) %}
+    {% if column.capitalize %}
+        {% set label = label | capitalize %}
+    {% endif %}
+{% endif %}
+
+{% if column.sortable %}
+    <th class="columnSortable{% if column.headerClass is not null %} {{ column.headerClass }}{% endif %}" data-column="{{ column.name }}" data-sort-column="{{ column.name }}"  data-label="{{column.label}}" scope="col">
+        <a href="#">
+            {{ label }}
+        </a>
+        <i class="fa columnSortableIcon"></i>
+    </th>
+{% else %}
+    <th data-column="{{ column.name }}" data-label="{{column.label}}" scope="col">
+        {{ label }}
+    </th>
+{% endif %}
+

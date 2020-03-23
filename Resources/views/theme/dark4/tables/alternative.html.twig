@@ -1,0 +1,100 @@
+{# @KilikTable/theme/bootstrap-4-fa/_defaultTableAlt.html.twig #}
+{% use "@KilikTable/_blocks.html.twig" with
+    tableHeadMassActionsColumn as parent_tableHeadMassActionsColumn,
+    tableFilterMassActionsColumn as parent_tableFilterMassActionsColumn,
+    tableBodyMassActionsColumn as parent_tableBodyMassActionsColumn %}
+{# @param Kilik\Components\Table table #}
+{{ form_start(table.formView) }}
+{% block tableBeforePanel %}
+{% endblock tableBeforePanel %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card card-info">
+            <div class="card-header">
+                {% block tableTitle %}
+                    Default title
+                {% endblock tableTitle %}
+
+                {# setup of the list: hidden columns, rows per page ... #}
+                {% include "@KilikTable/theme/dark4/components/setup.html.twig" %}
+                {% include "@KilikTable/_rowsPerPage.html.twig" %}
+
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-hover table-striped table-bordered" id="{{ table.id }}">
+                    <thead>
+                    {% block tableHead %}
+                        <tr>
+                            {# columns names #}
+                            {% block tableHeadMassActionsColumn %}
+                                {{ block('parent_tableHeadMassActionsColumn') }}
+                            {% endblock %}
+                            {% block tableHeadStdColumns %}
+                                {% for column in table.columns %}
+                                    {% include "@KilikTable/theme/dark4/components/columnName.html.twig" %}
+                                {% endfor %}
+                            {% endblock tableHeadStdColumns %}
+                        </tr>
+                        {# columns filters #}
+                        {% if table.columns|length > 0 %}
+                            <tr>
+                                {% block tableFilterMassActionsColumn %}
+                                    {{ block('parent_tableFilterMassActionsColumn') }}
+                                {% endblock %}
+                                {% block tableHeadStdFilters %}
+                                    {% for column in table.columns %}
+                                        {% include "@KilikTable/_columnFilter.html.twig" %}
+                                    {% endfor %}
+                                {% endblock tableHeadStdFilters %}
+                            </tr>
+                        {% endif %}
+                    {% endblock tableHead %}
+                    </thead>
+                    <tbody id="{{ table.bodyId }}">
+                    {% block tableBody %}
+                        {% if tableRenderBody is defined %}
+                            {% for row in rows %}
+                                <tr>
+                                    {% block tableBodyMassActionsColumn %}
+                                        {{ block('parent_tableBodyMassActionsColumn') }}
+                                    {% endblock %}
+                                    {% block tableBodyStdColumns %}
+                                        {% for column in table.columns %}
+                                            {% include "@KilikTable/_columnCell.html.twig" %}
+                                        {% endfor %}
+                                    {% endblock tableBodyStdColumns %}
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endblock tableBody %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        {% block tableStats %}
+            <div id="{{ table.id }}_stats">
+                {% block tableStatsAjax %}
+                    {% include "@KilikTable/_stats.html.twig" %}
+                {% endblock tableStatsAjax %}
+            </div>
+        {% endblock tableStats %}
+    </div>
+    <div class="col-md-6">
+        <div class="float-right">
+            {% block tablePagination %}
+                <div id="{{ table.id }}_pagination" class="btn-group">
+                    {% block tablePaginationAjax %}
+                        {% include "@KilikTable/theme/dark4/components/paginationNumbers.html.twig" %}
+                    {% endblock tablePaginationAjax %}
+                </div>
+            {% endblock tablePagination %}
+        </div>
+    </div>
+</div>
+{% block tableAfterPanel %}
+{% endblock tableAfterPanel %}
+{{ form_end(table.formView) }}

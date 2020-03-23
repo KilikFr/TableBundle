@@ -47,7 +47,7 @@ Installation
 composer require kilik/table
 ```
 
-Patch your AppKernel.php:
+Patch your AppKernel.php (symfony <4):
 ```php
 class AppKernel extends Kernel
 {
@@ -62,6 +62,17 @@ class AppKernel extends Kernel
     }
 }    
 ```
+
+Patch your AppKernel.php (symfony >=4):
+
+```php
+<?php
+
+return [
+    Kilik\TableBundle\KilikTableBundle::class => ['all' => true],
+];
+```
+
 
 Install assets
 ```sh

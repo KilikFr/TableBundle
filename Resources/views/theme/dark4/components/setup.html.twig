@@ -1,0 +1,22 @@
+{# @KilikTable/_setup.html.twig #}
+
+<span class="dropdown">
+    <button class="btn btn-normal dropdown-toggle" id="{{ table.id }}_setup" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa fa-cog"></i> {{ "kiliktable.setup" |trans }}</button>
+    <ul class="dropdown-menu" aria-labelledby="{{ table.id }}_setup">
+        {% for column in table.columns %}
+            {% set label = column.label %}
+            {% if column.translateDomain is not null %}
+                {% set label = (column.label | trans({}, column.translateDomain)) %}
+                {% if column.capitalize %}
+                    {% set label = label | capitalize %}
+                {% endif %}
+            {% endif %}
+
+            <li>
+                <a>
+                    <input type="checkbox" data-column="{{ column.name }}" data-setup="{{ table.id }}" class="input"></input> {{ label }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</span>

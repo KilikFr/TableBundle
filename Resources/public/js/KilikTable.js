@@ -1,6 +1,7 @@
 /**
- * @param string id : id de la div où afficher la table
- * @param string path : cheming pour actualiser la table
+ * @param string id : div id (to diplay table)
+ * @param string path : path to refresh table
+ * @param array : options
  */
 function KilikTable(id, path, options) {
     this.id = id;
@@ -33,36 +34,41 @@ function KilikTable(id, path, options) {
             localStorage.removeItem('localStorage');
         } catch (e) {
             Storage.prototype._setItem = Storage.prototype.setItem;
-            Storage.prototype.setItem = function() {};
+            Storage.prototype.setItem = function () {
+            };
         }
     }
 
-    // for each option
-    for (optionKey in options) {
-        switch (optionKey) {
-            case "sortColumnClassSortable":
-                this.sortColumnClassSortable = options[optionKey];
-                break;
-            case "sortColumnClassSorted":
-                this.sortColumnClassSorted = options[optionKey];
-                break;
-            case "sortColumnClassSortedReverse":
-                this.sortColumnClassSortedReverse = options[optionKey];
-                break;
-            case "askForReloadDelay":
-                this.askForReloadDelay = options[optionKey];
-                break;
-            case "rowsPerPage":
-                this.rowsPerPage = options[optionKey];
-                break;
-            case "defaultHiddenColumns":
-                this.defaultHiddenColumns = options[optionKey];
-                break;
-            case "skipLoadFromLocalStorage":
-                this.skipLoadFromLocalStorage = options[optionKey];
-                break;
+    this.applyOptions = function (options) {
+        // for each option
+        for (optionKey in options) {
+            switch (optionKey) {
+                case "sortColumnClassSortable":
+                    this.sortColumnClassSortable = options[optionKey];
+                    break;
+                case "sortColumnClassSorted":
+                    this.sortColumnClassSorted = options[optionKey];
+                    break;
+                case "sortColumnClassSortedReverse":
+                    this.sortColumnClassSortedReverse = options[optionKey];
+                    break;
+                case "askForReloadDelay":
+                    this.askForReloadDelay = options[optionKey];
+                    break;
+                case "rowsPerPage":
+                    this.rowsPerPage = options[optionKey];
+                    break;
+                case "defaultHiddenColumns":
+                    this.defaultHiddenColumns = options[optionKey];
+                    break;
+                case "skipLoadFromLocalStorage":
+                    this.skipLoadFromLocalStorage = options[optionKey];
+                    break;
+            }
         }
     }
+
+    this.applyOptions(options);
 
     this.init = function () {
         var table = this;
@@ -155,7 +161,7 @@ function KilikTable(id, path, options) {
         // on actualise maintenant
         this.doReload();
 
-        $buttonCheckAll.on('click', function() {
+        $buttonCheckAll.on('click', function () {
             table.checkAll($(this).prop('checked'));
         });
     };
@@ -281,23 +287,19 @@ function KilikTable(id, path, options) {
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
             this.sortReverse = options.sortReverse;
-            $("form[name='" + this.getFormName() + "'] [name]").each(function(index, elem)
-            {
+            $("form[name='" + this.getFormName() + "'] [name]").each(function (index, elem) {
                 var name = $(elem).attr("name")
                 if (options.filters[name] !== "") {
                     var value = options.filters[$(elem).attr("name")]
                     if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
                         $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
-                    }
-                    else if ($(elem).is("select")) {
+                    } else if ($(elem).is("select")) {
                         $("select[name='" + name + "'] option").each(function () {
-                            if ($(this).val() == value)
-                            {
+                            if ($(this).val() == value) {
                                 $(this).prop('selected', true)
                             }
                         }, value)
-                    }
-                    else {
+                    } else {
                         $(elem).val(value)
                     }
                 }
@@ -426,14 +428,14 @@ function KilikTable(id, path, options) {
         var form = $('form[name=' + table.id + '_form]');
         var massActions = $('[data-mass-action]', $table);
 
-        massActions.each(function() {
+        massActions.each(function () {
             var checkedRows = [], eventDetails, massActionName, action;
 
             massActionName = $(this).data('name');
             action = $(this).data('mass-action');
 
             $(this).on('click', function () {
-                $('[name="kilik_' + table.id + '_selected[]"]').each(function() {
+                $('[name="kilik_' + table.id + '_selected[]"]').each(function () {
                     if ($(this).is(":checked")) {
                         checkedRows.push($(this).val());
                     }
@@ -442,8 +444,8 @@ function KilikTable(id, path, options) {
                     form.attr("action", action);
                     form.submit();
                 } else {
-                    eventDetails = { 'checked': checkedRows, 'action' : massActionName };
-                    $table.trigger('kilik:massAction',  [eventDetails]);
+                    eventDetails = {'checked': checkedRows, 'action': massActionName};
+                    $table.trigger('kilik:massAction', [eventDetails]);
                 }
             });
         });
@@ -458,7 +460,25 @@ function KilikTable(id, path, options) {
             status = true;
         }
         $('[name="kilik_' + tableId + '_selected[]"]').each(function () {
-           $(this).prop('checked', status);
+            $(this).prop('checked', status);
         });
     }
+}
+
+/**
+ * KilikTable (Based on Bootstrap 4 and FontAwesome)
+ *
+ * @param string id : div id (to diplay table)
+ * @param string path : path to refresh table
+ * @param array : options
+ */
+
+function KilikTableFA(id, path, options) {
+    KilikTable.call(this, id, path, options)
+
+    this.sortColumnClassSortable = "fa-sort";
+    this.sortColumnClassSorted = "fa-sort-up";
+    this.sortColumnClassSortedReverse = "fa-sort-down";
+
+    this.applyOptions(options);
 }
