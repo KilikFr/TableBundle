@@ -40,30 +40,18 @@ function KilikTable(id, path, options) {
     }
 
     this.applyOptions = function (options) {
-        // for each option
+        var allowedOptions = [
+            "sortColumnClassSortable",
+            "sortColumnClassSorted",
+            "sortColumnClassSortedReverse",
+            "askForReloadDelay",
+            "rowsPerPage",
+            "defaultHiddenColumns",
+            "skipLoadFromLocalStorage"
+        ]
         for (optionKey in options) {
-            switch (optionKey) {
-                case "sortColumnClassSortable":
-                    this.sortColumnClassSortable = options[optionKey];
-                    break;
-                case "sortColumnClassSorted":
-                    this.sortColumnClassSorted = options[optionKey];
-                    break;
-                case "sortColumnClassSortedReverse":
-                    this.sortColumnClassSortedReverse = options[optionKey];
-                    break;
-                case "askForReloadDelay":
-                    this.askForReloadDelay = options[optionKey];
-                    break;
-                case "rowsPerPage":
-                    this.rowsPerPage = options[optionKey];
-                    break;
-                case "defaultHiddenColumns":
-                    this.defaultHiddenColumns = options[optionKey];
-                    break;
-                case "skipLoadFromLocalStorage":
-                    this.skipLoadFromLocalStorage = options[optionKey];
-                    break;
+            if(allowedOptions.indexOf(optionKey) != -1) {
+                this[optionKey] = options[optionKey];
             }
         }
     }
