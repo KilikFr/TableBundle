@@ -1,0 +1,17 @@
+{# @KilikTable/theme/bootstrap-4-fa/_pagination.html.twig #}
+
+{# basic pagination #}
+{% if tableRenderPagination is defined %}
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="1">
+        <i class="fa fa-fast-backward"></i>
+    </a>
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="{{ table.page-1 }}">
+        <i class="fa fa-backward"></i>
+    </a>
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page > table.lastPage-1 %}disabled{% endif %}" data-table-page="{{ table.page+1 }}">
+        <i class="fa fa-forward"></i>
+    </a>
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page == table.lastPage %}disabled{% endif %}" data-table-page="{{ table.lastPage }}">
+        <i class="fa fa-fast-forward"></i>
+    </a>
+{% endif %}

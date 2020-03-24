@@ -1,0 +1,72 @@
+{# @KilikTable/_paginationNumbers.html.twig #}
+
+{% if tableRenderPagination is defined %}
+    {# previous page #}
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page < 2 %}disabled{% endif %}" data-table-page="{{ table.page-1 }}">
+        <i class="fa fa-chevron-left"></i> {{ "kiliktable.previous" |trans }}
+    </a>
+
+    {# first page #}
+    {% if table.page > 2 %}
+        <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="1">
+            1
+        </a>
+    {% endif %}
+
+    {# page - 2 ? #}
+    {% if table.page > 3 %}
+        {% if table.page == 4 %}
+            <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="{{ table.page-2 }}">
+                {{ table.page-2 }}
+            </a>
+        {% else %}
+            <a href="#" class="btn btn-dark disabled">
+                ...
+            </a>
+        {% endif %}
+    {% endif %}
+
+    {# page - 1 ? (previous) #}
+    {% if table.page > 1 %}
+        <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="{{ table.page-1 }}">
+            {{ table.page-1 }}
+        </a>
+    {% endif %}
+
+    {# page active #}
+    <a href="#" class="btn btn-dark tablePaginationButton active disabled" data-table-page="{{ table.page }}">
+        {{ table.page }}
+    </a>
+
+    {# page + 1 ? (next) #}
+    {% if table.lastPage-table.page > 0 %}
+        <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="{{ table.page+1 }}">
+            {{ table.page+1 }}
+        </a>
+    {% endif %}
+
+    {# page + 2 ? #}
+    {% if table.lastPage-table.page > 2 %}
+        {% if table.lastPage-table.page == 3 %}
+            <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="{{ table.page+2 }}">
+                {{ table.page+2 }}
+            </a>
+        {% else %}
+            <a href="#" class="btn btn-dark disabled">
+                ...
+            </a>
+        {% endif %}
+    {% endif %}
+
+    {# last page #}
+    {% if table.lastPage-table.page > 1 %}
+        <a href="#" class="btn btn-dark tablePaginationButton" data-table-page="{{ table.lastPage }}">
+            {{ table.lastPage }}
+        </a>
+    {% endif %}
+
+    {# next page #}
+    <a href="#" class="btn btn-dark tablePaginationButton {% if table.page == table.lastPage or table.lastPage==0 %}disabled{% endif %}" data-table-page="{{ table.page+1 }}">
+        {{ "kiliktable.next"|trans }} <i class="fa fa-chevron-right"></i>
+    </a>
+{% endif %}
