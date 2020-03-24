@@ -152,3 +152,12 @@ You can get all rows checked as following :
     }
 });
 ```
+
+Note: WIP on Bootstrap 4 (with Font Awesome) integration, use new JS function:
+
+```javascript
+$(document).ready(function () {
+    var table = new KilikTableFA("{{ table.id }}", "{{ table.path }}", JSON.parse('{{ table.options | json_encode |raw }}'));
+    table.init();
+});
+```
