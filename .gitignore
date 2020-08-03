@@ -1,0 +1,5 @@
+/.idea
+/vendor
+/.composer/*
+!/.composer/.gitkeep
+/.phpunit.result.cache

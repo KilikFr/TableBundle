@@ -1,0 +1,11 @@
+sudo: required
+
+language: bash
+
+services:
+  - docker
+
+script:
+  - ./prepare-tests.sh
+  - ./scripts/composer.sh validate
+  - ./run-tests.sh
