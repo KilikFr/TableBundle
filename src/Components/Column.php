@@ -59,7 +59,7 @@ class Column
     /**
      * Domain for label translation ?
      *
-     * @var bool
+     * @var string
      */
     private $translateDomain = null;
 
@@ -311,7 +311,7 @@ class Column
      *
      * @return static
      */
-    public function setTranslateLabel($translate)
+    public function setTranslateLabel(bool $translate)
     {
         if ($translate) {
             $this->translateDomain = 'messages';
@@ -327,7 +327,7 @@ class Column
      *
      * @return bool
      */
-    public function getTranslateLabel()
+    public function getTranslateLabel(): bool
     {
         return !is_null($this->translateDomain);
     }
@@ -410,7 +410,7 @@ class Column
     /**
      * Set display format parameters.
      *
-     * @param array $displayFormatParams
+     * @param mixed $displayFormatParams
      *
      * @return static
      */
