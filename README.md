@@ -161,3 +161,17 @@ $(document).ready(function () {
     table.init();
 });
 ```
+
+For bundle developpers
+======================
+
+```shell
+# prepare tests
+./prepare-tests.sh
+
+# run tests
+./run-tests.sh
+
+# launch composer
+./scripts/composer.sh
+```

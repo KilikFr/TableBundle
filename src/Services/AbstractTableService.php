@@ -2,21 +2,19 @@
 
 namespace Kilik\TableBundle\Services;
 
-use Doctrine\ORM\Query;
-use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Twig_Environment;
+use Twig\Environment;
 
 abstract class AbstractTableService implements TableServiceInterface
 {
     /**
      * Twig Service.
      *
-     * @var Twig_Environment
+     * @var Environment
      */
     protected $twig;
 
@@ -30,10 +28,10 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * TableService constructor.
      *
-     * @param Twig_Environment $twig
-     * @param FormFactory      $formFactory
+     * @param Environment $twig
+     * @param FormFactory $formFactory
      */
-    public function __construct(Twig_Environment $twig, FormFactory $formFactory)
+    public function __construct(Environment $twig, FormFactory $formFactory)
     {
         $this->twig = $twig;
         $this->formFactory = $formFactory;
@@ -116,6 +114,7 @@ abstract class AbstractTableService implements TableServiceInterface
      * @param Request        $request
      *
      * @return Response
+     * @throws \Exception|\Throwable
      */
     public function handleRequest(TableInterface $table, Request $request)
     {
@@ -128,7 +127,7 @@ abstract class AbstractTableService implements TableServiceInterface
             'rows' => $rows,
         );
 
-        $template = $this->twig->loadTemplate($table->getTemplate());
+        $template = $this->twig->load($table->getTemplate());
 
         $responseParams = array(
             'page' => $table->getPage(),
@@ -140,7 +139,6 @@ abstract class AbstractTableService implements TableServiceInterface
                 'tableBody',
                 array_merge($twigParams, array('tableRenderBody' => true), $table->getTemplateParams())
             ),
-            //"tableFoot"=>$template->renderBlock("tableFoot", $twigParams),
             'tableStats' => $template->renderBlock(
                 'tableStatsAjax',
                 array_merge($twigParams, array('tableRenderStats' => true))
