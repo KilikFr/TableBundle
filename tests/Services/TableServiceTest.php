@@ -23,8 +23,7 @@ use Twig\Loader\FilesystemLoader;
 class TableServiceTest extends WebTestCase
 {
     /**
-     * @deprecated sould be replaced ASAP by Twig/Environment
-     * @var \Twig_Environment
+     * @var Environment
      */
     public static $twig;
 
@@ -35,10 +34,7 @@ class TableServiceTest extends WebTestCase
 
     public static function setUpBeforeClass(): void
     {
-        // @deprecated
-        static::$twig = new \Twig_Environment(new FilesystemLoader());
-        // sould be replaced asap by the following line
-        // static::$twig = new Environment(new FilesystemLoader());
+        static::$twig = new Environment(new FilesystemLoader());
         static::$formFactory = new FormFactory(new FormRegistry([], new ResolvedFormTypeFactory()));
     }
 
