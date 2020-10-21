@@ -15,19 +15,21 @@ interface TableServiceInterface
      * Get the form (for filtering).
      *
      * @param TableInterface $table
+     * @param array $data Initialize table form filters data
      *
      * @return FormView
      */
-    public function form(TableInterface $table);
+    public function form(TableInterface $table, array $data = array());
 
     /**
      * Build filter form and get twig params for main view.
      *
      * @param TableInterface $table
+     * @param array $data Initialize table form filters data
      *
      * @return Table
      */
-    public function createFormView(TableInterface $table);
+    public function createFormView(TableInterface $table, array $data = array());
 
     /**
      * Handle the user request and return an array of all elements.
@@ -36,6 +38,8 @@ interface TableServiceInterface
      * @param Request        $request
      * @param bool           $paginate   : limit selections with pagination mecanism
      * @param bool           $getObjects : get objects (else, only scalar results)
+     *
+     * @todo handle request with symfony form instead of manually parsing GET parameters
      *
      * @return array
      *

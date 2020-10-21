@@ -24,6 +24,7 @@ function KilikTable(id, path, options) {
     this.hiddenColumns = [];
     this.defaultHiddenColumns = [];
     this.skipLoadFromLocalStorage = false;
+    this.skipLoadFilterFromLocalStorage = false;
 
     this.xhr = false;
 
@@ -47,7 +48,8 @@ function KilikTable(id, path, options) {
             "askForReloadDelay",
             "rowsPerPage",
             "defaultHiddenColumns",
-            "skipLoadFromLocalStorage"
+            "skipLoadFromLocalStorage",
+            "skipLoadFilterFromLocalStorage"
         ]
         for (optionKey in options) {
             if(allowedOptions.indexOf(optionKey) != -1) {
@@ -275,23 +277,26 @@ function KilikTable(id, path, options) {
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
             this.sortReverse = options.sortReverse;
-            $("form[name='" + this.getFormName() + "'] [name]").each(function (index, elem) {
-                var name = $(elem).attr("name")
-                if (options.filters[name] !== "") {
-                    var value = options.filters[$(elem).attr("name")]
-                    if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
-                        $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
-                    } else if ($(elem).is("select")) {
-                        $("select[name='" + name + "'] option").each(function () {
-                            if ($(this).val() == value) {
-                                $(this).prop('selected', true)
-                            }
-                        }, value)
-                    } else {
-                        $(elem).val(value)
+
+            if (!this.skipLoadFilterFromLocalStorage) {
+                $("form[name='" + this.getFormName() + "'] [name]").each(function (index, elem) {
+                    var name = $(elem).attr("name")
+                    if (options.filters[name] !== "") {
+                        var value = options.filters[$(elem).attr("name")]
+                        if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
+                            $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
+                        } else if ($(elem).is("select")) {
+                            $("select[name='" + name + "'] option").each(function () {
+                                if ($(this).val() == value) {
+                                    $(this).prop('selected', true)
+                                }
+                            }, value)
+                        } else {
+                            $(elem).val(value)
+                        }
                     }
-                }
-            })
+                });
+            }
 
             if (typeof options.hiddenColumns === "undefined") {
                 this.hiddenColumns = [];

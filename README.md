@@ -162,6 +162,49 @@ $(document).ready(function () {
 });
 ```
 
+### Use other storage for table filters
+
+If you want to use a custom storage for table filters (Eg. Session).
+
+```php
+// Disable using javascript local storage form filters
+public function getTable()
+{
+    return (new Table())->setSkipLoadFilterFromLocalStorage(true);
+}
+
+// On ajax action : store filters data
+public function _list(Request $request)
+{
+    $table = $this->getTable();
+    $response = $this->get('kilik_table')->handleRequest($table, $request);
+    
+    // Handle request for table form
+    $this->kilik->createFormView($table);
+    $table->getForm()->handleRequest($request);
+    $data = $table->getForm()->getData();
+    
+    $this->filterStorage->store($data); // Use your custom storage
+
+    return $response;
+}
+
+
+// On default action
+public function list()
+{
+    $table = $this->getTable();
+    $data = $this->filterStorage->get();
+
+    return $this->render('list.html.twig', array(
+        'table' => $this->kilik->createFormView($table, $data),
+    ));
+}
+
+```
+
+
+
 For bundle developpers
 ======================
 

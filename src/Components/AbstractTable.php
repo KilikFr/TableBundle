@@ -2,6 +2,8 @@
 
 namespace Kilik\TableBundle\Components;
 
+use Symfony\Component\Form\FormInterface;
+
 abstract class AbstractTable implements TableInterface
 {
     /**
@@ -79,6 +81,11 @@ abstract class AbstractTable implements TableInterface
     private $filteredRows;
 
     /**
+     * @var FormInterface|null
+     */
+    private $form;
+
+    /**
      * @var string
      */
     private $formView;
@@ -106,6 +113,13 @@ abstract class AbstractTable implements TableInterface
      * @var bool
      */
     private $skipLoadFromLocalStorage = false;
+
+    /**
+     * Skip load form filters data from local storage.
+     *
+     * @var bool
+     */
+    private $skipLoadFilterFromLocalStorage = false;
 
     /**
      * Table constructor.
@@ -402,6 +416,24 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setForm(FormInterface $form)
+    {
+        $this->form = $form;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function setFormView($formView)
     {
         $this->formView = $formView;
@@ -553,6 +585,24 @@ abstract class AbstractTable implements TableInterface
     public function isSkipLoadFromLocalStorage()
     {
         return $this->skipLoadFromLocalStorage;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setSkipLoadFilterFromLocalStorage($skip)
+    {
+        $this->skipLoadFilterFromLocalStorage = $skip;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isSkipLoadFilterFromLocalStorage()
+    {
+        return $this->skipLoadFilterFromLocalStorage;
     }
 
     /**

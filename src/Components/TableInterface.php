@@ -2,6 +2,9 @@
 
 namespace Kilik\TableBundle\Components;
 
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
+
 interface TableInterface
 {
     /**
@@ -174,14 +177,28 @@ interface TableInterface
     public function getAllFilters();
 
     /**
-     * @param string $formView
+     * @param FormInterface $form
+     *
+     * @internal see \Kilik\TableBundle\Services\AbstractTableService::form()
+     *
+     * @return static
+     */
+    public function setForm(FormInterface $form);
+
+    /**
+     * @return FormInterface|null
+     */
+    public function getForm();
+
+    /**
+     * @param FormView $formView
      *
      * @return static
      */
     public function setFormView($formView);
 
     /**
-     * @return string
+     * @return FormView|null
      */
     public function getFormView();
 
@@ -287,6 +304,18 @@ interface TableInterface
      * @return bool
      */
     public function isSkipLoadFromLocalStorage();
+
+    /**
+     * @param bool $skip
+     *
+     * @return static
+     */
+    public function setSkipLoadFilterFromLocalStorage($skip);
+
+    /**
+     * @return bool
+     */
+    public function isSkipLoadFilterFromLocalStorage();
 
     /**
      * Get table options (for javascript).

@@ -40,7 +40,7 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function form(TableInterface $table)
+    public function form(TableInterface $table, array $data = array())
     {
         // prepare defaults values
         $defaultValues = array();
@@ -50,7 +50,8 @@ abstract class AbstractTableService implements TableServiceInterface
             }
         }
 
-        $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $defaultValues);
+        $data = array_merge($defaultValues, $data);
+        $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $data);
         //$this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
             $form->add(
@@ -63,16 +64,17 @@ abstract class AbstractTableService implements TableServiceInterface
         // append special inputs (used for export csv for exemple)
         $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
         $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
+        $table->setForm($form->getForm());
 
-        return $form->getForm()->createView();
+        return $table->getForm()->createView();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createFormView(TableInterface $table)
+    public function createFormView(TableInterface $table, array $data = array())
     {
-        return $table->setFormView($this->form($table));
+        return $table->setFormView($this->form($table, $data));
     }
 
     /**
