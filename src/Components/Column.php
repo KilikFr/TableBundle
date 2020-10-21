@@ -19,7 +19,7 @@ class Column
     /**
      * filter on this column ?
      *
-     * @var Filter
+     * @var Filter|null
      */
     private $filter;
 
@@ -141,13 +141,13 @@ class Column
     private $filterClass;
 
     /**
-     * @param Filter $filter
+     * @param Filter|null $filter
      *
      * @return static
      */
-    public function setFilter(Filter $filter)
+    public function setFilter(Filter $filter = null)
     {
-        if (is_null($this->name)) {
+        if (is_null($this->name) && null !== $filter) {
             $this->name = $filter->getName();
         }
         $this->filter = $filter;
@@ -156,7 +156,7 @@ class Column
     }
 
     /**
-     * @return Filter
+     * @return Filter|null
      */
     public function getFilter()
     {
