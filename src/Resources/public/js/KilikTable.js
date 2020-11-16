@@ -383,7 +383,7 @@ function KilikTable(id, path, options) {
                 $("#" + id + "_stats").html(data.tableStats);
                 $("#" + id + "_pagination").html(data.tablePagination);
                 table.totalRows = data.totalRows;
-                table.totalFilteredRows = data.totalFilteredRows;
+                table.totalFilteredRows = data.filteredRows;
                 table.page = data.page;
                 table.lastPage = data.lastPage;
 
