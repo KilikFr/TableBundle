@@ -94,7 +94,8 @@ abstract class AbstractTableService implements TableServiceInterface
         // first line: keys
         if (count($rows) > 0) {
             foreach ($table->getColumns() as $column) {
-                $buffer .= $column->getName().';';
+                $exportName = $column->getExportName() ?? $column->getName();
+                $buffer .= $exportName.';';
             }
             $buffer .= "\n";
         }
