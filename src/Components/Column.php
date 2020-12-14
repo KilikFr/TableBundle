@@ -57,6 +57,11 @@ class Column
     private $name;
 
     /**
+     * @var string|null
+     */
+    private $exportName = null;
+
+    /**
      * Domain for label translation ?
      *
      * @var string
@@ -209,6 +214,30 @@ class Column
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set export name
+     *
+     * @param string $exportName
+     *
+     * @return static
+     */
+    public function setExportName(string $exportName)
+    {
+        $this->exportName = $exportName;
+
+        return $this;
+    }
+
+    /**
+     * Get export name
+     *
+     * @return string
+     */
+    public function getExportName(): ?string
+    {
+        return $this->exportName;
     }
 
     /**
