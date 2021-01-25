@@ -22,6 +22,7 @@
 
     </div>
     <div class="panel-body table-responsive">
+        <div id="{{ table.id }}-table-loading-container" class="table-loading-container"><div class="table-loader"></div></div>
         <table class="table table-hover table-striped table-bordered" id="{{ table.id }}">
             <thead>
                 {% block tableHead %}
