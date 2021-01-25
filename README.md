@@ -38,7 +38,6 @@ Planned features:
 ------------------
 - more translations
 - add advanced templates
-- loading image waiting ajax response
 - new column display types (now: only raw text value)
 
 Installation
