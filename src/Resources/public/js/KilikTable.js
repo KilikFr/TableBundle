@@ -357,6 +357,8 @@ function KilikTable(id, path, options) {
      */
     this.doReload = function () {
         var table = this;
+        var $loader = $('#'+id+'-table-loading-container');
+        $loader.show();
         var postData = $("form[name=" + id + "_form]").serializeArray();
         postData.push({"name": "page", "value": table.page,});
         postData.push({"name": "rowsPerPage", "value": table.rowsPerPage,});
@@ -400,6 +402,7 @@ function KilikTable(id, path, options) {
             table.initMassActions();
             // callback
             table.afterReload(dataRaw);
+            $loader.hide();
         });
     };
 
