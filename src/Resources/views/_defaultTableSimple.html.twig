@@ -19,7 +19,9 @@
         </div>
     {% endblock %}
     <div class="panel-body table-responsive">
-        <div id="{{ table.id }}-table-loading-container" class="table-loading-container"><div class="table-loader"></div></div>
+        {% block tableLoader %}
+            <div id="{{ table.id }}-table-loading-container" class="table-loading-container"><div class="table-loader"></div></div>
+        {% endblock tableLoader %}
         <table class="table table-hover table-condensed table-striped" id="{{ table.id }}">
             <thead>
             {% block tableHead %}
