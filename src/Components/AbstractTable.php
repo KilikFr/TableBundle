@@ -51,7 +51,7 @@ abstract class AbstractTable implements TableInterface
      *
      * @var string
      */
-    private $template = 'KilikTableBundle::_defaultTable.html.twig';
+    private $template = '@KilikTable/_defaultTable.html.twig';
 
     /**
      * Params to pass to twig (when rendering the template).
