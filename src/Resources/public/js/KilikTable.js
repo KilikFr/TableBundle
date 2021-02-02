@@ -65,6 +65,8 @@ function KilikTable(id, path, options) {
         var $table = $("#" + this.id);
         var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
+        $table.trigger('kilik:init:start', [table]);
+
         // bouton pour forcer une actualisation
         $table.find("#" + id + "_submit").click(function () {
             table.doReload();
@@ -156,6 +158,8 @@ function KilikTable(id, path, options) {
         $buttonCheckAll.on('click', function () {
             table.checkAll($(this).prop('checked'));
         });
+
+        $table.trigger('kilik:init:end', [table]);
     };
 
     /**

@@ -115,6 +115,7 @@ $table = (new Table())
 // ...
 ```
 
+### Mass actions
 
 Define a mass action for list
 
@@ -151,6 +152,26 @@ You can get all rows checked as following :
     }
 });
 ```
+
+### Events / Listeners
+
+* `kilik:init:start` jQuery event when table init process starts
+
+```javascript
+$(document).on('kilik:init:start', function(event, table) {
+    // Do something with event or table object
+});
+```
+
+* `kilik:init:end` jQuery event when table init process ends
+
+```javascript
+$(document).on('kilik:init:start', function(event, table) {
+    // Do something with event or table object
+});
+```
+
+### Bootstrap 4
 
 Note: WIP on Bootstrap 4 (with Font Awesome) integration, use new JS function:
 
