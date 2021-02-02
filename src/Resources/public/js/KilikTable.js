@@ -62,42 +62,44 @@ function KilikTable(id, path, options) {
 
     this.init = function () {
         var table = this;
+        var $table = $("#" + this.id);
         var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
 
         // bouton pour forcer une actualisation
-        $("#" + this.id).find("#" + id + "_submit").click(function () {
+        $table.find("#" + id + "_submit").click(function () {
             table.doReload();
         });
 
         // boutons pour la pagination
         // bouton début
-        $("#" + this.id).find("#" + id + "_pagination_start").click(function () {
+        $table.find("#" + id + "_pagination_start").click(function () {
             table.page = 1;
             table.doReload();
         });
         // bouton précedent
-        $("#" + this.id).find("#" + id + "_pagination_previous").click(function () {
+        $table.find("#" + id + "_pagination_previous").click(function () {
             if (table.page > 1) {
                 table.page--;
             }
             table.doReload();
         });
         // bouton suivant
-        $("#" + this.id).find("#" + id + "_pagination_next").click(function () {
+        $table.find("#" + id + "_pagination_next").click(function () {
             table.page++;
             table.doReload();
         });
         // bouton fin
-        $("#" + this.id).find("#" + id + "_pagination_end").click(function () {
+        $table.find("#" + id + "_pagination_end").click(function () {
             table.page = table.lastPage;
             table.doReload();
         });
 
+        var $form = $("form[name='" + this.getFormName() + "']");
         // filtering
-        $("form[name='" + this.getFormName() + "']").find(".refreshOnChange").change(function () {
+        $form.find(".refreshOnChange").change(function () {
             table.askForReload();
         });
-        $("form[name='" + this.getFormName() + "']").find(".refreshOnKeyup").keyup(function () {
+        $form.find(".refreshOnKeyup").keyup(function () {
             // delayed reload
             table.askForReload();
         }).keydown(function (e) {
@@ -108,12 +110,12 @@ function KilikTable(id, path, options) {
         });
 
         // force reload (on click)
-        $("form[name='" + this.getFormName() + "']").find(".refreshOnClick").click(function () {
+        $form.find(".refreshOnClick").click(function () {
             table.doReload();
         });
 
         // ordering binding
-        $("#" + this.id).find(".columnSortable").click(function (event) {
+        $table.find(".columnSortable").click(function (event) {
             event.preventDefault();
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
@@ -186,6 +188,7 @@ function KilikTable(id, path, options) {
      */
     this.applyHideColumnsForm = function () {
         var table = this;
+        var $table = $("#" + id);
         // check all columns
         $("*[data-setup='" + id + "']:input").prop("checked", true);
         // uncheck hidden columns
@@ -194,8 +197,8 @@ function KilikTable(id, path, options) {
             $("*[data-column='" + hiddenColumn + "'][data-setup='" + id + "']:input").prop("checked", false);
 
             // hide column name and filter
-            $("#" + id).find("th[data-column='" + hiddenColumn + "']").hide();
-            $("#" + id).find("td[data-column='" + hiddenColumn + "']").hide();
+            $table.find("th[data-column='" + hiddenColumn + "']").hide();
+            $table.find("td[data-column='" + hiddenColumn + "']").hide();
         }
         // bind change
         $("*[data-setup='" + id + "']:input").change(function () {
@@ -209,8 +212,8 @@ function KilikTable(id, path, options) {
             } else {
                 table.hiddenColumns.push(name);
                 // when hidding column, disable filters on hidden columns
-                $("#" + id).find("input[data-column='" + name + "']").val("");
-                $("#" + id).find("select[data-column='" + name + "'] option").removeAttr("selected");
+                $table.find("input[data-column='" + name + "']").val("");
+                $table.find("select[data-column='" + name + "'] option").removeAttr("selected");
             }
 
             // reload (before hide or show columns names)
@@ -218,11 +221,11 @@ function KilikTable(id, path, options) {
 
             // if checked, column is not hidden
             if (checked) {
-                $("#" + id).find("th[data-column='" + name + "']").show();
-                $("#" + id).find("td[data-column='" + name + "']").show();
+                $table.find("th[data-column='" + name + "']").show();
+                $table.find("td[data-column='" + name + "']").show();
             } else {
-                $("#" + id).find("th[data-column='" + name + "']").hide();
-                $("#" + id).find("td[data-column='" + name + "']").hide();
+                $table.find("th[data-column='" + name + "']").hide();
+                $table.find("td[data-column='" + name + "']").hide();
             }
 
         });
