@@ -171,6 +171,35 @@ $(document).on('kilik:init:start', function(event, table) {
 });
 ```
 
+### Autoload Kilik Tables
+
+A new twig block provide metadata information about table so you can autoload it if necessary without any javascript in your twig template.
+
+```html
+{% block tableMetadata %}
+    <div style="display:none;width:0; height:0;" data-kiliktable-id="{{ table.id }}" data-kiliktable-path="{{ table.path }}">{{ table.options | json_encode | raw }}</div>
+{% endblock tableMetadata %}
+```
+
+You can access table configurations from HTML attributes with jQuery, see the example :
+
+```javascript
+var loadKiliktables = function() {
+    var $kilikTables = $("[data-kiliktable-id]");
+    if ($kilikTables && $kilikTables.length > 0) {
+        $kilikTables.each(function(index, currentTable){
+            var $currentTable = $(currentTable);
+            var id = $currentTable.data("kiliktable-id");
+            if (id.length > 0) {
+                var path = $currentTable.data("kiliktable-path");
+                var options = $currentTable.html();
+                new KilikTableFA(id, path, JSON.parse(options)).init();
+            }
+        });
+    }
+}
+```
+
 ### Bootstrap 4
 
 Note: WIP on Bootstrap 4 (with Font Awesome) integration, use new JS function:
