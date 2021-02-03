@@ -410,6 +410,8 @@ function KilikTable(id, path, options) {
             // callback
             table.afterReload(dataRaw);
             $loader.hide();
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            $loader.hide();
         });
     };
 
