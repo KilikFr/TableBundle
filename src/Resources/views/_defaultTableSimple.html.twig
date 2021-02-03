@@ -20,6 +20,9 @@
     {% endblock %}
     <div class="panel-body table-responsive">
         {% block tableLoader %}<div id="{{ table.id }}-table-loading-container" class="table-loading-container"><div class="table-loader"><div></div><div></div><div></div><div></div></div></div>{% endblock tableLoader %}
+        {% block tableMetadata %}
+            <div style="display:none;width:0; height:0;" data-kiliktable-id="{{ table.id }}" data-kiliktable-path="{{ table.path }}">{{ table.options | json_encode | raw }}</div>
+        {% endblock tableMetadata %}
         <table class="table table-hover table-condensed table-striped" id="{{ table.id }}">
             <thead>
             {% block tableHead %}

@@ -4,6 +4,9 @@
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
 {% endblock tableBeforePanel %}
+{% block tableMetadata %}
+<div style="display:none;width:0; height:0;" data-kiliktable-id="{{ table.id }}" data-kiliktable-path="{{ table.path }}">{{ table.options | json_encode | raw }}</div>
+{% endblock tableMetadata %}
 <table class="table table-hover table-striped table-condensed" id="{{ table.id }}">
     <thead>
     {% block tableHead %}
