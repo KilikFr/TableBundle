@@ -454,6 +454,8 @@ function KilikTable(id, path, options) {
                 }
             });
         });
+        
+        $('#kilik_' + table.id + '_mass_check').prop('checked', false);
     };
 
     /**
