@@ -4,11 +4,6 @@ namespace Kilik\TableBundle\Components;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-/**
- * Class FilterSelect.
- *
- * @deprecated since version 1.1 to be removed in 2.0
- */
 class FilterSelect extends Filter
 {
     /**
