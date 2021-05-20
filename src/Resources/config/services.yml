@@ -9,3 +9,5 @@ services:
         arguments:    ["@twig","@form.factory"]
         public: true
 
+    Kilik\TableBundle\Services\TableService: '@kilik_table'
+    Kilik\TableBundle\Services\TableApiService: 'kilik_table_api'
