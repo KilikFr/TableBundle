@@ -153,6 +153,7 @@ class TableService extends AbstractTableService
 
         if (is_null($identifiers)) {
             $paginatorTotal = new Paginator($qbtr->getQuery());
+            $paginatorTotal->setUseOutputWalkers(true);
             $count = $paginatorTotal->count();
         } else {
             $qbtr->select($qbtr->expr()->count($identifiers));
@@ -178,6 +179,7 @@ class TableService extends AbstractTableService
 
         if (is_null($identifiers)) {
             $paginatorFiltered = new Paginator($qbfr->getQuery());
+            $paginatorFiltered->setUseOutputWalkers(true);
             $count = $paginatorFiltered->count();
         } else {
             $qbfr->select($qbfr->expr()->count($identifiers));
