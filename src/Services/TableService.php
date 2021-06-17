@@ -24,7 +24,7 @@ class TableService extends AbstractTableService
         foreach ($table->getAllFilters() as $filter) {
             if (isset($queryParams[$filter->getName()])) {
                 if (is_array($queryParams[$filter->getName()])) {
-					$searchParamRaw = array_map('trim', $queryParams[$filter->getName()]);
+                    $searchParamRaw = array_map('trim', $queryParams[$filter->getName()]);
                     if (is_callable($filter->getQueryPartBuilder())) {
                         $callback = $filter->getQueryPartBuilder();
                         $callback($filter, $table, $queryBuilder, $searchParamRaw);
@@ -36,7 +36,7 @@ class TableService extends AbstractTableService
                         $callback($filter, $table, $queryBuilder, $searchParamRaw);
                     } else {
                         list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
-                        if ((string) $searchParam != '') {
+                        if ((string)$searchParam != '') {
                             list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
 
                             $sql = false;
@@ -150,14 +150,7 @@ class TableService extends AbstractTableService
         $qbtr = clone $qb;
 
         $identifiers = $table->getIdentifierFieldNames();
-
-        if (is_null($identifiers)) {
-            $paginatorTotal = new Paginator($qbtr->getQuery());
-            $count = $paginatorTotal->count();
-        } else {
-            $qbtr->select($qbtr->expr()->count($identifiers));
-            $count = (int) $qbtr->getQuery()->getSingleScalarResult();
-        }
+        $count = $this->countRows($qbtr, $identifiers);
 
         $table->setTotalRows($count);
     }
@@ -175,14 +168,7 @@ class TableService extends AbstractTableService
         $this->addSearch($table, $request, $qbfr);
 
         $identifiers = $table->getIdentifierFieldNames();
-
-        if (is_null($identifiers)) {
-            $paginatorFiltered = new Paginator($qbfr->getQuery());
-            $count = $paginatorFiltered->count();
-        } else {
-            $qbfr->select($qbfr->expr()->count($identifiers));
-            $count = (int) $qbfr->getQuery()->getSingleScalarResult();
-        }
+        $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
     }
@@ -346,5 +332,38 @@ class TableService extends AbstractTableService
         }
 
         return $entities;
+    }
+
+    /**
+     * @param QueryBuilder $qb
+     * @param string|null  $identifiers
+     *
+     * @return float|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    protected function countRows(QueryBuilder $qb, string $identifiers = null)
+    {
+        switch (true) {
+            case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && is_null($identifiers):
+                $em = $qb->getEntityManager();
+                $sql = $qb->getQuery()->getSQL();
+                $rsm = new Query\ResultSetMapping();
+                $rsm->addScalarResult('dctrn_count', 'count');
+                $nativeQuery = $em->createNativeQuery(sprintf('SELECT COUNT(*) AS dctrn_count FROM (%s) AS dctrn_table', $sql), $rsm);
+                foreach ($qb->getParameters() as $key => $item) {
+                    $nativeQuery->setParameter($key + 1, $item->getValue());
+                }
+
+                return (int)$nativeQuery->getSingleScalarResult();
+            case is_null($identifiers):
+                $paginatorFiltered = new Paginator($qb->getQuery());
+
+                return $paginatorFiltered->count();
+            default:
+                $qb->select($qb->expr()->count($identifiers));
+
+                return (int)$qb->getQuery()->getSingleScalarResult();
+        }
     }
 }
