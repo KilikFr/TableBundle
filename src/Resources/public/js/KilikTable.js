@@ -388,7 +388,11 @@ function KilikTable(id, path, options) {
             function (dataRaw) {
                 var data = $.parseJSON(dataRaw);
                 $("#" + id + "_body").html(data.tableBody);
-                //$("#" + id + "_foot").html(data.tableFoot);
+                if (data.filteredRows > 1) {
+                    $("#" + id + "_foot").html(data.tableFoot);
+                } else {
+                    $("#" + id + "_foot").html('');
+                }
                 $("#" + id + "_stats").html(data.tableStats);
                 $("#" + id + "_pagination").html(data.tablePagination);
                 table.totalRows = data.totalRows;
@@ -454,7 +458,7 @@ function KilikTable(id, path, options) {
                 }
             });
         });
-        
+
         $('#kilik_' + table.id + '_mass_check').prop('checked', false);
     };
 

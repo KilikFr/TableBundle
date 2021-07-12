@@ -125,6 +125,20 @@ class Column
     private $hidden = false;
 
     /**
+     * total field
+     *
+     * @var null|string
+     */
+    private $totalField = null;
+
+    /**
+     * total
+     *
+     * @var null|int
+     */
+    private $total = null;
+
+    /**
      * CSS Class.
      *
      * @var string
@@ -448,6 +462,44 @@ class Column
         $this->displayFormatParams = $displayFormatParams;
 
         return $this;
+    }
+
+    public function displayTotal(string $totalField = '')
+    {
+        $this->totalField = '' !== $totalField ? $totalField : $this->filter->getField();
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTotalField()
+    {
+        return $this->totalField;
+    }
+
+    /**
+     * @param int|null $total
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function isUseTotal()
+    {
+        return null !== $this->totalField;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getTotal()
+    {
+        return $this->total;
     }
 
     /**

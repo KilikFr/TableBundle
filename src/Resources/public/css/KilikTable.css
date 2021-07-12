@@ -2,6 +2,10 @@
     min-height: 300px;
 }
 
+tfoot td {
+    border-top: 2px solid grey !important;
+}
+
 .table-loading-container {
     position: absolute;
     left: 0;
