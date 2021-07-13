@@ -79,14 +79,16 @@
                     {% if tableRenderFoot is defined %}
                         <tr>
                             {% block tableFootStdColumns %}
-                                {% for column in table.columns %}
-                                    <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} >
-                                        {% if column.isUseTotal %}
-                                            {{ column.total | number_format(0, '.', ' ') }}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
+                                {% for key, column in table.columns %}
+                                    {% if not column.hidden %}
+                                        <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} >
+                                            {% if key == 0 and not column.isUseTotal %}
+                                                TOTAL
+                                            {% elseif column.isUseTotal %}
+                                                {{ column.total }}
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
                                 {% endfor %}
                             {% endblock tableFootStdColumns %}
                         </tr>
