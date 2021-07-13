@@ -72,6 +72,27 @@
                         {% endif %}
                     {% endblock tableBody %}
                     </tbody>
+                    {% if table.haveTotalColumns %}
+                        <tfoot id="{{ table.id }}_foot">
+                        {% block tableFoot %}
+                            {% if tableRenderFoot is defined %}
+                                <tr>
+                                    {% block tableFootStdColumns %}
+                                        {% for column in table.columns %}
+                                            <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} >
+                                                {% if column.isUseTotal %}
+                                                    {{ column.total | number_format(0, '.', ' ') }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    {% endblock tableFootStdColumns %}
+                                </tr>
+                            {% endif %}
+                        {% endblock tableFoot %}
+                        </tfoot>
+                    {% endif %}
                 </table>
             </div>
         </div>

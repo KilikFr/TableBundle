@@ -2,6 +2,7 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\QueryBuilder;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,6 +13,8 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class TableService extends AbstractTableService
 {
+    const TOTAL_PREFIX = 'TOTAL_';
+
     /**
      * @param Table        $table
      * @param Request      $request
@@ -232,6 +235,24 @@ class TableService extends AbstractTableService
 
         // force a final ordering by id
         $qb->addOrderBy($table->getAlias().'.id', 'asc');
+
+        if ($table->haveTotalColumns()) {
+            $totalQueryBuilder = clone ($qb);
+            $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
+            foreach ($table->getColumns() as $column) {
+                if ($column->isUseTotal()) {
+                    $totalQueryBuilder->addSelect('SUM('.$column->getTotalField(). ') AS ' . self::TOTAL_PREFIX.$column->getName());
+                }
+            }
+            $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
+            foreach ($table->getColumns() as $column) {
+                $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
+                if ($column->isUseTotal() && isset($totalResults[$totalColumnResultName])) {
+                    $column->setTotal((int) $totalResults[$totalColumnResultName]);
+                }
+            }
+        }
+
         $query = $qb->getQuery();
 
         // if we need to get objects, LEGACY mode

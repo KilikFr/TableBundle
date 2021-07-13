@@ -91,6 +91,9 @@ abstract class AbstractTableService implements TableServiceInterface
         $rows = $this->getRows($table, $request, false, false);
 
         $buffer = '';
+        if ($table->haveTotalColumns()) {
+            $buffer .= ';';
+        }
         // first line: keys
         if (count($rows) > 0) {
             foreach ($table->getColumns() as $column) {
@@ -101,8 +104,20 @@ abstract class AbstractTableService implements TableServiceInterface
         }
 
         foreach ($rows as $row) {
+            if ($table->haveTotalColumns()) {
+                $buffer .= ';';
+            }
             foreach ($table->getColumns() as $column) {
                 $buffer .= $column->getExportValue($row, $rows).';';
+            }
+            $buffer .= "\n";
+        }
+
+
+        if ($table->haveTotalColumns()) {
+            $buffer .= 'Total;';
+            foreach ($table->getColumns() as $column) {
+                $buffer .= $column->getTotal().';';
             }
             $buffer .= "\n";
         }
@@ -141,6 +156,10 @@ abstract class AbstractTableService implements TableServiceInterface
             'tableBody' => $template->renderBlock(
                 'tableBody',
                 array_merge($twigParams, array('tableRenderBody' => true), $table->getTemplateParams())
+            ),
+            'tableFoot' => $template->renderBlock(
+                'tableFoot',
+                array_merge($twigParams, array('tableRenderFoot' => true))
             ),
             'tableStats' => $template->renderBlock(
                 'tableStatsAjax',
