@@ -83,7 +83,7 @@
                                     {% if not column.hidden %}
                                         <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} >
                                             {% if key == 0 and not column.isUseTotal %}
-                                                TOTAL
+                                                {{ 'kiliktable.total' | trans | upper }}
                                             {% elseif column.isUseTotal %}
                                                 {{ column.total }}
                                             {% endif %}
