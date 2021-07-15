@@ -125,16 +125,12 @@ class Column
     private $hidden = false;
 
     /**
-     * total field
-     *
-     * @var null|string
+     * @var bool
      */
-    private $totalField = null;
+    private $useTotal = false;
 
     /**
-     * total
-     *
-     * @var null|int
+     * @var null|mixed
      */
     private $total = null;
 
@@ -464,24 +460,6 @@ class Column
         return $this;
     }
 
-    public function displayTotal(string $totalField = '')
-    {
-        $this->totalField = '' !== $totalField ? $totalField : $this->filter->getField();
-
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getTotalField()
-    {
-        return $this->totalField;
-    }
-
-    /**
-     * @param int|null $total
-     */
     public function setTotal($total)
     {
         $this->total = $total;
@@ -489,14 +467,18 @@ class Column
         return $this;
     }
 
-    public function isUseTotal()
+    public function useTotal()
     {
-        return null !== $this->totalField;
+        $this->useTotal = true;
+
+        return $this;
     }
 
-    /**
-     * @return int|null
-     */
+    public function isUseTotal()
+    {
+        return $this->useTotal;
+    }
+
     public function getTotal()
     {
         return $this->total;

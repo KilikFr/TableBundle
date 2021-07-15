@@ -241,14 +241,22 @@ class TableService extends AbstractTableService
             $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
             foreach ($table->getColumns() as $column) {
                 if ($column->isUseTotal()) {
-                    $totalQueryBuilder->addSelect('SUM('.$column->getTotalField(). ') AS ' . self::TOTAL_PREFIX.$column->getName());
+                    $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField(). ') AS ' . self::TOTAL_PREFIX.$column->getName());
                 }
             }
             $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
             foreach ($table->getColumns() as $column) {
                 $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
-                if ($column->isUseTotal() && isset($totalResults[$totalColumnResultName])) {
-                    $column->setTotal((int) $totalResults[$totalColumnResultName]);
+                if ($column->isUseTotal()) {
+                    $callback = $column->getDisplayCallback();
+                    if (!is_null($callback)) {
+                        if (!is_callable($callback)) {
+                            throw new \Exception('displayCallback is not callable');
+                        }
+                        $column->setTotal($callback($totalResults[$totalColumnResultName]) ?? 0);
+                    } else {
+                        $column->setTotal($totalResults[$totalColumnResultName] ?? 0);
+                    }
                 }
             }
         }

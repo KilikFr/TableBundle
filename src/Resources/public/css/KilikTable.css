@@ -4,6 +4,7 @@
 
 tfoot td {
     border-top: 2px solid grey !important;
+    font-weight: bold;
 }
 
 .table-loading-container {

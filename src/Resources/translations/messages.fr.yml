@@ -8,3 +8,4 @@ kiliktable:
     setup: configuration
     mass_select: tout sélectionner
     select: sélectionner
+    total: total
