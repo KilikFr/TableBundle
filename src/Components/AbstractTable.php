@@ -616,7 +616,8 @@ abstract class AbstractTable implements TableInterface
                 'rowsPerPage' => $this->rowsPerPage,
                 'defaultHiddenColumns' => $this->getHiddenColumnsNames(),
                 'skipLoadFromLocalStorage' => $this->skipLoadFromLocalStorage,
-            ]
+                'skipLoadFilterFromLocalStorage' => $this->skipLoadFilterFromLocalStorage,
+             ]
         );
     }
 
