@@ -1,12 +1,19 @@
 {# @KilikTable/_columnCell.html.twig #}
+{# @param table: Kilik\Table #}
+{# @param column: Kilik\Column #}
+{# @param row: array (from line result) #}
 
 {% if not column.hidden %}
-    <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} data-label="{{column.label}}">
-        {% set cellHtml=table.value(column,row) %}
-        {% if column.raw %}
-            {{ cellHtml | raw }}
-        {% else %}
-            {{ cellHtml }}
-        {% endif %}
-    </td>
+    {% block tableBodyCellOuter %}
+        <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} data-label="{{ column.label }}">
+            {% block tableBodyCellInner %}
+                {% set cellHtml=table.value(column,row) %}
+                {% if column.raw %}
+                    {{ cellHtml | raw }}
+                {% else %}
+                    {{ cellHtml }}
+                {% endif %}
+            {% endblock tableBodyCellInner %}
+        </td>
+    {% endblock tableBodyCellOuter %}
 {% endif %}
