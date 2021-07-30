@@ -64,7 +64,13 @@
                                     {% endblock %}
                                     {% block tableBodyStdColumns %}
                                         {% for column in table.columns %}
-                                            {% include "@KilikTable/_columnCell.html.twig" %}
+                                            {% if column.cellTemplate is not null %}
+                                                {# custom cell template is defined ? #}
+                                                {% include column.cellTemplate %}
+                                            {% else %}
+                                                {# cell template fallback #}
+                                                {% include "@KilikTable/_columnCell.html.twig" %}
+                                            {% endif %}
                                         {% endfor %}
                                     {% endblock tableBodyStdColumns %}
                                 </tr>

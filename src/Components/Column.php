@@ -156,6 +156,13 @@ class Column
     private $filterClass;
 
     /**
+     * Custom cell template
+     *
+     * @var  string
+     */
+    private $cellTemplate;
+
+    /**
      * @param Filter|null $filter
      *
      * @return static
@@ -799,5 +806,23 @@ class Column
     public function getFilterClass()
     {
         return $this->filterClass;
+    }
+
+    /**
+     * @param string $cellTemplate
+     */
+    public function setCellTemplate(string $cellTemplate)
+    {
+        $this->cellTemplate = $cellTemplate;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCellTemplate(): ?string
+    {
+        return $this->cellTemplate;
     }
 }

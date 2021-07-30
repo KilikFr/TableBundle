@@ -28,7 +28,8 @@ Working features:
 - checkbox and select filter
 - CSV export of filtered rows
 - customization of visible columns (hide/show checkboxes)
-- column display callback
+- column display colum cells with callback
+- [custom display colum cells with template](doc/custom_cell_template.md)
 - multiple lists on one page
 - pre-load default filters and reset local storage filters
 - smart filtering on many words (Filter::TYPE_LIKE_WORDS_AND)
@@ -38,7 +39,6 @@ Planned features:
 ------------------
 - more translations
 - add advanced templates
-- new column display types (now: only raw text value)
 
 Installation
 ------------
