@@ -300,6 +300,7 @@ class Column
     {
         $result = [];
         foreach ($this->getSort() as $sort => $order) {
+            $order = strtolower($order);
             $result[$sort] = ($order == 'asc' ? 'desc' : 'asc');
         }
 
