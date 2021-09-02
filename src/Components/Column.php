@@ -651,7 +651,7 @@ class Column
                     if (is_null($formatParams)) {
                         $formatParams = 'Y-m-d H:i:s';
                     }
-                    if (!is_null($rawValue) && is_object($rawValue) && in_array(get_class($rawValue), [\DateTime::class, \DateTimeImmutable::class])) {
+                    if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
                         return $rawValue->format($formatParams);
                     } else {
                         return '';
@@ -703,7 +703,7 @@ class Column
                         if (is_null($formatParams)) {
                             $formatParams = 'Y-m-d H:i:s';
                         }
-                        if (!is_null($rawValue) && is_object($rawValue) && in_array(get_class($rawValue), [\DateTime::class, \DateTimeImmutable::class])) {
+                        if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
                             return $rawValue->format($formatParams);
                         } else {
                             return '';
