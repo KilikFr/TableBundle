@@ -8,7 +8,7 @@
 
 {% block tableFilterMassActionsColumn %}
     {% if table.massActions %}
-        <td class="mass-action" data-label="{{ 'kiliktable.mass_select'|trans|capitalize }}">
+        <td class="mass-action" data-label="{{ 'kiliktable.mass_select'|trans }}">
             <div class="input-group btn-group">
                 <span class="input-group-addon">
                     <input type="checkbox" id="kilik_{{ table.id }}_mass_check"/>
@@ -24,7 +24,7 @@
                                data-name="{{ massAction.name }}"
                                class="btn-border-success checkbox-action"
                             >
-                                <b class="success"><i class="{{ massAction.class }}"></i> {{ massAction.label|capitalize }}</b>
+                                <b class="success"><i class="{{ massAction.class }}"></i> {{ massAction.label }}</b>
                             </a>
                         </li>
                         {% if loop.last == false %}
@@ -39,7 +39,7 @@
 
 {% block tableBodyMassActionsColumn %}
     {% if table.massActions %}
-        <td class="mass-action" data-label="{{ 'kiliktable.select'|trans|capitalize }}">
+        <td class="mass-action" data-label="{{ 'kiliktable.select'|trans }}">
             <div class="input-group">
                 <span class="input-group-addon">
                     <input type="checkbox" id="checkbox-{{ row.object.id }}" name="kilik_{{ table.id }}_selected[]" value="{{ row.object.id }}"/>
