@@ -1,0 +1,11 @@
+kiliktable:
+    showing_entries: "{0} keine Daten gefunden | {1} 1 Datensatz |]1,Inf[ %firstRow% bis %lastRow% von %filteredRows% Datensätzen "
+    filtered_from: "gefilter von insgesamt %totalRows% Datensätzen"
+    previous: vorherige
+    next: nächste
+    show: anzeigen
+    rows_per_page: Zeilen pro Seite
+    setup: Einstellungen
+    mass_select: alle auswählen
+    select: auswählen
+    total: insgesamt
