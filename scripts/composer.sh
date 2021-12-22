@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PHP_IMAGE=kilik/php:7.2-stretch-dev
+PHP_IMAGE=kilik/php:7.4-buster-dev
 
 if [ -t 0 ]
 then
