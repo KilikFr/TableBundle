@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#PHP_IMAGE=kilik/php:8.0-bullseye-dev
 PHP_IMAGE=kilik/php:7.4-buster-dev
 
 if [ -t 0 ]
@@ -9,5 +10,5 @@ else
 	TTY_DOCKER=
 fi
 
-docker run ${TTY_DOCKER} --user ${UID} --rm -v ${PWD}:/app -v ${PWD}/.composer:/.composer -w /app ${PHP_IMAGE} \
+docker run ${TTY_DOCKER} --rm -v ${PWD}:/var/www/html -v ${PWD}/.composer:/.composer -w /var/www/html ${PHP_IMAGE} \
 composer "$@"
