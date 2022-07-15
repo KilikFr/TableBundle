@@ -54,3 +54,9 @@ tfoot td {
         transform: rotate(360deg);
     }
 }
+.filter-filled {
+    background: aliceblue !important;
+}
+select.filter-filled option {
+    background: white !important;
+}

@@ -403,7 +403,11 @@ function KilikTable(id, path, options) {
                     table.page = button.attr("data-table-page");
                     table.doReload();
                 });
-
+                $("form[name='" + table.getFormName() + "'] [name]").each(function (index, elem) {
+                    if (!$(elem).is(":checkbox") && !$(elem).is(":radio")) {
+                        $(elem).toggleClass('filter-filled', $(elem).val() !== '');
+                    }
+                });
             }
         ).done(function (dataRaw) {
             table.initMassActions();
