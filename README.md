@@ -252,7 +252,15 @@ public function list()
 
 ```
 
+### Customize filled filters
 
+When a filter is filled, class <em>table-filter-filled</em> is added on field. By default, no style is applied, but you can override it to fit your needs :
+
+```css
+.table-filter-filled {
+    ...
+}
+```
 
 For bundle developpers
 ======================

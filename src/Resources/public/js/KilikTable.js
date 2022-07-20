@@ -405,7 +405,7 @@ function KilikTable(id, path, options) {
                 });
                 $("form[name='" + table.getFormName() + "'] [name]").each(function (index, elem) {
                     if (!$(elem).is(":checkbox") && !$(elem).is(":radio")) {
-                        $(elem).toggleClass('filter-filled', $(elem).val() !== '');
+                        $(elem).toggleClass('table-filter-filled', $(elem).val() !== '');
                     }
                 });
             }
