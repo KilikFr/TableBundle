@@ -264,7 +264,7 @@ function KilikTable(id, path, options) {
             "sortColumn": this.sortColumn,
             "sortReverse": this.sortReverse,
             "filters": $("form[name=" + this.getFormName() + "]").serializeArray().reduce(function (obj, item) {
-                obj[item.name] = item.value;
+                obj[item.name] = $('[name="'+item.name+'"]').val();
                 return obj;
             }, {}),
             "hiddenColumns": this.hiddenColumns,
@@ -287,20 +287,30 @@ function KilikTable(id, path, options) {
 
             if (!this.skipLoadFilterFromLocalStorage) {
                 $("form[name='" + this.getFormName() + "'] [name]").each(function (index, elem) {
-                    var name = $(elem).attr("name")
-                    if (options.filters[name] !== "") {
-                        var value = options.filters[$(elem).attr("name")]
-                        if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
-                            $("input[name='" + name + "'][value='" + value + "']").prop("checked", true)
-                        } else if ($(elem).is("select")) {
-                            $("select[name='" + name + "'] option").each(function () {
-                                if ($(this).val() == value) {
-                                    $(this).prop('selected', true)
-                                }
-                            }, value)
-                        } else {
-                            $(elem).val(value)
-                        }
+                    var name = $(elem).attr("name");
+                    var value = options.filters[name];
+
+                    if (value === ""){
+                        return;
+                    }
+
+                    var multiple = $(elem).attr('multiple');
+                    switch (true){
+                        case $(elem).is(":checkbox"):
+                        case $(elem).is(":radio"):
+                            $("input[name='" + name + "'][value='" + value + "']").prop("checked", true);
+                            break;
+                        case $(elem).is("select") && !multiple:
+                            $("select[name='" + name + "'] option[value='"+value+"']").prop('selected', true);
+                            break;
+                        case $(elem).is("select") && multiple:
+                            value.forEach((val) => {
+                                $("select[name='" + name + "'] option[value='"+val+"']").prop('selected', true);
+                            });
+                            break;
+                        default:
+                            $(elem).val(value);
+                            break;
                     }
                 });
             }
