@@ -87,41 +87,46 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     public function exportAsCsv(TableInterface $table, Request $request)
     {
+        $stream = fopen('php://memory', 'w+');
         // execute query with filters, without pagination, only scalar results
         $rows = $this->getRows($table, $request, false, false);
-
-        $buffer = '';
-        if ($table->haveTotalColumns()) {
-            $buffer .= ';';
-        }
         // first line: keys
         if (count($rows) > 0) {
-            foreach ($table->getColumns() as $column) {
-                $exportName = $column->getExportName() ?? $column->getName();
-                $buffer .= $exportName.';';
+            $headers = array_map(function($column){
+                return $column->getExportName() ?? $column->getName();
+            }, $table->getColumns());
+
+            if ($table->haveTotalColumns()) {
+                $headers = array_merge([""], $headers);
             }
-            $buffer .= "\n";
+
+            fputcsv($stream, $headers, ';');
         }
 
         foreach ($rows as $row) {
-            if ($table->haveTotalColumns()) {
-                $buffer .= ';';
+            $line = array_map(function($column) use ($row, $rows){
+                return $column->getExportValue($row, $rows);
+            }, $table->getColumns());
+
+            if ($table->haveTotalColumns()){
+                $line = array_merge([""], $line);
             }
-            foreach ($table->getColumns() as $column) {
-                $buffer .= $column->getExportValue($row, $rows).';';
-            }
-            $buffer .= "\n";
+
+            fputcsv($stream, $line, ';');
         }
 
 
         if ($table->haveTotalColumns()) {
-            $buffer .= 'Total;';
-            foreach ($table->getColumns() as $column) {
-                $buffer .= $column->getTotal().';';
-            }
-            $buffer .= "\n";
+            $total = array_map(function($column){
+                return $column->getTotal();
+            }, $table->getColumns());
+
+            fputcsv($stream, array_merge(['Total'], $total), ';');
         }
 
+        rewind($stream);
+        $buffer = stream_get_contents($stream);
+        fclose($stream);
         return $buffer;
     }
 
