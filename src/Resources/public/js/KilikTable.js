@@ -64,12 +64,18 @@ function KilikTable(id, path, options) {
         var table = this;
         var $table = $("#" + this.id);
         var $buttonCheckAll = $('#kilik_' + table.id + '_mass_check');
+        var $buttonClearFilters = $('.btn-clear-filters');
 
         $table.trigger('kilik:init:start', [table]);
 
         // bouton pour forcer une actualisation
         $table.find("#" + id + "_submit").click(function () {
             table.doReload();
+        });
+
+        // bouton pour vider les filtres
+        $buttonClearFilters.click(function () {
+            table.clearFilters();
         });
 
         // boutons pour la pagination
