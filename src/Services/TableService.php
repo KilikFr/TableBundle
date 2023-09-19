@@ -270,10 +270,12 @@ class TableService extends AbstractTableService
                 $objects = [];
                 foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
                     if (is_object($object)) {
-                        $objects[$object->getId()] = $object;
+                        $index = is_int($object->getId()) ? $object->getId() : (string) $object->getId();
+                        $objects[$index] = $object;
                     } // when results are mixed with objects and scalar
                     elseif (isset($object[0]) && is_object($object[0])) {
-                        $objects[$object[0]->getId()] = $object[0];
+                        $index = is_int($object[0]->getId()) ? $object[0]->getId() : (string) $object[0]->getId();
+                        $objects[$index] = $object[0];
                     }
                 }
             }
@@ -316,8 +318,12 @@ class TableService extends AbstractTableService
         if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
             // results as scalar
             foreach ($rows as &$row) {
-                if (isset($objects[$row[$table->getAlias().'_id']])) {
-                    $row['object'] = $objects[$row[$table->getAlias().'_id']];
+                $index = is_int($row[$table->getAlias().'_id'])
+                    ? $row[$table->getAlias().'_id']
+                    : (string) $row[$table->getAlias().'_id'];
+
+                if (isset($objects[$index])) {
+                    $row['object'] = $objects[$index];
                 }
             }
         }
