@@ -328,6 +328,44 @@ function KilikTable(id, path, options) {
     }
 
     /**
+     * Count enabled filters
+     *
+     * @returns int
+     */
+    this.countEnabledFilters = function () {
+        var enabledFilters = 0;
+        var tableFilters = $('#' + id).find('.table-filter-filled');
+
+        tableFilters.each(function () {
+            var element = $(this);
+
+            if ((element.is('input') && element.value !== '') || (element.is('select') && element.selectedIndex !== 0)) {
+                enabledFilters++;
+            }
+        });
+        return enabledFilters;
+    }
+
+    /**
+     * Clear all filters
+     */
+    this.clearFilters = function () {
+        var tableFilters = $('#' + id).find('.table-filter-filled');
+
+        tableFilters.each(function () {
+            var element = $(this);
+
+            if (element.is('input')) {
+                element.val('');
+            } else if (element.is('select')) {
+                element.prop('selectedIndex', 0);
+            }
+        });
+
+        this.doReload();
+    }
+
+    /**
      * Callback before ask for reload
      */
     this.beforeAskForReload = function () {
@@ -436,6 +474,16 @@ function KilikTable(id, path, options) {
      */
     this.afterReload = function (dataRaw) {
         // could be overridden
+        var nbFilters = this.countEnabledFilters();
+        var filtersEnabled = $('#nbFilters');
+
+        if (nbFilters > 0) {
+            filtersEnabled.text(nbFilters);
+            $('#btnGroupDropFilter').removeClass("d-none");
+        } else {
+            filtersEnabled.text("");
+            $('#btnGroupDropFilter').addClass("d-none");
+        }
     }
 
     /**
