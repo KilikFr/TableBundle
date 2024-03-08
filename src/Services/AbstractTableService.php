@@ -190,7 +190,7 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     public function getSelectedRows(Request $request, TableInterface $table)
     {
-        $identifiers = $request->request->get($table->getSelectionFormKey());
+        $identifiers = $request->request->all($table->getSelectionFormKey());
         $entities = $this->loadRowsById($table, $identifiers);
 
         return $entities;
