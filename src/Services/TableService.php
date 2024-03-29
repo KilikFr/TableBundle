@@ -13,7 +13,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class TableService extends AbstractTableService
 {
-    const TOTAL_PREFIX = 'TOTAL_';
+    public const TOTAL_PREFIX = 'TOTAL_';
 
     /**
      * @param Table        $table
@@ -25,120 +25,107 @@ class TableService extends AbstractTableService
         $queryParams = $request->get($table->getFormId());
 
         foreach ($table->getAllFilters() as $filter) {
-            if (isset($queryParams[$filter->getName()])) {
-                if (is_array($queryParams[$filter->getName()])) {
-                    $searchParamRaw = array_map('trim', $queryParams[$filter->getName()]);
-                    if (is_callable($filter->getQueryPartBuilder())) {
-                        $callback = $filter->getQueryPartBuilder();
-                        $callback($filter, $table, $queryBuilder, $searchParamRaw);
-                    }
-                } else {
-                    $searchParamRaw = trim($queryParams[$filter->getName()]);
-                    if (is_callable($filter->getQueryPartBuilder())) {
-                        $callback = $filter->getQueryPartBuilder();
-                        $callback($filter, $table, $queryBuilder, $searchParamRaw);
-                    } else {
-                        list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
-                        if ((string)$searchParam != '') {
-                            list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
-
-                            $sql = false;
-
-                            // depending on operator
-                            switch ($searchOperator) {
-                                case Filter::TYPE_GREATER:
-                                case Filter::TYPE_GREATER_OR_EQUAL:
-                                case Filter::TYPE_LESS:
-                                case Filter::TYPE_LESS_OR_EQUAL:
-                                case Filter::TYPE_NOT_EQUAL:
-                                    $sql = $filter->getField()." {$searchOperator} :filter_".$filter->getName();
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
-                                    break;
-                                case Filter::TYPE_EQUAL_STRICT:
-                                    $sql = $filter->getField().' = :filter_'.$filter->getName();
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
-                                    break;
-                                case Filter::TYPE_EQUAL:
-                                    $sql = $filter->getField().' like :filter_'.$filter->getName();
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
-                                    break;
-                                case Filter::TYPE_NOT_LIKE:
-                                    $sql = $filter->getField().' not like :filter_'.$filter->getName();
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
-                                    break;
-                                case Filter::TYPE_NULL:
-                                    $sql = $filter->getField().' IS NULL';
-                                    break;
-                                case Filter::TYPE_NOT_NULL:
-                                    $sql = $filter->getField().' IS NOT NULL';
-                                    break;
-                                case Filter::TYPE_IN:
-                                    $sql = $filter->getField().' IN (:filter_'.$filter->getName().')';
-                                    // $formattedSearch is like 'new,cancelled'
-                                    if (is_array($formattedSearch)) {
-                                        $values = $formattedSearch;
-                                    } else {
-                                        $values = explode(',', $formattedSearch);
-                                    }
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
-                                    break;
-                                case Filter::TYPE_NOT_IN:
-                                    $sql = $filter->getField().' NOT IN (:filter_'.$filter->getName().')';
-                                    // $formattedSearch is like 'new,cancelled'
-                                    if (is_array($formattedSearch)) {
-                                        $values = $formattedSearch;
-                                    } else {
-                                        $values = explode(',', $formattedSearch);
-                                    }
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
-                                    break;
-                                // when filtering on 'description LIKE WORDS "house red blue"'
-                                // results are: description LIKE '%house%' AND
-                                case Filter::TYPE_LIKE_WORDS_AND:
-                                case Filter::TYPE_LIKE_WORDS_OR:
-                                    if ($searchOperator == Filter::TYPE_LIKE_WORDS_OR) {
-                                        $binaryOperator = 'OR';
-                                    } else {
-                                        $binaryOperator = 'AND';
-                                    }
-                                    $words = [];
-                                    foreach (explode(' ', trim($formattedSearch)) as $word) {
-                                        // add only non blank words
-                                        $word = trim($word);
-                                        if ($word) {
-                                            $words[] = $word;
-                                        }
-                                    }
-                                    if (count($words) > 0) {
-                                        $sql = '(';
-                                        foreach ($words as $i => $word) {
-                                            if ($i > 0) {
-                                                $sql .= ' '.$binaryOperator.' '; // AND / OR
-                                            }
-                                            $termKey = 'filter_'.$filter->getName().'_t'.$i;
-                                            $sql .= $filter->getField().' like :'.$termKey;
-                                            $queryBuilder->setParameter($termKey, '%'.$word.'%');
-                                        }
-                                        $sql .= ')';
-                                    }
-                                    break;
-                                default:
-                                case Filter::TYPE_LIKE:
-                                    $sql = $filter->getField().' like :filter_'.$filter->getName();
-                                    $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
-                                    break;
-                            }
-                            if (!is_null($sql)) {
-                                if ($filter->getHaving()) {
-                                    $queryBuilder->andHaving($sql);
-                                } else {
-                                    $queryBuilder->andWhere($sql);
-                                }
-                            }
-                        }
-                    }
-                }
+            if (!isset($queryParams[$filter->getName()])) {
+                continue;
             }
+            // Multiple inputs
+            if (is_array($queryParams[$filter->getName()])) {
+                $searchParamRaw = array_map('trim', $queryParams[$filter->getName()]);
+                if (is_callable($filter->getQueryPartBuilder())) {
+                    $callback = $filter->getQueryPartBuilder();
+                    $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                }
+                continue;
+            }
+
+            $searchParamRaw = trim($queryParams[$filter->getName()]);
+
+            // query build callback
+            if (is_callable($filter->getQueryPartBuilder())) {
+                $callback = $filter->getQueryPartBuilder();
+                $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                continue;
+            }
+
+            list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
+            if ('' === (string)$searchParam) {
+                continue;
+            }
+
+            list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
+
+            // depending on operator
+            switch ($searchOperator) {
+                case Filter::TYPE_GREATER:
+                case Filter::TYPE_GREATER_OR_EQUAL:
+                case Filter::TYPE_LESS:
+                case Filter::TYPE_LESS_OR_EQUAL:
+                case Filter::TYPE_NOT_EQUAL:
+                    $sql = $filter->getField()." {$searchOperator} :filter_".$filter->getName();
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
+                    break;
+                case Filter::TYPE_EQUAL_STRICT:
+                    $sql = $filter->getField().' = :filter_'.$filter->getName();
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
+                    break;
+                case Filter::TYPE_EQUAL:
+                    $sql = $filter->getField().' like :filter_'.$filter->getName();
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), $formattedSearch);
+                    break;
+                case Filter::TYPE_NOT_LIKE:
+                    $sql = $filter->getField().' not like :filter_'.$filter->getName();
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                    break;
+                case Filter::TYPE_NULL:
+                    $sql = $filter->getField().' IS NULL';
+                    break;
+                case Filter::TYPE_NOT_NULL:
+                    $sql = $filter->getField().' IS NOT NULL';
+                    break;
+                case Filter::TYPE_IN:
+                    $sql = $filter->getField().' IN (:filter_'.$filter->getName().')';
+                    // $formattedSearch is like 'new,cancelled'
+                    $values = is_array($formattedSearch) ? $formattedSearch : explode(',', $formattedSearch);
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
+                    break;
+                case Filter::TYPE_NOT_IN:
+                    $sql = $filter->getField().' NOT IN (:filter_'.$filter->getName().')';
+                    // $formattedSearch is like 'new,cancelled'
+                    $values = is_array($formattedSearch) ? $formattedSearch : explode(',', $formattedSearch);
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
+                    break;
+                // when filtering on 'description LIKE WORDS "house red blue"'
+                // results are: description LIKE '%house%' AND
+                case Filter::TYPE_LIKE_WORDS_AND:
+                case Filter::TYPE_LIKE_WORDS_OR:
+                    $binaryOperator =  Filter::TYPE_LIKE_WORDS_OR == $searchOperator ? 'OR' : 'AND';
+                    $words = array_filter(array_map('trim', explode(' ', trim($formattedSearch))));
+                    if (empty($words)) {
+                        break;
+                    }
+                    $sql = '(';
+                    foreach ($words as $i => $word) {
+                        if ($i > 0) {
+                            $sql .= ' '.$binaryOperator.' '; // AND / OR
+                        }
+                        $termKey = 'filter_'.$filter->getName().'_t'.$i;
+                        $sql .= $filter->getField().' like :'.$termKey;
+                        $queryBuilder->setParameter($termKey, '%'.$word.'%');
+                    }
+                    $sql .= ')';
+                    break;
+                default:
+                case Filter::TYPE_LIKE:
+                    $sql = $filter->getField().' like :filter_'.$filter->getName();
+                    $queryBuilder->setParameter('filter_'.$filter->getName(), '%'.$formattedSearch.'%');
+                    break;
+            }
+
+            if (!$sql) {
+                continue;
+            }
+
+            $filter->getHaving() ? $queryBuilder->andHaving($sql) : $queryBuilder->andWhere($sql);
         }
     }
 

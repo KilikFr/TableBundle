@@ -195,7 +195,7 @@ class Filter
      */
     public function setType($type)
     {
-        if (!in_array($type, self::TYPES)) {
+        if (!in_array($type, static::TYPES)) {
             throw new \InvalidArgumentException("bad type {$type}");
         }
         $this->type = $type;
