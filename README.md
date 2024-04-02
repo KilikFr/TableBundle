@@ -262,6 +262,35 @@ When a filter is filled, class <em>table-filter-filled</em> is added on field. B
 }
 ```
 
+### Filter date columns
+
+```php
+$table
+    ->addColumn(
+        (new Column())
+            ->setSort(['u.createdAt' => 'asc'])
+            ->setDisplayFormat(Column::FORMAT_DATE)
+            ->setDisplayFormatParams('d/m/Y H:i:s') // or for example FilterDate::INPUT_FORMAT_LITTLE_ENDIAN
+            ->setFilter((new FilterDate())
+                ->setName('u_createdAt')
+                ->setField('u.createdAt')
+                ->setInputFormat(FilterDate::INPUT_FORMAT_LITTLE_ENDIAN)
+            )
+    )
+;
+```
+
+Users can filter this data using various operators, for example :
+- `26/02/1802` or `=26/02/1802` : expects a specific day
+- `!=21/11/1694` : expects any day except 21 November 1694
+- `>26/02/1802 18:00` : expects specific day after 18:00 and without end limit
+- `>=02/1802` : expects in february 1802 and after
+- `<2024` : expects in 2023 and before
+- `<=26/02/1802 15` : expects 26 February 1802 at 3pm or earlier
+- `=` : expects date is NULL
+- `!=` : expects date is not NULL
+
+
 For bundle developpers
 ======================
 
