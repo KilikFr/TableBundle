@@ -58,10 +58,12 @@ class Filter
     /**
      * data formats.
      */
-    const FORMAT_DATE = 'date';
     const FORMAT_INTEGER = 'integer';
     const FORMAT_TEXT = 'text';
     const FORMAT_DEFAULT = self::FORMAT_TEXT;
+    /** @deprecated prefer new \Kilik\TableBundle\Components\FilterDate */
+    const FORMAT_DATE = 'date';
+
     const FORMATS = array(self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT);
 
     /**
@@ -271,7 +273,7 @@ class Filter
      *
      * @return array [string operator,string value]
      */
-    public function getOperatorAndValue($input)
+    public function getOperatorAndValue($input): array
     {
         switch ($this->getType()) {
             case self::TYPE_GREATER:
@@ -284,39 +286,33 @@ class Filter
             case self::TYPE_EQUAL_STRICT:
             case self::TYPE_LIKE_WORDS_AND:
             case self::TYPE_LIKE_WORDS_OR:
-                return array($this->getType(), $input);
+                return [$this->getType(), $input];
             case self::TYPE_AUTO:
             default:
-                // handle blank search is different to search 0 value
-                if ((string) $input != '') {
-                    $simpleOperator = substr($input, 0, 1);
-                    $doubleOperator = substr($input, 0, 2);
-                    // if start with operators
-                    switch ($doubleOperator) {
-                        case self::TYPE_GREATER_OR_EQUAL:
-                        case self::TYPE_LESS_OR_EQUAL:
-                        case self::TYPE_NOT_EQUAL:
-                        case self::TYPE_EQUAL_STRICT:
-                            return array($doubleOperator, substr($input, 2));
-                            break;
-                        default:
-                            switch ($simpleOperator) {
-                                case self::TYPE_GREATER:
-                                case self::TYPE_LESS:
-                                case self::TYPE_EQUAL:
-                                case self::TYPE_NOT_LIKE:
-                                    return array($simpleOperator, substr($input, 1));
-                                    break;
-                                default:
-                                    return array(self::TYPE_LIKE, $input);
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
+                if ((string) $input == '') {
+                    return [self::TYPE_LIKE, false];
                 }
 
-                    return array(self::TYPE_LIKE, false);
+                $simpleOperator = substr($input, 0, 1);
+                $doubleOperator = substr($input, 0, 2);
+                // if start with operators
+                switch ($doubleOperator) {
+                    case self::TYPE_GREATER_OR_EQUAL:
+                    case self::TYPE_LESS_OR_EQUAL:
+                    case self::TYPE_NOT_EQUAL:
+                    case self::TYPE_EQUAL_STRICT:
+                        return [$doubleOperator, substr($input, 2)];
+                    default:
+                        switch ($simpleOperator) {
+                            case self::TYPE_GREATER:
+                            case self::TYPE_LESS:
+                            case self::TYPE_EQUAL:
+                            case self::TYPE_NOT_LIKE:
+                                return [$simpleOperator, substr($input, 1)];
+                        }
+                }
+
+                return [self::TYPE_LIKE, $input];
         }
     }
 
@@ -349,69 +345,69 @@ class Filter
             $function = $this->inputFormatter;
 
             return $function($this, $operator, $input);
-        } // else, use standard input converter
+        }
 
-            switch ($this->getDataFormat()) {
-                // date/time format dd/mm/YYYY HH:ii:ss
-                case self::FORMAT_DATE:
-                    $params = explode('/', str_replace(array('-', ' ',':'), '/', $input));
-                    // only year ?
-                    if (count($params) == 1) {
-                        $fInput = $params[0];
-                    } // month/year ?
-                    elseif (count($params) == 2) {
-                        $fInput = sprintf('%04d-%02d', $params[1], $params[0]);
-                    } // day/month/year ?
-                    elseif (count($params) == 3) {
-                        $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
-                    } // day/month/year hour ?
-                    elseif (count($params) == 4) {
-                        $fInput = sprintf('%04d-%02d-%02d %02d', $params[2], $params[1], $params[0], $params[3]);
-                    } // day/month/year hour:minute ?
-                    elseif (count($params) == 5) {
-                        $fInput = sprintf(
-                            '%04d-%02d-%02d %02d:%02d',
-                            $params[2],
-                            $params[1],
-                            $params[0],
-                            $params[3],
-                            $params[4]
-                        );
-                    } // day/month/year hour:minute:second ?
-                    elseif (count($params) == 6) {
-                        $fInput = sprintf(
-                            '%04d-%02d-%02d %02d:%02d:%02d',
-                            $params[2],
-                            $params[1],
-                            $params[0],
-                            $params[3],
-                            $params[4],
-                            $params[5]
-                        );
-                    } // default, same has raw value
-                    else {
-                        $fInput = $input;
-                    }
-                    break;
-                case self::FORMAT_INTEGER:
-                    $fInput = (int) $input;
-                    switch ($operator) {
-                        case self::TYPE_NOT_LIKE:
-                            $operator = self::TYPE_NOT_EQUAL;
-                            break;
-                        case self::TYPE_LIKE:
-                        case self::TYPE_LIKE_WORDS_AND:
-                        case self::TYPE_LIKE_WORDS_OR:
-                        case self::TYPE_AUTO:
-                            $operator = self::TYPE_EQUAL_STRICT;
-                            break;
-                    }
-                    break;
-                case self::FORMAT_TEXT:
-                default:
+        switch ($this->getDataFormat()) {
+            // date/time format dd/mm/YYYY HH:ii:ss
+            case self::FORMAT_DATE:
+                $params = explode('/', str_replace(array('-', ' ',':'), '/', $input));
+                // only year ?
+                if (count($params) == 1) {
+                    $fInput = $params[0];
+                } // month/year ?
+                elseif (count($params) == 2) {
+                    $fInput = sprintf('%04d-%02d', $params[1], $params[0]);
+                } // day/month/year ?
+                elseif (count($params) == 3) {
+                    $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
+                } // day/month/year hour ?
+                elseif (count($params) == 4) {
+                    $fInput = sprintf('%04d-%02d-%02d %02d', $params[2], $params[1], $params[0], $params[3]);
+                } // day/month/year hour:minute ?
+                elseif (count($params) == 5) {
+                    $fInput = sprintf(
+                        '%04d-%02d-%02d %02d:%02d',
+                        $params[2],
+                        $params[1],
+                        $params[0],
+                        $params[3],
+                        $params[4]
+                    );
+                } // day/month/year hour:minute:second ?
+                elseif (count($params) == 6) {
+                    $fInput = sprintf(
+                        '%04d-%02d-%02d %02d:%02d:%02d',
+                        $params[2],
+                        $params[1],
+                        $params[0],
+                        $params[3],
+                        $params[4],
+                        $params[5]
+                    );
+                } // default, same has raw value
+                else {
                     $fInput = $input;
-                    break;
-            }
+                }
+                break;
+            case self::FORMAT_INTEGER:
+                $fInput = (int) $input;
+                switch ($operator) {
+                    case self::TYPE_NOT_LIKE:
+                        $operator = self::TYPE_NOT_EQUAL;
+                        break;
+                    case self::TYPE_LIKE:
+                    case self::TYPE_LIKE_WORDS_AND:
+                    case self::TYPE_LIKE_WORDS_OR:
+                    case self::TYPE_AUTO:
+                        $operator = self::TYPE_EQUAL_STRICT;
+                        break;
+                }
+                break;
+            case self::FORMAT_TEXT:
+            default:
+                $fInput = $input;
+                break;
+        }
 
         return array($operator, $fInput);
     }
