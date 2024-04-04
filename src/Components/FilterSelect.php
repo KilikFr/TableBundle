@@ -11,6 +11,8 @@ class FilterSelect extends Filter
      */
     protected $input = ChoiceType::class;
 
+    protected $type = self::TYPE_EQUAL_STRICT;
+
     /**
      * Liste des valeurs du select.
      *
@@ -227,7 +229,7 @@ class FilterSelect extends Filter
     public function getOptions()
     {
         $options = array_merge(
-            array(
+            [
                 'required' => false,
                 'choices' => $this->getChoices(),
                 'placeholder' => $this->getPlaceholder(),
@@ -236,7 +238,7 @@ class FilterSelect extends Filter
                 'choice_value' => $this->getChoiceValue(),
                 'translation_domain' => $this->getTranslationDomain(),
                 'choice_translation_domain' => $this->getChoiceTranslationDomain(),
-            ),
+            ],
             $this->options
         );
 

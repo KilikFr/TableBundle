@@ -106,7 +106,7 @@ class Filter
      *
      * @var string
      */
-    private $type = self::TYPE_DEFAULT;
+    protected $type = self::TYPE_DEFAULT;
 
     /**
      * Data format.
