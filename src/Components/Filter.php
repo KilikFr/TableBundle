@@ -283,6 +283,7 @@ class Filter
             case self::TYPE_NOT_LIKE:
             case self::TYPE_LIKE:
             case self::TYPE_NOT_EQUAL:
+            case self::TYPE_EQUAL:
             case self::TYPE_EQUAL_STRICT:
             case self::TYPE_LIKE_WORDS_AND:
             case self::TYPE_LIKE_WORDS_OR:
