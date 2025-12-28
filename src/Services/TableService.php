@@ -364,7 +364,7 @@ class TableService extends AbstractTableService
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function countRows(QueryBuilder $qb, string $identifiers = null)
+    protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
     {
         switch (true) {
             case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && is_null($identifiers):
