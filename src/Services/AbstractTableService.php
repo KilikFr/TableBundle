@@ -100,7 +100,7 @@ abstract class AbstractTableService implements TableServiceInterface
                 $headers = array_merge([""], $headers);
             }
 
-            fputcsv($stream, $headers, ';');
+            fputcsv($stream, $headers, ';', '"', '\\');
         }
 
         foreach ($rows as $row) {
@@ -112,7 +112,7 @@ abstract class AbstractTableService implements TableServiceInterface
                 $line = array_merge([""], $line);
             }
 
-            fputcsv($stream, $line, ';');
+            fputcsv($stream, $line, ';', '"', '\\');
         }
 
 
@@ -121,7 +121,7 @@ abstract class AbstractTableService implements TableServiceInterface
                 return $column->getTotal();
             }, $table->getColumns());
 
-            fputcsv($stream, array_merge(['Total'], $total), ';');
+            fputcsv($stream, array_merge(['Total'], $total), ';', '"', '\\');
         }
 
         rewind($stream);
