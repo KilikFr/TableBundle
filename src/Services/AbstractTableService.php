@@ -5,6 +5,7 @@ namespace Kilik\TableBundle\Services;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
@@ -177,7 +178,7 @@ abstract class AbstractTableService implements TableServiceInterface
         );
 
         // encode response
-        $response = new Response(json_encode($responseParams));
+        $response = new JsonResponse($responseParams);
 
         return $response;
     }
