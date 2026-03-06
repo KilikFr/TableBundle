@@ -10,78 +10,56 @@ interface TableInterface
     /**
      * Set table identifier.
      *
-     * @param string $id
-     *
      * @return static
      */
-    public function setId($id);
+    public function setId(string $id);
 
     /**
      * Set URL for ajax call.
      *
-     * @param string $path
-     *
      * @return static
      */
-    public function setPath($path);
+    public function setPath(string $path);
 
     /**
-     * @param string $template
-     *
      * @return static
      */
-    public function setTemplate($template);
+    public function setTemplate(string $template);
 
-    /**
-     * @return string
-     */
-    public function getTemplate();
+    public function getTemplate(): string;
 
     /**
      * Set template params.
-     *
-     * @param array $templateParams
-     *
      * @return static
      */
-    public function setTemplateParams($templateParams);
+    public function setTemplateParams(array $templateParams);
 
     /**
      * Get template params.
-     *
-     * @return array
      */
-    public function getTemplateParams();
+    public function getTemplateParams(): array;
 
     /**
      * Get Table ID.
-     *
-     * @return string
      */
-    public function getId();
+    public function getId(): string;
 
     /**
      * Get Table path.
-     *
-     * @return string
      */
-    public function getPath();
+    public function getPath(): string;
 
     /**
      * Set Rows per page.
      *
-     * @param int $rowsPerPage
-     *
      * @return static
      */
-    public function setRowsPerPage($rowsPerPage);
+    public function setRowsPerPage(int $rowsPerPage);
 
     /**
      * Get rows per page.
-     *
-     * @return int
      */
-    public function getRowsPerPage();
+    public function getRowsPerPage(): int;
 
     /**
      * Set rows per page options (selectable).
@@ -95,71 +73,37 @@ interface TableInterface
     /**
      * Get rows per page options (selectable).
      *
-     * @return int
+     * @return array|int
      */
     public function getRowsPerPageOptions();
 
     /**
-     * @param int $page
-     *
      * @return static
      */
-    public function setPage($page);
+    public function setPage(int $page);
+
+    public function getPage(): int;
+
+    public function getPreviousPage(): int;
+
+    public function getNextPage(): int;
+
+    public function setLastPage(int $page);
+
+    public function getLastPage(): int;
+
+    public function setTotalRows(int $totalRows);
+
+    public function getTotalRows(): int;
 
     /**
-     * @return int
-     */
-    public function getPage();
-
-    /**
-     * @return int
-     */
-    public function getPreviousPage();
-
-    /**
-     * @return int
-     */
-    public function getNextPage();
-
-    /**
-     * @param int $page
-     *
      * @return static
      */
-    public function setLastPage($page);
+    public function setFilteredRows(int $filteredRows);
+
+    public function getFilteredRows(): int;
 
     /**
-     * @return int
-     */
-    public function getLastPage();
-
-    /**
-     * @param int $totalRows
-     *
-     * @return static
-     */
-    public function setTotalRows($totalRows);
-
-    /**
-     * @return int
-     */
-    public function getTotalRows();
-
-    /**
-     * @param int $filteredRows
-     *
-     * @return static
-     */
-    public function setFilteredRows($filteredRows);
-
-    /**
-     * @return int
-     */
-    public function getFilteredRows();
-
-    /**
-     * @param Filter $filter
-     *
      * @return $this
      */
     public function addFilter(Filter $filter);
@@ -177,8 +121,6 @@ interface TableInterface
     public function getAllFilters();
 
     /**
-     * @param FormInterface $form
-     *
      * @internal see \Kilik\TableBundle\Services\AbstractTableService::form()
      *
      * @return static
@@ -191,11 +133,9 @@ interface TableInterface
     public function getForm();
 
     /**
-     * @param FormView $formView
-     *
      * @return static
      */
-    public function setFormView($formView);
+    public function setFormView(FormView $formView);
 
     /**
      * @return FormView|null
@@ -203,8 +143,6 @@ interface TableInterface
     public function getFormView();
 
     /**
-     * @param Column $column
-     *
      * @return $this
      */
     public function addColumn(Column $column);
@@ -217,53 +155,37 @@ interface TableInterface
     /**
      * Get a column by its name.
      *
-     * @param string $name
-     *
      * @return Column|void
      */
-    public function getColumnByName($name);
+    public function getColumnByName(string $name);
 
     /**
      * Get the table body id.
-     *
-     * @return string
      */
-    public function getBodyId();
+    public function getBodyId(): string;
 
     /**
      * Get the table foot id.
-     *
-     * @return string
      */
-    public function getFootId();
+    public function getFootId(): string;
 
     /**
      * Get the form id.
-     *
-     * @return string
      */
-    public function getFormId();
+    public function getFormId(): string;
 
     /**
      * Get the first row rank.
-     *
-     * @return int
      */
-    public function getFirstRow();
+    public function getFirstRow(): int;
 
     /**
      * Get the last row rank.
-     *
-     * @return int
      */
-    public function getLastRow();
+    public function getLastRow(): int;
 
     /**
      * Get the formatted value to display.
-     *
-     * @param Column $column
-     * @param array  $row
-     * @param array  $rows
      *
      * @return string|void
      */
@@ -272,71 +194,50 @@ interface TableInterface
     /**
      * Add a custom option.
      *
-     * @param string $option
      * @param mixed  $value
      *
      * @return static
      */
-    public function addCustomOption($option, $value);
+    public function addCustomOption(string $option, $value);
 
     /**
      * Get custom options.
-     *
-     * @return array
      */
-    public function getCustomOptions();
+    public function getCustomOptions(): array;
 
     /**
      * Get hidden columns names.
-     *
-     * @return array
      */
-    public function getHiddenColumnsNames();
+    public function getHiddenColumnsNames(): array;
 
     /**
-     * @param bool $skipLoadFromLocalStorage
-     *
      * @return static
      */
-    public function setSkipLoadFromLocalStorage($skipLoadFromLocalStorage);
+    public function setSkipLoadFromLocalStorage(bool $skipLoadFromLocalStorage);
+
+    public function isSkipLoadFromLocalStorage(): bool;
 
     /**
-     * @return bool
-     */
-    public function isSkipLoadFromLocalStorage();
-
-    /**
-     * @param bool $skip
-     *
      * @return static
      */
-    public function setSkipLoadFilterFromLocalStorage($skip);
+    public function setSkipLoadFilterFromLocalStorage(bool $skip);
 
-    /**
-     * @return bool
-     */
-    public function isSkipLoadFilterFromLocalStorage();
+    public function isSkipLoadFilterFromLocalStorage(): bool;
 
     /**
      * Get table options (for javascript).
-     *
-     * @return array
      */
-    public function getOptions();
+    public function getOptions(): array;
 
     /**
      * Get filter by name
      *
-     * @param string $filterName
-     *
      * @return Filter
      */
-    public function getFilterByName($filterName);
+    public function getFilterByName(string $filterName);
 
     /**
      * Get form key of row selection
-     *
-     * @return string
      */
-    public function getSelectionFormKey();
+    public function getSelectionFormKey(): string;
 }
