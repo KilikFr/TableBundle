@@ -3,41 +3,33 @@
 namespace Kilik\TableBundle\Components;
 
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 
 abstract class AbstractTable implements TableInterface
 {
     /**
      * Table id.
-     *
-     * @var string
      */
-    protected $id;
+    protected string $id;
 
-    /**
-     * @var string
-     */
-    protected $title;
+    protected string $title;
 
     /**
      * URL for ajax call.
-     *
-     * @var string
      */
-    protected $path;
+    protected string $path;
 
     /**
      * Filters applied on the table.
      *
      * @var Filter[]
      */
-    protected $filters;
+    protected array $filters;
 
     /**
      * Rows per page.
-     *
-     * @var int
      */
-    protected $rowsPerPage = 10;
+    protected int $rowsPerPage = 10;
 
     /**
      * Rows per page (options).
@@ -48,47 +40,28 @@ abstract class AbstractTable implements TableInterface
 
     /**
      * Template for table and lines.
-     *
-     * @var string
      */
-    private $template = '@KilikTable/_defaultTable.html.twig';
+    private string $template = '@KilikTable/_defaultTable.html.twig';
 
     /**
      * Params to pass to twig (when rendering the template).
-     *
-     * @var array
      */
-    private $templateParams = [];
+    private array $templateParams = [];
 
-    /**
-     * @var int
-     */
-    private $page;
+    private int $page;
 
-    /**
-     * @var int
-     */
-    private $lastPage;
+    private int $lastPage;
 
-    /**
-     * @var int
-     */
-    private $totalRows;
+    private int $totalRows;
 
-    /**
-     * @var int
-     */
-    private $filteredRows;
+    private int $filteredRows;
 
     /**
      * @var FormInterface|null
      */
     private $form;
 
-    /**
-     * @var string
-     */
-    private $formView;
+    private FormView $formView;
 
     /**
      * @var array|Column
@@ -97,29 +70,23 @@ abstract class AbstractTable implements TableInterface
 
     /**
      * custom options.
-     *
-     * @var array
      */
-    private $customOptions = [];
+    private array $customOptions = [];
 
     /**
      * @var MassAction[]
      */
-    private $massActions = [];
+    private array $massActions = [];
 
     /**
      * Skip load from local storage.
-     *
-     * @var bool
      */
-    private $skipLoadFromLocalStorage = false;
+    private bool $skipLoadFromLocalStorage = false;
 
     /**
      * Skip load form filters data from local storage.
-     *
-     * @var bool
      */
-    private $skipLoadFilterFromLocalStorage = false;
+    private bool $skipLoadFilterFromLocalStorage = false;
 
     /**
      * Table constructor.
@@ -133,11 +100,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Set table identifiant.
      *
-     * @param string $id
-     *
      * @return static
      */
-    public function setId($id)
+    public function setId(string $id)
     {
         $this->id = $id;
 
@@ -147,11 +112,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Set table title.
      *
-     * @param string $id
-     *
      * @return static
      */
-    public function setTitle($title)
+    public function setTitle(string $title)
     {
         $this->title = $title;
 
@@ -161,11 +124,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Set URL for ajax call.
      *
-     * @param string $path
-     *
      * @return static
      */
-    public function setPath($path)
+    public function setPath(string $path)
     {
         $this->path = $path;
 
@@ -173,21 +134,16 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * @param string $template
-     *
      * @return static
      */
-    public function setTemplate($template)
+    public function setTemplate(string $template)
     {
         $this->template = $template;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         return $this->template;
     }
@@ -195,11 +151,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Set template params.
      *
-     * @param array $templateParams
-     *
      * @return static
      */
-    public function setTemplateParams($templateParams)
+    public function setTemplateParams(array $templateParams)
     {
         $this->templateParams = $templateParams;
 
@@ -208,40 +162,32 @@ abstract class AbstractTable implements TableInterface
 
     /**
      * Get template params.
-     *
-     * @return array
      */
-    public function getTemplateParams()
+    public function getTemplateParams(): array
     {
         return $this->templateParams;
     }
 
     /**
      * Get Table ID.
-     *
-     * @return string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
     /**
      * Get Table Title.
-     *
-     * @return string
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
     /**
      * Get Table path.
-     *
-     * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -249,11 +195,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Set Rows per page.
      *
-     * @param int $rowsPerPage
-     *
      * @return static
      */
-    public function setRowsPerPage($rowsPerPage)
+    public function setRowsPerPage(int $rowsPerPage)
     {
         $this->rowsPerPage = $rowsPerPage;
 
@@ -262,10 +206,8 @@ abstract class AbstractTable implements TableInterface
 
     /**
      * Get rows per page.
-     *
-     * @return int
      */
-    public function getRowsPerPage()
+    public function getRowsPerPage(): int
     {
         return $this->rowsPerPage;
     }
@@ -305,7 +247,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getPage()
+    public function getPage(): int
     {
         return $this->page;
     }
@@ -313,7 +255,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getPreviousPage()
+    public function getPreviousPage(): int
     {
         return $this->page - 1;
     }
@@ -321,7 +263,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getNextPage()
+    public function getNextPage(): int
     {
         return min($this->lastPage, $this->page + 1);
     }
@@ -339,7 +281,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getLastPage()
+    public function getLastPage(): int
     {
         return $this->lastPage;
     }
@@ -357,7 +299,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getTotalRows()
+    public function getTotalRows(): int
     {
         return $this->totalRows;
     }
@@ -375,7 +317,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getFilteredRows()
+    public function getFilteredRows(): int
     {
         return $this->filteredRows;
     }
@@ -434,7 +376,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function setFormView($formView)
+    public function setFormView(FormView $formView)
     {
         $this->formView = $formView;
 
@@ -486,7 +428,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getBodyId()
+    public function getBodyId(): string
     {
         return $this->id.'_body';
     }
@@ -494,7 +436,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getFootId()
+    public function getFootId(): string
     {
         return $this->id.'_foot';
     }
@@ -502,7 +444,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getFormId()
+    public function getFormId(): string
     {
         return $this->id.'_form';
     }
@@ -510,7 +452,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getFirstRow()
+    public function getFirstRow(): int
     {
         return ($this->page - 1) * $this->rowsPerPage + 1;
     }
@@ -518,7 +460,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getLastRow()
+    public function getLastRow(): int
     {
         return min($this->filteredRows, ($this->page) * $this->rowsPerPage);
     }
@@ -548,7 +490,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getCustomOptions()
+    public function getCustomOptions(): array
     {
         return $this->customOptions;
     }
@@ -556,7 +498,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getHiddenColumnsNames()
+    public function getHiddenColumnsNames(): array
     {
         $hiddenColumns = [];
 
@@ -572,7 +514,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function setSkipLoadFromLocalStorage($skipLoadFromLocalStorage)
+    public function setSkipLoadFromLocalStorage(bool $skipLoadFromLocalStorage)
     {
         $this->skipLoadFromLocalStorage = $skipLoadFromLocalStorage;
 
@@ -582,7 +524,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function isSkipLoadFromLocalStorage()
+    public function isSkipLoadFromLocalStorage(): bool
     {
         return $this->skipLoadFromLocalStorage;
     }
@@ -590,7 +532,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function setSkipLoadFilterFromLocalStorage($skip)
+    public function setSkipLoadFilterFromLocalStorage(bool $skip)
     {
         $this->skipLoadFilterFromLocalStorage = $skip;
 
@@ -600,7 +542,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function isSkipLoadFilterFromLocalStorage()
+    public function isSkipLoadFilterFromLocalStorage(): bool
     {
         return $this->skipLoadFilterFromLocalStorage;
     }
@@ -608,7 +550,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return array_merge(
             $this->customOptions,
@@ -624,7 +566,7 @@ abstract class AbstractTable implements TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getFilterByName($filterName)
+    public function getFilterByName(string $filterName)
     {
         foreach ($this->getAllFilters() as $filter) {
             if ($filter->getName() == $filterName) {
@@ -655,10 +597,7 @@ abstract class AbstractTable implements TableInterface
         return $this->massActions;
     }
 
-    /**
-     * @return string
-     */
-    public function getSelectionFormKey()
+    public function getSelectionFormKey(): string
     {
         return 'kilik_' . $this->getId() . '_selected';
     }

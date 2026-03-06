@@ -14,17 +14,12 @@ class Table extends AbstractTable
     // entity loader from custom load method
     const ENTITY_LOADER_CALLBACK = 3;
 
-    /**
-     * @var QueryBuilder
-     */
-    private $queryBuilder;
+    private QueryBuilder $queryBuilder;
 
     /**
      * Root entity alias.
-     *
-     * @var string
      */
-    private $alias;
+    private string $alias;
 
     /**
      * Identifier fields used to run count queries.
@@ -37,10 +32,8 @@ class Table extends AbstractTable
 
     /**
      * Entity loader method.
-     *
-     * @var string
      */
-    private $entityLoaderMode = self::ENTITY_LOADER_LEGACY;
+    private int $entityLoaderMode = self::ENTITY_LOADER_LEGACY;
 
     /**
      * Entity loader repository name (ENTITY_LOADER_REPOSITORY mode).
@@ -57,12 +50,9 @@ class Table extends AbstractTable
     private $entityLoaderCallback = null;
 
     /**
-     * @param QueryBuilder $queryBuilder
-     * @param string       $alias
-     *
      * @return static
      */
-    public function setQueryBuilder(QueryBuilder $queryBuilder, $alias)
+    public function setQueryBuilder(QueryBuilder $queryBuilder, string $alias)
     {
         $this->queryBuilder = $queryBuilder;
         $this->alias = $alias;
@@ -92,18 +82,12 @@ class Table extends AbstractTable
         return $this;
     }
 
-    /**
-     * @return QueryBuilder
-     */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         return $this->queryBuilder;
     }
 
-    /**
-     * @return string
-     */
-    public function getAlias()
+    public function getAlias(): string
     {
         return $this->alias;
     }
@@ -129,31 +113,24 @@ class Table extends AbstractTable
     }
 
     /**
-     * @param int $entityLoaderMode
-     *
      * @return static
      */
-    public function setEntityLoaderMode($entityLoaderMode)
+    public function setEntityLoaderMode(int $entityLoaderMode)
     {
         $this->entityLoaderMode = $entityLoaderMode;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getEntityLoaderMode()
+    public function getEntityLoaderMode(): int
     {
         return $this->entityLoaderMode;
     }
 
     /**
-     * @param string $entityLoaderRepository
-     *
      * @return static
      */
-    public function setEntityLoaderRepository($entityLoaderRepository)
+    public function setEntityLoaderRepository(string $entityLoaderRepository)
     {
         // force mode
         $this->setEntityLoaderMode(self::ENTITY_LOADER_REPOSITORY);
@@ -163,10 +140,7 @@ class Table extends AbstractTable
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getEntityLoaderRepository()
+    public function getEntityLoaderRepository(): string
     {
         return $this->entityLoaderRepository;
     }

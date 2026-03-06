@@ -439,8 +439,7 @@ function KilikTable(id, path, options) {
         }
         // and send the query
         this.xhr = $.post(this.path, postData,
-            function (dataRaw) {
-                var data = $.parseJSON(dataRaw);
+            function (data) {
                 $("#" + id + "_body").html(data.tableBody);
                 $("#" + id + "_foot").html(data.tableFoot);
                 $("#" + id + "_stats").html(data.tableStats);
