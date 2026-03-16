@@ -193,9 +193,27 @@ tfoot td {
     }
 
     /* --- Pagination: compact on mobile --- */
+    .kilik-table-responsive .panel-heading,
+    .kilik-table-responsive .card-header {
+        overflow: visible;
+    }
+
     .kilik-table-responsive .panel-heading .btn-group,
     .kilik-table-responsive .card-header .btn-group {
+        display: flex;
         flex-wrap: wrap;
+    }
+
+    .kilik-table-responsive .panel-title,
+    .kilik-table-responsive .card-title {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .kilik-table-responsive .tablePaginationButton {
+        padding: 4px 8px;
+        font-size: 0.85em;
     }
 
     /* --- Prevent horizontal scroll --- */

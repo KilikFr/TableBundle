@@ -50,7 +50,11 @@
                     <li>
                         <a href="#" class="columnSortable"
                            data-sort-column="{{ column.name }}">
-                            {{ column.label }}
+                            {% if column.translateDomain is not null %}
+                                {{ column.label|trans({}, column.translateDomain) }}
+                            {% else %}
+                                {{ column.label }}
+                            {% endif %}
                             <span class="columnSortableIcon"></span>
                         </a>
                     </li>

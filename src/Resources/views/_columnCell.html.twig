@@ -5,7 +5,11 @@
 
 {% if not column.hidden %}
     {% block tableBodyCellOuter %}
-        <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} data-label="{{ column.label }}">
+        {% set cellLabel = column.label %}
+        {% if column.translateDomain is not null %}
+            {% set cellLabel = (column.label | trans({}, column.translateDomain)) %}
+        {% endif %}
+        <td {% if column.displayClass %}class="{{ column.displayClass }}"{% endif %} data-label="{{ cellLabel }}">
             {% block tableBodyCellInner %}
                 {% set cellHtml=table.value(column,row) %}
                 {% if column.raw %}

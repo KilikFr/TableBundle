@@ -171,7 +171,9 @@ function KilikTable(id, path, options) {
         // Mobile filter toggle
         var $responsiveWrapper = $table.closest('.kilik-table-responsive');
         if ($responsiveWrapper.length > 0) {
-            $responsiveWrapper.find('.kilik-toggle-filters').off('click').on('click', function() {
+            $responsiveWrapper.find('.kilik-toggle-filters').off('click').on('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
                 var $filterRow = $table.find('thead > tr:nth-child(2)');
                 $filterRow.toggleClass('kilik-filters-visible');
                 $(this).toggleClass('active');
