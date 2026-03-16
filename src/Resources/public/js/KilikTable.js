@@ -123,7 +123,10 @@ function KilikTable(id, path, options) {
         });
 
         // ordering binding
-        $table.find(".columnSortable").click(function (event) {
+        var $sortScope = $table.closest('.kilik-table-responsive').length > 0
+            ? $table.closest('form')
+            : $table;
+        $sortScope.find(".columnSortable").click(function (event) {
             event.preventDefault();
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
@@ -165,6 +168,16 @@ function KilikTable(id, path, options) {
             table.checkAll($(this).prop('checked'));
         });
 
+        // Mobile filter toggle
+        var $responsiveWrapper = $table.closest('.kilik-table-responsive');
+        if ($responsiveWrapper.length > 0) {
+            $responsiveWrapper.find('.kilik-toggle-filters').off('click').on('click', function() {
+                var $filterRow = $table.find('thead > tr:nth-child(2)');
+                $filterRow.toggleClass('kilik-filters-visible');
+                $(this).toggleClass('active');
+            });
+        }
+
         $table.trigger('kilik:init:end', [table]);
     };
 
@@ -174,7 +187,10 @@ function KilikTable(id, path, options) {
     this.applyColumnSort = function () {
         var table = this;
         // update icons sort order
-        $("#" + this.id).find(".columnSortableIcon").each(function () {
+        var $sortScope = $("#" + this.id).closest('.kilik-table-responsive').length > 0
+            ? $("#" + this.id).closest('form')
+            : $("#" + this.id);
+        $sortScope.find(".columnSortableIcon").each(function () {
             var pColumn = $(this);
             var pSortColumn = pColumn.parent().attr("data-sort-column");
             pColumn.removeClass(table.sortColumnClassSorted);

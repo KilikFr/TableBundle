@@ -89,6 +89,11 @@ abstract class AbstractTable implements TableInterface
     private bool $skipLoadFilterFromLocalStorage = false;
 
     /**
+     * Responsive mode (card layout on mobile).
+     */
+    private bool $responsive = false;
+
+    /**
      * Table constructor.
      */
     public function __construct()
@@ -595,6 +600,24 @@ abstract class AbstractTable implements TableInterface
     public function getMassActions()
     {
         return $this->massActions;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setResponsive(bool $responsive)
+    {
+        $this->responsive = $responsive;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isResponsive(): bool
+    {
+        return $this->responsive;
     }
 
     public function getSelectionFormKey(): string

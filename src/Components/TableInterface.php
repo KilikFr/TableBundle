@@ -237,6 +237,18 @@ interface TableInterface
     public function getFilterByName(string $filterName);
 
     /**
+     * Enable or disable responsive mode (card layout on mobile).
+     *
+     * @return static
+     */
+    public function setResponsive(bool $responsive);
+
+    /**
+     * Whether responsive mode is enabled.
+     */
+    public function isResponsive(): bool;
+
+    /**
      * Get form key of row selection
      */
     public function getSelectionFormKey(): string;

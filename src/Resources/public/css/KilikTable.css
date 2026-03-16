@@ -54,3 +54,152 @@ tfoot td {
         transform: rotate(360deg);
     }
 }
+
+/* ============================================
+   RESPONSIVE MODE — table to cards on mobile
+   Activated by .kilik-table-responsive wrapper
+   ============================================ */
+
+/* Mobile toolbar hidden on desktop */
+.kilik-table-responsive .kilik-mobile-toolbar {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+
+    /* --- Mobile toolbar visible --- */
+    .kilik-table-responsive .kilik-mobile-toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* --- Hide column headers (row 1 of thead) --- */
+    .kilik-table-responsive thead > tr:first-child {
+        display: none;
+    }
+
+    /* --- Filter row: hidden by default, toggled via JS --- */
+    .kilik-table-responsive thead > tr:nth-child(2) {
+        display: none;
+    }
+
+    .kilik-table-responsive thead > tr:nth-child(2).kilik-filters-visible {
+        display: block;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+
+    .kilik-table-responsive thead > tr:nth-child(2).kilik-filters-visible > td,
+    .kilik-table-responsive thead > tr:nth-child(2).kilik-filters-visible > th {
+        display: block;
+        width: 100%;
+        padding: 4px 0;
+        border: none;
+    }
+
+    .kilik-table-responsive thead > tr:nth-child(2).kilik-filters-visible > td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 600;
+        font-size: 0.85em;
+        margin-bottom: 2px;
+        color: #666;
+    }
+
+    /* Hide mass-action header in filter row on mobile */
+    .kilik-table-responsive thead > tr:nth-child(2).kilik-filters-visible > .mass-action {
+        display: none;
+    }
+
+    /* --- Transform table to block layout --- */
+    .kilik-table-responsive table,
+    .kilik-table-responsive tbody,
+    .kilik-table-responsive tfoot {
+        display: block;
+        width: 100%;
+    }
+
+    .kilik-table-responsive table {
+        border: none;
+    }
+
+    /* --- Each row = card --- */
+    .kilik-table-responsive tbody tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    /* --- Each cell = labeled flex row --- */
+    .kilik-table-responsive tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        text-align: right;
+    }
+
+    .kilik-table-responsive tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .kilik-table-responsive tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-align: left;
+        flex-shrink: 0;
+        margin-right: 12px;
+        color: #333;
+    }
+
+    /* Mass action cell in card */
+    .kilik-table-responsive tbody td.mass-action {
+        background: #f8f9fa;
+        justify-content: flex-start;
+        padding: 6px 12px;
+    }
+
+    /* --- tfoot cards --- */
+    .kilik-table-responsive tfoot tr {
+        display: block;
+        margin-top: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #f9f9f9;
+        overflow: hidden;
+    }
+
+    .kilik-table-responsive tfoot td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .kilik-table-responsive tfoot td:last-child {
+        border-bottom: none;
+    }
+
+    /* --- Pagination: compact on mobile --- */
+    .kilik-table-responsive .panel-heading .btn-group,
+    .kilik-table-responsive .card-header .btn-group {
+        flex-wrap: wrap;
+    }
+
+    /* --- Prevent horizontal scroll --- */
+    .kilik-table-responsive .table-responsive {
+        overflow-x: visible;
+    }
+}

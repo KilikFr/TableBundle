@@ -37,4 +37,20 @@ class TableTest extends TestCase
         $this->assertSame($massAction, $result);
         $this->assertEquals('/new-action', $massAction->getAction());
     }
+
+    public function testResponsiveDefault()
+    {
+        $table = new Table();
+        $table->setId('test');
+        $this->assertFalse($table->isResponsive());
+    }
+
+    public function testResponsiveEnabled()
+    {
+        $table = new Table();
+        $table->setId('test');
+        $result = $table->setResponsive(true);
+        $this->assertTrue($table->isResponsive());
+        $this->assertSame($table, $result);
+    }
 }

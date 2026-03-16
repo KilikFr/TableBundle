@@ -8,7 +8,7 @@
 {{ form_start(table.formView) }}
 {% block tableBeforePanel %}
 {% endblock tableBeforePanel %}
-<div class="panel panel-info">
+<div class="panel panel-info{% if table.responsive %} kilik-table-responsive{% endif %}">
     <div class="panel-heading">
         <div class="panel-title">
             {% block tablePagination %}
@@ -28,6 +28,39 @@
         {% block tableMetadata %}
             <div style="display:none;width:0; height:0;" data-kiliktable-id="{{ table.id }}" data-kiliktable-path="{{ table.path }}">{{ table.options | json_encode | raw }}</div>
         {% endblock tableMetadata %}
+        {% if table.responsive %}
+        {% block tableMobileToolbar %}
+        <div class="kilik-mobile-toolbar">
+            <button type="button" class="btn btn-default btn-sm kilik-toggle-filters"
+                    data-table-id="{{ table.id }}">
+                <span class="glyphicon glyphicon-filter"></span>
+                {{ 'kiliktable.filters'|trans }}
+            </button>
+            {% set sortableColumns = table.columns|filter(c => c.sort is not null) %}
+            {% if sortableColumns|length > 0 %}
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm dropdown-toggle"
+                        data-toggle="dropdown" aria-expanded="false">
+                    <span class="glyphicon glyphicon-sort"></span>
+                    {{ 'kiliktable.sort'|trans }}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% for column in sortableColumns %}
+                    <li>
+                        <a href="#" class="columnSortable"
+                           data-sort-column="{{ column.name }}">
+                            {{ column.label }}
+                            <span class="columnSortableIcon"></span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endblock tableMobileToolbar %}
+        {% endif %}
         <table class="table table-hover table-striped table-bordered" id="{{ table.id }}">
             <thead>
                 {% block tableHead %}

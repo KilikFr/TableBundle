@@ -8,7 +8,7 @@
 {% block tableBeforePanel %}
 {% endblock tableBeforePanel %}
 <div class="row">
-    <div class="card">
+    <div class="card{% if table.responsive %} kilik-table-responsive{% endif %}">
         <div class="card-header">
             <div class="card-title">
                 {% block tablePagination %}
@@ -28,6 +28,39 @@
             {% block tableMetadata %}
                 <div style="display:none;width:0; height:0;" data-kiliktable-id="{{ table.id }}" data-kiliktable-path="{{ table.path }}">{{ table.options | json_encode | raw }}</div>
             {% endblock tableMetadata %}
+            {% if table.responsive %}
+            {% block tableMobileToolbar %}
+            <div class="kilik-mobile-toolbar">
+                <button type="button" class="btn btn-secondary btn-sm kilik-toggle-filters"
+                        data-table-id="{{ table.id }}">
+                    <i class="fa fa-filter"></i>
+                    {{ 'kiliktable.filters'|trans }}
+                </button>
+                {% set sortableColumns = table.columns|filter(c => c.sort is not null) %}
+                {% if sortableColumns|length > 0 %}
+                <div class="btn-group">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle"
+                            data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-sort"></i>
+                        {{ 'kiliktable.sort'|trans }}
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for column in sortableColumns %}
+                        <li>
+                            <a href="#" class="columnSortable dropdown-item"
+                               data-sort-column="{{ column.name }}">
+                                {{ column.label }}
+                                <span class="columnSortableIcon"></span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endblock tableMobileToolbar %}
+            {% endif %}
             <table class="table table-hover table-striped table-bordered" id="{{ table.id }}">
                 <thead>
                 {% block tableHead %}

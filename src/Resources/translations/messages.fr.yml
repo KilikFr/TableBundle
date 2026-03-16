@@ -9,3 +9,5 @@ kiliktable:
     mass_select: tout sélectionner
     select: sélectionner
     total: total
+    filters: filtres
+    sort: trier
