@@ -616,6 +616,36 @@ class Column
     }
 
     /**
+     * Format a raw value according to the display format.
+     *
+     * @param mixed $rawValue
+     *
+     * @return mixed
+     */
+    private function formatRawValue($rawValue)
+    {
+        switch ($this->getDisplayFormat()) {
+            case static::FORMAT_DATE:
+                $formatParams = $this->getDisplayFormatParams();
+                if (is_null($formatParams)) {
+                    $formatParams = 'Y-m-d H:i:s';
+                }
+                if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
+                    return $rawValue->format($formatParams);
+                }
+
+                return '';
+            case static::FORMAT_TEXT:
+            default:
+                if (is_array($rawValue)) {
+                    return implode(',', $rawValue);
+                }
+
+                return $rawValue;
+        }
+    }
+
+    /**
      * Get the formatted value to display.
      *
      * priority formatter methods:
@@ -645,29 +675,9 @@ class Column
             }
 
             return $callback($rawValue, $row, $rows);
-        } else {
-            switch ($this->getDisplayFormat()) {
-                case static::FORMAT_DATE:
-                    $formatParams = $this->getDisplayFormatParams();
-                    if (is_null($formatParams)) {
-                        $formatParams = 'Y-m-d H:i:s';
-                    }
-                    if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
-                        return $rawValue->format($formatParams);
-                    } else {
-                        return '';
-                    }
-                    break;
-                case static::FORMAT_TEXT:
-                default:
-                    if (is_array($rawValue)) {
-                        return implode(',', $rawValue);
-                    } else {
-                        return $rawValue;
-                    }
-                    break;
-            }
         }
+
+        return $this->formatRawValue($rawValue);
     }
 
     /**
@@ -697,32 +707,12 @@ class Column
                 }
 
                 return $callback($rawValue, $row, $rows);
-            } else {
-                switch ($this->getDisplayFormat()) {
-                    case static::FORMAT_DATE:
-                        $formatParams = $this->getDisplayFormatParams();
-                        if (is_null($formatParams)) {
-                            $formatParams = 'Y-m-d H:i:s';
-                        }
-                        if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
-                            return $rawValue->format($formatParams);
-                        } else {
-                            return '';
-                        }
-                        break;
-                    case static::FORMAT_TEXT:
-                    default:
-                        if (is_array($rawValue)) {
-                            return implode(',', $rawValue);
-                        } else {
-                            return $rawValue;
-                        }
-                        break;
-                }
             }
-        } else {
-            return '';
+
+            return $this->formatRawValue($rawValue);
         }
+
+        return '';
     }
 
     /**

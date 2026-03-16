@@ -112,7 +112,7 @@ function KilikTable(id, path, options) {
             table.askForReload();
         }).keydown(function (e) {
             // prevent reload on press enter (for configuration dropdown)
-            if (e.keyCode == 13) {
+            if (e.key === "Enter") {
                 return false;
             }
         });
@@ -218,7 +218,10 @@ function KilikTable(id, path, options) {
 
             // if hidding
             if (checked) {
-                table.hiddenColumns.splice($.inArray(name, table.hiddenColumns), 1);
+                var idx = $.inArray(name, table.hiddenColumns);
+                if (idx !== -1) {
+                    table.hiddenColumns.splice(idx, 1);
+                }
             } else {
                 table.hiddenColumns.push(name);
                 // when hidding column, disable filters on hidden columns
@@ -282,10 +285,10 @@ function KilikTable(id, path, options) {
      * Load filters and sorts from localStorage
      */
     this.loadFromLocalStorage = function () {
-        var options = $.parseJSON(localStorage.getItem(this.getLocalStorageName()));
+        var options = JSON.parse(localStorage.getItem(this.getLocalStorageName()));
         if (options) {
             // clear all checkbox
-            $("form[name='" + this.getFormName() + "']").find("checkbox").removeProp("checked");
+            $("form[name='" + this.getFormName() + "']").find(":checkbox").prop("checked", false);
             this.page = options.page;
             this.rowsPerPage = options.rowsPerPage;
             this.sortColumn = options.sortColumn;
@@ -345,7 +348,7 @@ function KilikTable(id, path, options) {
         tableFilters.each(function () {
             var element = $(this);
 
-            if ((element.is('input') && element.value !== '') || (element.is('select') && element.selectedIndex !== 0)) {
+            if ((element.is('input') && element.val() !== '') || (element.is('select') && element.prop('selectedIndex') !== 0)) {
                 enabledFilters++;
             }
         });
@@ -450,7 +453,7 @@ function KilikTable(id, path, options) {
                 table.lastPage = data.lastPage;
 
                 // rebind click on pagination buttons
-                $("#" + id + "_pagination .tablePaginationButton").click(function (event) {
+                $("#" + id + "_pagination .tablePaginationButton").off('click').on('click', function (event) {
                     event.preventDefault();
                     var button = $(this);
                     table.page = button.attr("data-table-page");
@@ -506,7 +509,7 @@ function KilikTable(id, path, options) {
             massActionName = $(this).data('name');
             action = $(this).data('mass-action');
 
-            $(this).on('click', function () {
+            $(this).off('click').on('click', function () {
                 $('[name="kilik_' + table.id + '_selected[]"]').each(function () {
                     if ($(this).is(":checked")) {
                         checkedRows.push($(this).val());

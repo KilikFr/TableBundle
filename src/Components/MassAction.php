@@ -40,6 +40,7 @@ class MassAction
         $this->name = $name;
         $this->label = $label;
         $this->class = $class;
+        $this->action = $action;
     }
 
     /**
@@ -115,5 +116,7 @@ class MassAction
     public function setAction($action)
     {
         $this->action = $action;
+
+        return $this;
     }
 }

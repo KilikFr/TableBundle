@@ -54,6 +54,7 @@ class TableService extends AbstractTableService
 
             list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
 
+            $sql = null;
             // depending on operator
             switch ($searchOperator) {
                 case Filter::TYPE_GREATER:
@@ -171,12 +172,7 @@ class TableService extends AbstractTableService
         $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
         $table->setPage((int) $request->get('page', 1));
 
-        foreach ((array)$request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
-            $column = $table->getColumnByName($hiddenColumnName);
-            if (!is_null($column)) {
-                $column->setHidden(true);
-            }
-        }
+        $this->applyHiddenColumns($table, $request);
 
         $qb = $table->getQueryBuilder();
 
@@ -200,23 +196,11 @@ class TableService extends AbstractTableService
         $this->addSearch($table, $request, $qb);
 
         // handle ordering
-        $queryParams = $request->get($table->getFormId());
-
-        if (isset($queryParams['sortColumn']) && $queryParams['sortColumn'] != '') {
-            $column = $table->getColumnByName($queryParams['sortColumn']);
-            // if column exists
-            if (!is_null($column)) {
-                if (!is_null($column->getSort())) {
-                    $qb->resetDQLPart('orderBy');
-                    if (isset($queryParams['sortReverse'])) {
-                        $sortReverse = $queryParams['sortReverse'];
-                    } else {
-                        $sortReverse = false;
-                    }
-                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $qb->addOrderBy($sortField, $sortOrder);
-                    }
-                }
+        $sortParams = $this->parseSortParams($table, $request);
+        if ($sortParams !== null) {
+            $qb->resetDQLPart('orderBy');
+            foreach ($sortParams as $sortField => $sortOrder) {
+                $qb->addOrderBy($sortField, $sortOrder);
             }
         }
 
@@ -286,17 +270,16 @@ class TableService extends AbstractTableService
                 // loaded entities
                 $entities = $this->loadRowsById($table, $identifiers);
 
+                // index entities by ID for O(1) lookup
+                $entitiesById = [];
+                foreach ($entities as $entity) {
+                    $id = $entity->getId();
+                    $entitiesById[is_int($id) ? $id : (string) $id] = $entity;
+                }
                 // associate objects to rows
-                if (count($entities) > 0) {
-                    foreach ($rows as &$row) {
-                        $row['object'] = null;
-                        foreach ($entities as $entity) {
-                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
-                                $row['object'] = $entity;
-                                break;
-                            }
-                        }
-                    }
+                foreach ($rows as &$row) {
+                    $id = $row[$table->getAlias().'_id'];
+                    $row['object'] = $entitiesById[is_int($id) ? $id : (string) $id] ?? null;
                 }
             }
         }

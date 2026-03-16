@@ -47,28 +47,7 @@ class TableApiService extends AbstractTableService
      */
     private function parseOrderBy(TableInterface $table, Request $request)
     {
-        $orderBy = [];
-
-        $queryParams = $request->get($table->getFormId());
-
-        if (isset($queryParams['sortColumn']) && $queryParams['sortColumn'] != '') {
-            $column = $table->getColumnByName($queryParams['sortColumn']);
-            // if column exists
-            if (!is_null($column)) {
-                if (!is_null($column->getSort())) {
-                    if (isset($queryParams['sortReverse'])) {
-                        $sortReverse = $queryParams['sortReverse'];
-                    } else {
-                        $sortReverse = false;
-                    }
-                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $orderBy[$sortField] = $sortOrder;
-                    }
-                }
-            }
-        }
-
-        return $orderBy;
+        return $this->parseSortParams($table, $request) ?? [];
     }
 
     /**
@@ -80,12 +59,7 @@ class TableApiService extends AbstractTableService
         $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
         $table->setPage((int) $request->get('page', 1));
 
-        foreach ((array)$request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
-            $column = $table->getColumnByName($hiddenColumnName);
-            if (!is_null($column)) {
-                $column->setHidden(true);
-            }
-        }
+        $this->applyHiddenColumns($table, $request);
 
         // get results with api
         $apiResult = $table->getApi()->load(

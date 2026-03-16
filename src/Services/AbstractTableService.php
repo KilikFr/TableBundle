@@ -88,21 +88,19 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     public function exportAsCsv(TableInterface $table, Request $request)
     {
-        $stream = fopen('php://memory', 'w+');
+        $stream = fopen('php://temp', 'w+');
         // execute query with filters, without pagination, only scalar results
         $rows = $this->getRows($table, $request, false, false);
         // first line: keys
-        if (count($rows) > 0) {
-            $headers = array_map(function($column){
-                return $column->getExportName() ?? $column->getName();
-            }, $table->getColumns());
+        $headers = array_map(function($column){
+            return $column->getExportName() ?? $column->getName();
+        }, $table->getColumns());
 
-            if ($table->haveTotalColumns()) {
-                $headers = array_merge([""], $headers);
-            }
-
-            fputcsv($stream, $headers, ';', '"', '\\');
+        if ($table->haveTotalColumns()) {
+            $headers = array_merge([""], $headers);
         }
+
+        fputcsv($stream, $headers, ';', '"', '\\');
 
         foreach ($rows as $row) {
             $line = array_map(function($column) use ($row, $rows){
@@ -195,5 +193,39 @@ abstract class AbstractTableService implements TableServiceInterface
         $entities = $this->loadRowsById($table, $identifiers);
 
         return $entities;
+    }
+
+    /**
+     * Apply hidden columns from request.
+     */
+    protected function applyHiddenColumns(TableInterface $table, Request $request): void
+    {
+        foreach ((array) $request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+            $column = $table->getColumnByName($hiddenColumnName);
+            if (!is_null($column)) {
+                $column->setHidden(true);
+            }
+        }
+    }
+
+    /**
+     * Parse sort parameters from request.
+     *
+     * @return array|null sort fields as [field => order] or null if no sort
+     */
+    protected function parseSortParams(TableInterface $table, Request $request): ?array
+    {
+        $queryParams = $request->get($table->getFormId());
+
+        if (isset($queryParams['sortColumn']) && $queryParams['sortColumn'] != '') {
+            $column = $table->getColumnByName($queryParams['sortColumn']);
+            if (!is_null($column) && !is_null($column->getSort())) {
+                $sortReverse = $queryParams['sortReverse'] ?? false;
+
+                return $column->getAutoSort($sortReverse);
+            }
+        }
+
+        return null;
     }
 }
