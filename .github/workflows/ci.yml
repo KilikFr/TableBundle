@@ -33,6 +33,7 @@ jobs:
           - { php: '8.4', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest, extra: 'symfony/polyfill-php86' }
           - { php: '8.5', symfony: '7.4.*', orm: '^3.7', database: sqlite, dependencies: highest }
           - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: mysql, dependencies: highest }
+          - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: mariadb, dependencies: highest }
           - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: postgresql, dependencies: highest }
     services:
       mysql:
@@ -43,6 +44,15 @@ jobs:
         ports: ['3306:3306']
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+      mariadb:
+        image: ${{ matrix.database == 'mariadb' && 'mariadb:11.4' || '' }}
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: kilik_table
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=5s --health-timeout=5s --health-retries=30
       postgres:
         image: ${{ matrix.database == 'postgresql' && 'postgres:17' || '' }}
@@ -58,6 +68,7 @@ jobs:
     env:
       KILIK_TEST_DATABASE_URL: >-
         ${{ matrix.database == 'mysql' && 'mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=8.4&charset=utf8mb4'
+        || matrix.database == 'mariadb' && 'mysql://root:root@127.0.0.1:3307/kilik_table?serverVersion=11.4.0-MariaDB&charset=utf8mb4'
         || matrix.database == 'postgresql' && 'postgresql://postgres:postgres@127.0.0.1:5432/kilik_table?serverVersion=17&charset=utf8'
         || 'sqlite:///:memory:' }}
     steps:

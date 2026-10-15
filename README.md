@@ -306,10 +306,11 @@ For bundle developpers
 ```
 
 The test suite fails on any deprecation. Integration tests use an in-memory SQLite database by default;
-run them against MySQL or PostgreSQL with a DBAL URL:
+run them against MySQL, MariaDB or PostgreSQL with a DBAL URL:
 
 ```shell
 KILIK_TEST_DATABASE_URL="mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=8.4" vendor/bin/phpunit
+KILIK_TEST_DATABASE_URL="mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=11.4.0-MariaDB" vendor/bin/phpunit
 KILIK_TEST_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/kilik_table?serverVersion=17" vendor/bin/phpunit
 ```
 
