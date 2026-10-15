@@ -1,0 +1,73 @@
+<form name="products_form" method="post">
+<div class="row">
+    <div class="col-xs-12 col-sm-4" id="products">
+                                    
+    <div class="columnSortable" data-column="p_id" data-sort-column="p_id" data-label="Id" scope="col">
+        <a href="#">
+            Id
+        </a>
+        <span class="glyphicon columnSortableIcon"></span>
+    </div>
+
+                <div data-column="p_id">
+    </div>
+                            
+    <div class="columnSortable" data-column="p_name" data-sort-column="p_name" data-label="Name" scope="col">
+        <a href="#">
+            Name
+        </a>
+        <span class="glyphicon columnSortableIcon"></span>
+    </div>
+
+                <div data-column="p_name">
+            <input type="text" id="products_form_p_name" name="products_form[p_name]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_name" data-label="Name" value="apple" />
+    </div>
+                                                
+    <div data-column="p_status" data-label="kiliktable.show" scope="col">
+        Show
+    </div>
+
+                <div data-column="p_status">
+            <select id="products_form_p_status" name="products_form[p_status]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_status" data-label="kiliktable.show"><option value="">All</option><option value="new">New</option><option value="validated">Validated</option></select>
+    </div>
+                            
+    <div data-column="p_out" data-label="Out of stock" scope="col">
+        Out of stock
+    </div>
+
+                <div data-column="p_out">
+            <input type="checkbox" id="products_form_p_out" name="products_form[p_out]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_out" data-label="Out of stock" value="1" />
+    </div>
+                            
+    <div data-column="p_createdAt" data-label="Created" scope="col">
+        Created
+    </div>
+
+                <div data-column="p_createdAt">
+            <input type="text" id="products_form_p_createdAt" name="products_form[p_createdAt]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_createdAt" data-label="Created" />
+    </div>
+                            
+    <div data-column="p_description" data-label="Description" scope="col">
+        Description
+    </div>
+
+                <div data-column="p_description">
+    </div>
+                        </div>
+    <div class="col-xs-12 col-sm-8">
+                    Default title
+        
+        <div id="products_body">
+                                                                </div>
+
+                    <div id="products_stats">
+                                    
+                            </div>
+        
+                    <div id="products_pagination" class="btn-group">
+                                    
+                            </div>
+            </div>
+</div>
+
+<div><label for="products_form_search">Search</label><input type="text" id="products_form_search" name="products_form[search]" /></div><input type="hidden" id="products_form_sortColumn" name="products_form[sortColumn]" /><input type="hidden" id="products_form_sortReverse" name="products_form[sortReverse]" /></form>
