@@ -17,6 +17,11 @@ class TableService extends AbstractTableService
     public const TOTAL_PREFIX = 'TOTAL_';
 
     /**
+     * Whether QueryBuilder::addOrderBy() accepts \SortDirection (Doctrine ORM >= 3.7).
+     */
+    private static ?bool $sortDirectionSupported = null;
+
+    /**
      * {@inheritdoc}
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
@@ -67,14 +72,14 @@ class TableService extends AbstractTableService
                         $sortReverse = false;
                     }
                     foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $qb->addOrderBy($sortField, $sortOrder);
+                        $qb->addOrderBy($sortField, $this->toOrmSortDirection($sortOrder));
                     }
                 }
             }
         }
 
         // force a final ordering by id
-        $qb->addOrderBy($table->getAlias().'.id', 'asc');
+        $qb->addOrderBy($table->getAlias().'.id', $this->toOrmSortDirection('asc'));
 
         if ($table->haveTotalColumns()) {
             $totalQueryBuilder = clone $qb;
@@ -374,5 +379,43 @@ class TableService extends AbstractTableService
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * Converts a sort direction to the type expected by the installed Doctrine ORM.
+     *
+     * Doctrine ORM 3.7 deprecates string directions in favor of \SortDirection, which older versions do not accept
+     * (even when symfony/polyfill-php86 provides the enum). "asc" and "desc" are converted case-insensitively, as
+     * the ORM does; any other value is passed unchanged.
+     *
+     * @param string|\SortDirection $order
+     *
+     * @return string|\SortDirection
+     */
+    private function toOrmSortDirection($order)
+    {
+        if (null === self::$sortDirectionSupported) {
+            $type = (new \ReflectionMethod(QueryBuilder::class, 'addOrderBy'))->getParameters()[1]->getType();
+            self::$sortDirectionSupported = null !== $type && str_contains((string) $type, 'SortDirection');
+        }
+
+        if (self::$sortDirectionSupported) {
+            if (\is_string($order)) {
+                switch (strtolower($order)) {
+                    case 'asc':
+                        return \SortDirection::Ascending;
+                    case 'desc':
+                        return \SortDirection::Descending;
+                }
+            }
+
+            return $order;
+        }
+
+        if ($order instanceof \SortDirection) {
+            return \SortDirection::Ascending === $order ? 'ASC' : 'DESC';
+        }
+
+        return $order;
     }
 }

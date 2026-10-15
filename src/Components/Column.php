@@ -246,9 +246,9 @@ class Column
     }
 
     /**
-     * Set sort fields.
+     * Set sort fields, as field => direction ("asc", "desc" or a \SortDirection case).
      *
-     * @param array $sort
+     * @param array<string, string|\SortDirection> $sort
      *
      * @return static
      */
@@ -288,6 +288,10 @@ class Column
     {
         $result = [];
         foreach ($this->getSort() as $sort => $order) {
+            if ($order instanceof \SortDirection) {
+                $result[$sort] = \SortDirection::Ascending === $order ? \SortDirection::Descending : \SortDirection::Ascending;
+                continue;
+            }
             $order = strtolower($order);
             $result[$sort] = ('asc' == $order ? 'desc' : 'asc');
         }
@@ -306,9 +310,9 @@ class Column
     }
 
     /**
-     * Set reversed sort fields.
+     * Set reversed sort fields, as field => direction ("asc", "desc" or a \SortDirection case).
      *
-     * @param array $sortReverse
+     * @param array<string, string|\SortDirection> $sortReverse
      *
      * @return static
      */

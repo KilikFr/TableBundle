@@ -41,6 +41,7 @@
         "symfony/doctrine-bridge": "^6.4 || ^7.4 || ^8.0",
         "symfony/framework-bundle": "^6.4 || ^7.4 || ^8.0",
         "symfony/phpunit-bridge": "^6.4 || ^7.4 || ^8.0",
+        "symfony/polyfill-php86": "^1.37",
         "symfony/translation": "^6.4 || ^7.4 || ^8.0",
         "symfony/twig-bundle": "^6.4 || ^7.4 || ^8.0",
         "symfony/uid": "^6.4 || ^7.4 || ^8.0",
