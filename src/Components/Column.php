@@ -167,7 +167,7 @@ class Column
      *
      * @return static
      */
-    public function setFilter(Filter $filter = null)
+    public function setFilter(?Filter $filter = null)
     {
         if (is_null($this->name) && null !== $filter) {
             $this->name = $filter->getName();
