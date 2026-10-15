@@ -3,6 +3,7 @@
 namespace Kilik\TableBundle\Tests\Doctrine;
 
 use Composer\InstalledVersions;
+use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration as DbalConfiguration;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
@@ -10,6 +11,7 @@ use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -38,7 +40,8 @@ final class EntityManagerFactory
 
         $connection = DriverManager::getConnection(self::connectionParams($url), $dbalConfig);
 
-        return new EntityManager($connection, self::ormConfiguration());
+        // passing the event manager avoids the deprecated Connection::getEventManager() (ORM 2.x on DBAL 3)
+        return new EntityManager($connection, self::ormConfiguration(), new EventManager());
     }
 
     public static function createSchema(EntityManager $em): void
@@ -71,6 +74,15 @@ final class EntityManagerFactory
     {
         $paths = [\dirname(__DIR__).'/Fixtures/Entity'];
 
+        if (str_starts_with((string) InstalledVersions::getVersion('doctrine/orm'), '2.')) {
+            // ORM 2.x: opt into the ORM 3 behaviors to avoid their deprecations
+            $config = ORMSetup::createConfiguration(true);
+            $config->setMetadataDriverImpl(new AttributeDriver($paths, true));
+            $config->setLazyGhostObjectEnabled(true);
+
+            return $config;
+        }
+
         if (\PHP_VERSION_ID >= 80400 && method_exists(ORMSetup::class, 'createAttributeMetadataConfig')) {
             // ORM >= 3.5 on PHP >= 8.4: native lazy objects, no proxy directory
             $config = ORMSetup::createAttributeMetadataConfig($paths, true);
@@ -80,9 +92,6 @@ final class EntityManagerFactory
 
         if (\PHP_VERSION_ID >= 80400 && method_exists($config, 'enableNativeLazyObjects')) {
             $config->enableNativeLazyObjects(true);
-        } elseif (str_starts_with((string) InstalledVersions::getVersion('doctrine/orm'), '2.')) {
-            // ORM 2.x: opt into lazy ghost objects to avoid the legacy proxy deprecation
-            $config->setLazyGhostObjectEnabled(true);
         }
 
         return $config;
