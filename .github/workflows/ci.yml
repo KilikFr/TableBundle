@@ -27,9 +27,10 @@ jobs:
         include:
           - { php: '8.2', symfony: '6.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
           - { php: '8.2', symfony: '6.4.*', orm: '^3.2', database: sqlite, dependencies: highest }
+          # ORM 2.x on PHP >= 8.4 triggers unavoidable symfony/var-exporter deprecations (lazy ghost proxies)
+          - { php: '8.3', symfony: '7.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
           # symfony/polyfill-php86 installed with an ORM that does not accept \SortDirection yet
-          - { php: '8.3', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest, extra: 'symfony/polyfill-php86' }
-          - { php: '8.4', symfony: '7.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
+          - { php: '8.4', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest, extra: 'symfony/polyfill-php86' }
           - { php: '8.5', symfony: '7.4.*', orm: '^3.7', database: sqlite, dependencies: highest }
           - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: mysql, dependencies: highest }
           - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: postgresql, dependencies: highest }
