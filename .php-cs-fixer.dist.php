@@ -9,6 +9,8 @@ return (new PhpCsFixer\Config())
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'combine_consecutive_unsets' => true,
+        // keep existing declare(strict_types=1) statements (removed by @Symfony:risky since PHP CS Fixer 3.9x)
+        'declare_strict_types' => false,
         'no_superfluous_phpdoc_tags' => true,
         'phpdoc_separation' => false,
         'phpdoc_types_order' => false,
