@@ -70,15 +70,16 @@ abstract class IntegrationTestCase extends KernelTestCase
     }
 
     /**
-     * Database platform the tests are running on: sqlite, mysql or postgresql.
+     * Database platform the tests are running on: sqlite, mysql, mariadb or postgresql.
      */
     protected static function platform(): string
     {
-        $driver = static::$em->getConnection()->getParams()['driver'] ?? '';
+        $platformClass = \get_class(static::$em->getConnection()->getDatabasePlatform());
 
-        return match ($driver) {
-            'pdo_mysql', 'mysqli' => 'mysql',
-            'pdo_pgsql', 'pgsql' => 'postgresql',
+        return match (true) {
+            false !== stripos($platformClass, 'mariadb') => 'mariadb',
+            false !== stripos($platformClass, 'mysql') => 'mysql',
+            false !== stripos($platformClass, 'postgre') => 'postgresql',
             default => 'sqlite',
         };
     }

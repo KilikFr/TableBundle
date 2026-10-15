@@ -130,11 +130,11 @@ final class TotalColumnsTest extends IntegrationTestCase
 
     /**
      * Without GROUP BY, the total query mixes SUM() with the selected columns: MySQL (ONLY_FULL_GROUP_BY) and
-     * PostgreSQL reject it.
+     * PostgreSQL reject it, SQLite and MariaDB (no ONLY_FULL_GROUP_BY by default) accept it.
      */
     private function expectTotalQueryFailureOnStrictPlatforms(): void
     {
-        if ('sqlite' !== self::platform()) {
+        if (\in_array(self::platform(), ['mysql', 'postgresql'], true)) {
             $this->expectException(\Doctrine\DBAL\Exception::class);
         }
     }
