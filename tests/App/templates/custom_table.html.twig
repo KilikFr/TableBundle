@@ -1,0 +1,9 @@
+{% extends '@KilikTable/_defaultTable.html.twig' %}
+
+{% block tableBody %}
+    <tr><td>custom body, foo={{ foo|default('none') }}, rows={{ rows|length }}</td></tr>
+{% endblock tableBody %}
+
+{% block tableFoot %}
+    <tr><td>custom foot, foo={{ foo|default('none') }}</td></tr>
+{% endblock tableFoot %}

@@ -1,0 +1,51 @@
+page: 1
+rowsPerPage: 10
+totalRows: 12
+filteredRows: 2
+lastPage: 1
+===== tableBody =====
+                                                                        <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Name">
+                                                                alpha
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Name">
+                                                                &lt;b&gt;beta&lt;/b&gt;
+                                    </td>
+                                                                                                                                            </tr>
+                                                            
+===== tableFoot =====
+                                            <tr>
+                                                                                                                                        <td  >
+                                                                                            TOTAL
+                                                                                    </td>
+                                                                                                                        </tr>
+                                    
+===== tableStats =====
+                    
+    showing 1 to 2 of 2 entries
+            (filtered from 12 total entries)
+                    
+===== tablePagination =====
+                        
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
+        1
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+                    

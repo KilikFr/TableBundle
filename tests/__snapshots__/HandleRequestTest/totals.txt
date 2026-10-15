@@ -1,0 +1,119 @@
+page: 1
+rowsPerPage: 10
+totalRows: 4
+filteredRows: 4
+lastPage: 1
+===== tableBody =====
+                                                                        <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                1
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Category">
+                                                                fruits
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Products">
+                                                                8
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Total price">
+                                                                1450
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                2
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Category">
+                                                                games
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Products">
+                                                                7
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Total price">
+                                                                12750
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                3
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Category">
+                                                                tools
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Products">
+                                                                7
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Total price">
+                                                                18500
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                        
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                4
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Category">
+                                                                empty
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Products">
+                                                                0
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Total price">
+                                                                
+                                    </td>
+                                                                                                                                            </tr>
+                                                            
+===== tableFoot =====
+                                            <tr>
+                                                                                                                                        <td  >
+                                                                                            TOTAL
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                            1450
+                                                                                    </td>
+                                                                                                                        </tr>
+                                    
+===== tableStats =====
+                    
+    showing 1 to 4 of 4 entries
+                    
+===== tablePagination =====
+                        
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
+        1
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+                    
