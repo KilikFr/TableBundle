@@ -13,6 +13,8 @@ return (new PhpCsFixer\Config())
         'declare_strict_types' => false,
         // adding ": void" to public or protected methods breaks child classes overriding them
         'void_return' => false,
+        // keep inline @var annotations, used by static analysis
+        'phpdoc_to_comment' => ['ignored_tags' => ['var']],
         'no_superfluous_phpdoc_tags' => true,
         'phpdoc_separation' => false,
         'phpdoc_types_order' => false,
