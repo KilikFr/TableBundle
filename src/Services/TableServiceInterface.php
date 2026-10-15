@@ -25,7 +25,7 @@ interface TableServiceInterface
      *
      * @param array $data Initialize table form filters data
      *
-     * @return Table
+     * @return TableInterface the table given as argument
      */
     public function createFormView(TableInterface $table, array $data = []);
 

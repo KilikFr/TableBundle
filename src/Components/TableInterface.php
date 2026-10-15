@@ -230,7 +230,7 @@ interface TableInterface
     /**
      * Get filter by name.
      *
-     * @return Filter
+     * @return Filter|null
      */
     public function getFilterByName(string $filterName);
 

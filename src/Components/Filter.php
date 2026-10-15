@@ -64,7 +64,8 @@ class Filter
     /** @deprecated prefer new \Kilik\TableBundle\Components\FilterDate */
     public const FORMAT_DATE = 'date';
 
-    public const FORMATS = [self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT];
+    // 'date' is the value of the deprecated FORMAT_DATE constant
+    public const FORMATS = ['date', self::FORMAT_INTEGER, self::FORMAT_TEXT];
 
     /**
      * Input type.
@@ -120,7 +121,7 @@ class Filter
     /**
      * Custom inputFormatter.
      *
-     * @var callable
+     * @var callable|null
      *
      * prototype (Filter,$defaultOperator,$value)
      */
@@ -128,15 +129,13 @@ class Filter
 
     /**
      * Default filter value (forced from GET VARS for example).
-     *
-     * @var string
      */
     private $defaultValue;
 
     /**
      * Custom query part builder handler.
      *
-     * @var callable
+     * @var callable|null
      */
     private $queryPartBuilder;
 
@@ -232,7 +231,7 @@ class Filter
     /**
      * Get if this filter is working on a HAVING clause, or not.
      *
-     * @return string
+     * @return bool
      */
     public function getHaving()
     {
@@ -350,7 +349,7 @@ class Filter
 
         switch ($this->getDataFormat()) {
             // date/time format dd/mm/YYYY HH:ii:ss
-            case self::FORMAT_DATE:
+            case 'date': // deprecated Filter::FORMAT_DATE
                 $params = explode('/', str_replace(['-', ' ', ':'], '/', $input));
                 // only year ?
                 if (1 == count($params)) {
@@ -429,8 +428,6 @@ class Filter
 
     /**
      * Get default value.
-     *
-     * @return string
      */
     public function getDefaultValue()
     {
@@ -450,7 +447,7 @@ class Filter
     }
 
     /**
-     * @return callable
+     * @return callable|null
      */
     public function getQueryPartBuilder()
     {

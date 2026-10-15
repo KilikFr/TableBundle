@@ -33,7 +33,7 @@ class Column
     /**
      * Sort.
      *
-     * @var array
+     * @var array<string, string|\SortDirection>|null
      */
     private $sort;
 
@@ -45,14 +45,7 @@ class Column
     private $sortReverse = [];
 
     /**
-     * Wich type (for default display transco).
-     *
-     * @var string
-     */
-    private $type = self::TYPE_DEFAULT;
-
-    /**
-     * @var string
+     * @var string|null
      */
     private $name;
 
@@ -64,7 +57,7 @@ class Column
     /**
      * Domain for label translation ?
      *
-     * @var string
+     * @var string|null
      */
     private $translateDomain;
 
@@ -218,7 +211,7 @@ class Column
     /**
      * Get name (scalar field).
      *
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -264,7 +257,7 @@ class Column
      *
      * @param bool $reverse
      *
-     * @return array
+     * @return array<string, string|\SortDirection>|null
      */
     public function getAutoSort($reverse)
     {
@@ -302,7 +295,7 @@ class Column
     /**
      * Get sort fields.
      *
-     * @return array
+     * @return array<string, string|\SortDirection>|null
      */
     public function getSort()
     {
@@ -384,7 +377,7 @@ class Column
     /**
      * Column label translation domain.
      *
-     * @return bool
+     * @return string|null
      */
     public function getTranslateDomain()
     {
@@ -480,8 +473,6 @@ class Column
 
     /**
      * Get display format parameters.
-     *
-     * @return string
      */
     public function getDisplayFormatParams()
     {
@@ -635,7 +626,6 @@ class Column
                 }
 
                 return '';
-                break;
             case static::FORMAT_TEXT:
             default:
                 if (is_array($rawValue)) {
@@ -643,7 +633,6 @@ class Column
                 }
 
                 return $rawValue;
-                break;
         }
     }
 
@@ -677,12 +666,11 @@ class Column
                     if (null === $formatParams) {
                         $formatParams = 'Y-m-d H:i:s';
                     }
-                    if (null !== $rawValue && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
+                    if (is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
                         return $rawValue->format($formatParams);
                     }
 
                     return '';
-                    break;
                 case static::FORMAT_TEXT:
                 default:
                     if (is_array($rawValue)) {
@@ -690,7 +678,6 @@ class Column
                     }
 
                     return $rawValue;
-                    break;
             }
         } else {
             return '';

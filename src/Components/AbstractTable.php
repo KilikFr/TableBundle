@@ -570,6 +570,8 @@ abstract class AbstractTable implements TableInterface
                 return $filter;
             }
         }
+
+        return null;
     }
 
     /**

@@ -26,7 +26,7 @@ class Table extends AbstractTable
      * If is null a classical 'COUNT(*) FROM (query)' will be done.
      * Be aware no to use this option with GROUP BY query.
      *
-     * @var string|void
+     * @var string|null
      */
     private $identifierFieldNames;
 
@@ -63,7 +63,7 @@ class Table extends AbstractTable
     /**
      * Defines default identifiers from query builder in order to optimize count queries.
      *
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     * @throws \Doctrine\Persistence\Mapping\MappingException
      * @return $this
      */
     public function setDefaultIdentifierFieldNames()
@@ -160,7 +160,7 @@ class Table extends AbstractTable
     }
 
     /**
-     * @return callable
+     * @return callable|null
      */
     public function getEntityLoaderCallback()
     {

@@ -26,6 +26,7 @@ class TableService extends AbstractTableService
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
+        /** @var Table $table */
         $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
         $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
@@ -44,7 +45,7 @@ class TableService extends AbstractTableService
             $this->setFilteredRows($table, $request);
 
             // compute last page and floor curent page
-            $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
+            $table->setLastPage((int) ceil($table->getFilteredRows() / $table->getRowsPerPage()));
 
             if ($table->getPage() > $table->getLastPage()) {
                 $table->setPage($table->getLastPage());
@@ -180,6 +181,7 @@ class TableService extends AbstractTableService
      */
     public function loadRowsById(TableInterface $table, $identifiers)
     {
+        /** @var Table $table */
         $entities = [];
         // if we need to use repository name
         if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {

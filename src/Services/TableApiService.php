@@ -18,7 +18,7 @@ class TableApiService extends AbstractTableService
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
-        /* @var ApiTable $table */
+        /** @var ApiTable $table */
         $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
         $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
@@ -42,7 +42,7 @@ class TableApiService extends AbstractTableService
             $table->setTotalRows($apiResult->getNbTotalRows());
             $table->setFilteredRows($apiResult->getNbFilteredRows());
 
-            $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
+            $table->setLastPage((int) ceil($table->getFilteredRows() / $table->getRowsPerPage()));
 
             if ($table->getPage() > $table->getLastPage()) {
                 $table->setPage($table->getLastPage());
