@@ -1,0 +1,26 @@
+p_id;Name;p_status;p_createdAt;p_price;p_description
+25;yo-yo;NEW;;;"wooden toy"
+7;"yellow submarine";VALIDATED;31/12/2023;;toy
+12;wrench;CANCELLED;14/07/2024;;adjustable
+10;screwdriver;NEW;05/04/2024;;
+19;saw;CANCELLED;01/12/2024;;"sharp blade"
+11;"red toolbox";VALIDATED;;;"red plastic box"
+14;"red house";VALIDATED;;;"model kit"
+1;"red apple";NEW;15/01/2024;;"fresh and sweet"
+6;puzzle;CANCELLED;20/05/2024;;
+24;pear;VALIDATED;04/04/2025;;"green fruit"
+21;orange;NEW;01/01/2025;;juicy
+23;nails;NEW;03/03/2025;;"box of 100"
+22;kite;VALIDATED;14/02/2025;;
+9;hammer;NEW;05/04/2024;;"steel head"
+16;"green tea";VALIDATED;10/10/2024;;organic
+2;"green apple";VALIDATED;01/02/2024;;
+20;drill;VALIDATED;24/12/2024;;"cordless drill"
+15;"discount 50%";NEW;01/09/2024;;"percent sign in name"
+18;dice;NEW;30/11/2024;;"six faces"
+5;"chess board";VALIDATED;01/01/2024;;"wooden board"
+8;"card game";NEW;01/06/2024;;"red and black cards"
+13;"blue house";NEW;08/08/2024;;"model kit"
+17;"black tea";NEW;11/10/2024;;
+4;banana;CANCELLED;29/02/2024;;"yellow fruit"
+3;"apple pie";NEW;10/03/2024;;homemade
