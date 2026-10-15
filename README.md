@@ -304,3 +304,27 @@ For bundle developpers
 # launch composer
 ./scripts/composer.sh
 ```
+
+The test suite fails on any deprecation. Integration tests use an in-memory SQLite database by default;
+run them against MySQL or PostgreSQL with a DBAL URL:
+
+```shell
+KILIK_TEST_DATABASE_URL="mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=8.4" vendor/bin/phpunit
+KILIK_TEST_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/kilik_table?serverVersion=17" vendor/bin/phpunit
+```
+
+Large outputs (CSV, JSON responses, HTML) are compared with snapshots stored in `tests/__snapshots__`.
+After an intended change, rewrite them with `KILIK_UPDATE_SNAPSHOTS=1 vendor/bin/phpunit` and review the diff.
+
+```shell
+# static analysis
+vendor/bin/phpstan analyse
+
+# KilikTable.js tests (jsdom), with jQuery 3 and jQuery 4
+npm ci
+npm run test:jquery3
+npm run test:jquery4
+
+# SQL queries, time and memory of the main scenarios
+php tests/Benchmark/benchmark.php --rows=10000 --runs=7
+```
