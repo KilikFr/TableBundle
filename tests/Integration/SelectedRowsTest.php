@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kilik\TableBundle\Tests\Integration;
 
 use Kilik\TableBundle\Tests\Fixtures\Entity\Product;

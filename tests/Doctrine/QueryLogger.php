@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kilik\TableBundle\Tests\Doctrine;
 
 use Psr\Log\AbstractLogger;

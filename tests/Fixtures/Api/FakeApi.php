@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kilik\TableBundle\Tests\Fixtures\Api;
 
 use Kilik\TableBundle\Api\ApiInterface;

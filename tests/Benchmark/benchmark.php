@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Measures SQL queries, time and memory of the main TableService scenarios on a generated data set.
  *
