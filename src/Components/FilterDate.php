@@ -57,10 +57,10 @@ class FilterDate extends Filter
             }
 
             $query = $this->buildWhereQuery($operator);
-            if (false !== strpos($query, $this->buildPeriodStartParameterName())) {
+            if (str_contains($query, $this->buildPeriodStartParameterName())) {
                 $qb->setParameter($this->buildPeriodStartParameterName(), $period[0]);
             }
-            if (false !== strpos($query, $this->buildPeriodEndParameterName())) {
+            if (str_contains($query, $this->buildPeriodEndParameterName())) {
                 $qb->setParameter($this->buildPeriodEndParameterName(), $period[1]);
             }
 

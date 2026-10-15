@@ -12,66 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 class TableApiService extends AbstractTableService
 {
     /**
-     * Parse filters.
-     *
-     * @param TableInterface $table
-     * @param Request        $request
-     *
-     * @return array
-     */
-    private function parseFilters(TableInterface $table, Request $request)
-    {
-        $filters = [];
-
-        $queryParams = $request->get($table->getFormId());
-
-        foreach ($table->getAllFilters() as $filter) {
-            if (isset($queryParams[$filter->getName()])) {
-                $searchParamRaw = trim($queryParams[$filter->getName()]);
-                if ($searchParamRaw != '') {
-                    $filters[$filter->getName()] = $searchParamRaw;
-                }
-            }
-        }
-
-        return $filters;
-    }
-
-    /**
-     * Parse OrderBy.
-     *
-     * @param TableInterface $table
-     * @param Request        $request
-     *
-     * @return array
-     */
-    private function parseOrderBy(TableInterface $table, Request $request)
-    {
-        $orderBy = [];
-
-        $queryParams = $request->get($table->getFormId());
-
-        if (isset($queryParams['sortColumn']) && $queryParams['sortColumn'] != '') {
-            $column = $table->getColumnByName($queryParams['sortColumn']);
-            // if column exists
-            if (!is_null($column)) {
-                if (!is_null($column->getSort())) {
-                    if (isset($queryParams['sortReverse'])) {
-                        $sortReverse = $queryParams['sortReverse'];
-                    } else {
-                        $sortReverse = false;
-                    }
-                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $orderBy[$sortField] = $sortOrder;
-                    }
-                }
-            }
-        }
-
-        return $orderBy;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
@@ -80,9 +20,9 @@ class TableApiService extends AbstractTableService
         $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
         $table->setPage((int) $request->get('page', 1));
 
-        foreach ((array)$request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+        foreach ((array) $request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
             $column = $table->getColumnByName($hiddenColumnName);
-            if (!is_null($column)) {
+            if (null !== $column) {
                 $column->setHidden(true);
             }
         }
@@ -111,10 +51,64 @@ class TableApiService extends AbstractTableService
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function loadRowsById(TableInterface $table, $identifiers)
     {
         throw new \Exception('this method should be overridden');
+    }
+
+    /**
+     * Parse filters.
+     *
+     * @return array
+     */
+    private function parseFilters(TableInterface $table, Request $request)
+    {
+        $filters = [];
+
+        $queryParams = $request->get($table->getFormId());
+
+        foreach ($table->getAllFilters() as $filter) {
+            if (isset($queryParams[$filter->getName()])) {
+                $searchParamRaw = trim($queryParams[$filter->getName()]);
+                if ('' != $searchParamRaw) {
+                    $filters[$filter->getName()] = $searchParamRaw;
+                }
+            }
+        }
+
+        return $filters;
+    }
+
+    /**
+     * Parse OrderBy.
+     *
+     * @return array
+     */
+    private function parseOrderBy(TableInterface $table, Request $request)
+    {
+        $orderBy = [];
+
+        $queryParams = $request->get($table->getFormId());
+
+        if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
+            $column = $table->getColumnByName($queryParams['sortColumn']);
+            // if column exists
+            if (null !== $column) {
+                if (null !== $column->getSort()) {
+                    if (isset($queryParams['sortReverse'])) {
+                        $sortReverse = $queryParams['sortReverse'];
+                    } else {
+                        $sortReverse = false;
+                    }
+                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
+                        $orderBy[$sortField] = $sortOrder;
+                    }
+                }
+            }
+        }
+
+        return $orderBy;
     }
 }

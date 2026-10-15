@@ -10,31 +10,31 @@ class Filter
      * Filter type.
      */
     // WHERE field LIKE '%value%'
-    const TYPE_LIKE = 'like';
+    public const TYPE_LIKE = 'like';
     // WHERE field LIKE '%value1%' AND field LIKE '%value2%'
-    const TYPE_LIKE_WORDS_AND = 'like_words_and';
+    public const TYPE_LIKE_WORDS_AND = 'like_words_and';
     // WHERE (field LIKE '%value1%' OR field LIKE '%value2%')
-    const TYPE_LIKE_WORDS_OR = 'like_words_or';
+    public const TYPE_LIKE_WORDS_OR = 'like_words_or';
     // WHERE field NOT LIKE '%value%'
-    const TYPE_NOT_LIKE = '!';
+    public const TYPE_NOT_LIKE = '!';
     // WHERE field LIKE 'value'
-    const TYPE_EQUAL = '=';
+    public const TYPE_EQUAL = '=';
     // WHERE field != 'value'
-    const TYPE_NOT_EQUAL = '!=';
+    public const TYPE_NOT_EQUAL = '!=';
     // WHERE field = 'value'
-    const TYPE_EQUAL_STRICT = '==';
+    public const TYPE_EQUAL_STRICT = '==';
     // WHERE field > 'value'
-    const TYPE_GREATER = '>';
+    public const TYPE_GREATER = '>';
     // WHERE field >= 'value'
-    const TYPE_GREATER_OR_EQUAL = '>=';
+    public const TYPE_GREATER_OR_EQUAL = '>=';
     // WHERE field < 'value'
-    const TYPE_LESS = '<';
+    public const TYPE_LESS = '<';
     // WHERE field <= 'value'
-    const TYPE_LESS_OR_EQUAL = '<=';
+    public const TYPE_LESS_OR_EQUAL = '<=';
     // use input to apply arithmetic comparators, then filter the results
-    const TYPE_AUTO = 'auto';
-    const TYPES
-        = array(
+    public const TYPE_AUTO = 'auto';
+    public const TYPES
+        = [
             self::TYPE_LIKE,
             self::TYPE_NOT_LIKE,
             self::TYPE_EQUAL,
@@ -47,24 +47,24 @@ class Filter
             self::TYPE_LIKE_WORDS_AND,
             self::TYPE_LIKE_WORDS_OR,
             self::TYPE_AUTO,
-        );
-    const TYPE_DEFAULT = self::TYPE_AUTO;
+        ];
+    public const TYPE_DEFAULT = self::TYPE_AUTO;
     // specials types:
-    const TYPE_NULL = 'null';
-    const TYPE_NOT_NULL = 'not_null';
-    const TYPE_IN = 'in';
-    const TYPE_NOT_IN = 'not_in';
+    public const TYPE_NULL = 'null';
+    public const TYPE_NOT_NULL = 'not_null';
+    public const TYPE_IN = 'in';
+    public const TYPE_NOT_IN = 'not_in';
 
     /**
      * data formats.
      */
-    const FORMAT_INTEGER = 'integer';
-    const FORMAT_TEXT = 'text';
-    const FORMAT_DEFAULT = self::FORMAT_TEXT;
+    public const FORMAT_INTEGER = 'integer';
+    public const FORMAT_TEXT = 'text';
+    public const FORMAT_DEFAULT = self::FORMAT_TEXT;
     /** @deprecated prefer new \Kilik\TableBundle\Components\FilterDate */
-    const FORMAT_DATE = 'date';
+    public const FORMAT_DATE = 'date';
 
-    const FORMATS = array(self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT);
+    public const FORMATS = [self::FORMAT_DATE, self::FORMAT_INTEGER, self::FORMAT_TEXT];
 
     /**
      * Input type.
@@ -80,7 +80,14 @@ class Filter
      *
      * @var array
      */
-    protected $options = array('required' => false);
+    protected $options = ['required' => false];
+
+    /**
+     * Filter type.
+     *
+     * @var string
+     */
+    protected $type = self::TYPE_DEFAULT;
 
     /**
      * Filter name.
@@ -104,13 +111,6 @@ class Filter
     private $having = false;
 
     /**
-     * Filter type.
-     *
-     * @var string
-     */
-    protected $type = self::TYPE_DEFAULT;
-
-    /**
      * Data format.
      *
      * @var string
@@ -124,21 +124,21 @@ class Filter
      *
      * prototype (Filter,$defaultOperator,$value)
      */
-    private $inputFormatter = null;
+    private $inputFormatter;
 
     /**
      * Default filter value (forced from GET VARS for example).
      *
      * @var string
      */
-    private $defaultValue = null;
+    private $defaultValue;
 
     /**
      * Custom query part builder handler.
      *
      * @var callable
      */
-    private $queryPartBuilder = null;
+    private $queryPartBuilder;
 
     /**
      * Set the filter name.
@@ -290,7 +290,7 @@ class Filter
                 return [$this->getType(), $input];
             case self::TYPE_AUTO:
             default:
-                if ((string) $input == '') {
+                if ('' == (string) $input) {
                     return [self::TYPE_LIKE, false];
                 }
 
@@ -351,21 +351,21 @@ class Filter
         switch ($this->getDataFormat()) {
             // date/time format dd/mm/YYYY HH:ii:ss
             case self::FORMAT_DATE:
-                $params = explode('/', str_replace(array('-', ' ',':'), '/', $input));
+                $params = explode('/', str_replace(['-', ' ', ':'], '/', $input));
                 // only year ?
-                if (count($params) == 1) {
+                if (1 == count($params)) {
                     $fInput = $params[0];
                 } // month/year ?
-                elseif (count($params) == 2) {
+                elseif (2 == count($params)) {
                     $fInput = sprintf('%04d-%02d', $params[1], $params[0]);
                 } // day/month/year ?
-                elseif (count($params) == 3) {
+                elseif (3 == count($params)) {
                     $fInput = sprintf('%04d-%02d-%02d', $params[2], $params[1], $params[0]);
                 } // day/month/year hour ?
-                elseif (count($params) == 4) {
+                elseif (4 == count($params)) {
                     $fInput = sprintf('%04d-%02d-%02d %02d', $params[2], $params[1], $params[0], $params[3]);
                 } // day/month/year hour:minute ?
-                elseif (count($params) == 5) {
+                elseif (5 == count($params)) {
                     $fInput = sprintf(
                         '%04d-%02d-%02d %02d:%02d',
                         $params[2],
@@ -375,7 +375,7 @@ class Filter
                         $params[4]
                     );
                 } // day/month/year hour:minute:second ?
-                elseif (count($params) == 6) {
+                elseif (6 == count($params)) {
                     $fInput = sprintf(
                         '%04d-%02d-%02d %02d:%02d:%02d',
                         $params[2],
@@ -410,7 +410,7 @@ class Filter
                 break;
         }
 
-        return array($operator, $fInput);
+        return [$operator, $fInput];
     }
 
     /**
@@ -486,14 +486,12 @@ class Filter
     }
 
     /**
-     * @param array $options
-     *
      * @return static
      */
     public function setOptions(array $options)
     {
         // We do an array_merge to keep the possibility to overwrite the required option
-        $this->options = array_merge($this->options,$options);
+        $this->options = array_merge($this->options, $options);
 
         return $this;
     }

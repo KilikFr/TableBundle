@@ -71,8 +71,6 @@ abstract class AbstractResult implements ResultInterface
 
     /**
      * Add a row.
-     *
-     * @param mixed $row
      */
     public function addRow($row)
     {

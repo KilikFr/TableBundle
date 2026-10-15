@@ -11,10 +11,10 @@ class TableTest extends TestCase
 {
     public function testConstruct()
     {
-        $table=new Table();
+        $table = new Table();
 
         $table->setId('myid');
-        $this->assertEquals('myid',$table->getId());
-        $this->assertEquals('kilik_myid_selected',$table->getSelectionFormKey());
+        $this->assertEquals('myid', $table->getId());
+        $this->assertEquals('kilik_myid_selected', $table->getSelectionFormKey());
     }
 }

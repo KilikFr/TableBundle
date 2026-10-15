@@ -347,7 +347,7 @@ abstract class AbstractTable implements TableInterface
     {
         $filters = $this->getFilters();
         foreach ($this->getColumns() as $column) {
-            if (!is_null($column->getFilter())) {
+            if (null !== $column->getFilter()) {
                 $filters[] = $column->getFilter();
             }
         }
@@ -422,7 +422,6 @@ abstract class AbstractTable implements TableInterface
         }
 
         // if not found
-        return;
     }
 
     /**
@@ -462,7 +461,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function getLastRow(): int
     {
-        return min($this->filteredRows, ($this->page) * $this->rowsPerPage);
+        return min($this->filteredRows, $this->page * $this->rowsPerPage);
     }
 
     /**
@@ -470,11 +469,9 @@ abstract class AbstractTable implements TableInterface
      */
     public function getValue(Column $column, array $row, array $rows = [])
     {
-        if (!is_null($column->getName())) {
+        if (null !== $column->getName()) {
             return $column->getValue($row, $rows);
         }
-
-        return;
     }
 
     /**
@@ -559,7 +556,7 @@ abstract class AbstractTable implements TableInterface
                 'defaultHiddenColumns' => $this->getHiddenColumnsNames(),
                 'skipLoadFromLocalStorage' => $this->skipLoadFromLocalStorage,
                 'skipLoadFilterFromLocalStorage' => $this->skipLoadFilterFromLocalStorage,
-             ]
+            ]
         );
     }
 
@@ -573,13 +570,9 @@ abstract class AbstractTable implements TableInterface
                 return $filter;
             }
         }
-
-        return;
     }
 
     /**
-     * @param MassAction $massAction
-     *
      * @return static
      */
     public function addMassAction(MassAction $massAction)
@@ -599,6 +592,6 @@ abstract class AbstractTable implements TableInterface
 
     public function getSelectionFormKey(): string
     {
-        return 'kilik_' . $this->getId() . '_selected';
+        return 'kilik_'.$this->getId().'_selected';
     }
 }

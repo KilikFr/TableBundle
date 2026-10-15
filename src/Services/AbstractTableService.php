@@ -28,9 +28,6 @@ abstract class AbstractTableService implements TableServiceInterface
 
     /**
      * TableService constructor.
-     *
-     * @param Environment $twig
-     * @param FormFactory $formFactory
      */
     public function __construct(Environment $twig, FormFactory $formFactory)
     {
@@ -41,10 +38,10 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function form(TableInterface $table, array $data = array())
+    public function form(TableInterface $table, array $data = [])
     {
         // prepare defaults values
-        $defaultValues = array();
+        $defaultValues = [];
         foreach ($table->getAllFilters() as $filter) {
             if (null !== $filter->getDefaultValue()) {
                 $defaultValues[$filter->getName()] = $filter->getDefaultValue();
@@ -53,7 +50,7 @@ abstract class AbstractTableService implements TableServiceInterface
 
         $data = array_merge($defaultValues, $data);
         $form = $this->formFactory->createNamedBuilder($table->getId().'_form', FormType::class, $data);
-        //$this->formBuilder->set
+        // $this->formBuilder->set
         foreach ($table->getAllFilters() as $filter) {
             $form->add(
                 $filter->getName(),
@@ -63,8 +60,8 @@ abstract class AbstractTableService implements TableServiceInterface
         }
 
         // append special inputs (used for export csv for exemple)
-        $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
-        $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, array('required' => false));
+        $form->add('sortColumn', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
+        $form->add('sortReverse', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, ['required' => false]);
         $table->setForm($form->getForm());
 
         return $table->getForm()->createView();
@@ -73,16 +70,13 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function createFormView(TableInterface $table, array $data = array())
+    public function createFormView(TableInterface $table, array $data = [])
     {
         return $table->setFormView($this->form($table, $data));
     }
 
     /**
      * Export (selection by filters) as a CSV buffer.
-     *
-     * @param TableInterface $table
-     * @param Request        $request
      *
      * @return string
      */
@@ -93,32 +87,31 @@ abstract class AbstractTableService implements TableServiceInterface
         $rows = $this->getRows($table, $request, false, false);
         // first line: keys
         if (count($rows) > 0) {
-            $headers = array_map(function($column){
+            $headers = array_map(static function ($column) {
                 return $column->getExportName() ?? $column->getName();
             }, $table->getColumns());
 
             if ($table->haveTotalColumns()) {
-                $headers = array_merge([""], $headers);
+                $headers = array_merge([''], $headers);
             }
 
             fputcsv($stream, $headers, ';', '"', '\\');
         }
 
         foreach ($rows as $row) {
-            $line = array_map(function($column) use ($row, $rows){
+            $line = array_map(static function ($column) use ($row, $rows) {
                 return $column->getExportValue($row, $rows);
             }, $table->getColumns());
 
-            if ($table->haveTotalColumns()){
-                $line = array_merge([""], $line);
+            if ($table->haveTotalColumns()) {
+                $line = array_merge([''], $line);
             }
 
             fputcsv($stream, $line, ';', '"', '\\');
         }
 
-
         if ($table->haveTotalColumns()) {
-            $total = array_map(function($column){
+            $total = array_map(static function ($column) {
                 return $column->getTotal();
             }, $table->getColumns());
 
@@ -128,17 +121,15 @@ abstract class AbstractTableService implements TableServiceInterface
         rewind($stream);
         $buffer = stream_get_contents($stream);
         fclose($stream);
+
         return $buffer;
     }
 
     /**
      * Handle the user request and return the JSON response (with pagination).
      *
-     * @param TableInterface $table
-     * @param Request        $request
-     *
-     * @return Response
      * @throws \Exception|\Throwable
+     * @return Response
      */
     public function handleRequest(TableInterface $table, Request $request)
     {
@@ -146,14 +137,14 @@ abstract class AbstractTableService implements TableServiceInterface
         $rows = $this->getRows($table, $request);
 
         // params for twig parts
-        $twigParams = array(
+        $twigParams = [
             'table' => $table,
             'rows' => $rows,
-        );
+        ];
 
         $template = $this->twig->load($table->getTemplate());
 
-        $responseParams = array(
+        $responseParams = [
             'page' => $table->getPage(),
             'rowsPerPage' => $table->getRowsPerPage(),
             'totalRows' => $table->getTotalRows(),
@@ -161,21 +152,21 @@ abstract class AbstractTableService implements TableServiceInterface
             'lastPage' => $table->getLastPage(),
             'tableBody' => $template->renderBlock(
                 'tableBody',
-                array_merge($twigParams, array('tableRenderBody' => true), $table->getTemplateParams())
+                array_merge($twigParams, ['tableRenderBody' => true], $table->getTemplateParams())
             ),
             'tableFoot' => $template->renderBlock(
                 'tableFoot',
-                array_merge($twigParams, array('tableRenderFoot' => true))
+                array_merge($twigParams, ['tableRenderFoot' => true])
             ),
             'tableStats' => $template->renderBlock(
                 'tableStatsAjax',
-                array_merge($twigParams, array('tableRenderStats' => true))
+                array_merge($twigParams, ['tableRenderStats' => true])
             ),
             'tablePagination' => $template->renderBlock(
                 'tablePaginationAjax',
-                array_merge($twigParams, array('tableRenderPagination' => true))
+                array_merge($twigParams, ['tableRenderPagination' => true])
             ),
-        );
+        ];
 
         // encode response
         $response = new JsonResponse($responseParams);
@@ -183,12 +174,6 @@ abstract class AbstractTableService implements TableServiceInterface
         return $response;
     }
 
-    /**
-     * @param Request        $request
-     * @param TableInterface $table
-     *
-     * @return mixed
-     */
     public function getSelectedRows(Request $request, TableInterface $table)
     {
         $identifiers = $request->request->all($table->getSelectionFormKey());

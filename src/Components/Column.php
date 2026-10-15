@@ -4,17 +4,17 @@ namespace Kilik\TableBundle\Components;
 
 class Column
 {
-    const TYPE_DEFAULT = 'text';
-    const TYPE_TEXT = 'text';
-    const TYPES = [self::TYPE_TEXT];
+    public const TYPE_DEFAULT = 'text';
+    public const TYPE_TEXT = 'text';
+    public const TYPES = [self::TYPE_TEXT];
 
     /**
      * display formats.
      */
-    const FORMAT_DATE = 'date';
-    const FORMAT_TEXT = 'text';
-    const FORMAT_DEFAULT = self::FORMAT_TEXT;
-    const FORMATS = [self::FORMAT_DATE, self::FORMAT_TEXT];
+    public const FORMAT_DATE = 'date';
+    public const FORMAT_TEXT = 'text';
+    public const FORMAT_DEFAULT = self::FORMAT_TEXT;
+    public const FORMATS = [self::FORMAT_DATE, self::FORMAT_TEXT];
 
     /**
      * filter on this column ?
@@ -59,14 +59,14 @@ class Column
     /**
      * @var string|null
      */
-    private $exportName = null;
+    private $exportName;
 
     /**
      * Domain for label translation ?
      *
      * @var string
      */
-    private $translateDomain = null;
+    private $translateDomain;
 
     /**
      * Capitalize label ?
@@ -84,24 +84,18 @@ class Column
 
     /**
      * custom display params ?
-     *
-     * @var mixed
      */
-    private $displayFormatParams = null;
+    private $displayFormatParams;
 
     /**
      * callback for a custom display method.
-     *
-     * @var mixed
      */
-    private $displayCallback = null;
+    private $displayCallback;
 
     /**
      * callback for a custom export method.
-     *
-     * @var mixed
      */
-    private $exportCallback = null;
+    private $exportCallback;
 
     /**
      * mode raw ?
@@ -132,7 +126,7 @@ class Column
     /**
      * @var null|mixed
      */
-    private $total = null;
+    private $total;
 
     /**
      * CSS Class.
@@ -156,20 +150,18 @@ class Column
     private $filterClass;
 
     /**
-     * Custom cell template
+     * Custom cell template.
      *
-     * @var  string
+     * @var string
      */
     private $cellTemplate;
 
     /**
-     * @param Filter|null $filter
-     *
      * @return static
      */
     public function setFilter(?Filter $filter = null)
     {
-        if (is_null($this->name) && null !== $filter) {
+        if (null === $this->name && null !== $filter) {
             $this->name = $filter->getName();
         }
         $this->filter = $filter;
@@ -234,9 +226,7 @@ class Column
     }
 
     /**
-     * Set export name
-     *
-     * @param string $exportName
+     * Set export name.
      *
      * @return static
      */
@@ -248,9 +238,7 @@ class Column
     }
 
     /**
-     * Get export name
-     *
-     * @return string
+     * Get export name.
      */
     public function getExportName(): ?string
     {
@@ -281,11 +269,11 @@ class Column
     public function getAutoSort($reverse)
     {
         if ($reverse) {
-            if (count($this->sortReverse) == 0) {
+            if (0 == count($this->sortReverse)) {
                 return $this->getAutoInvertedSort();
-            } else {
-                return $this->sortReverse;
             }
+
+            return $this->sortReverse;
         }
 
         return $this->sort;
@@ -301,7 +289,7 @@ class Column
         $result = [];
         foreach ($this->getSort() as $sort => $order) {
             $order = strtolower($order);
-            $result[$sort] = ($order == 'asc' ? 'desc' : 'asc');
+            $result[$sort] = ('asc' == $order ? 'desc' : 'asc');
         }
 
         return $result;
@@ -354,8 +342,6 @@ class Column
     /**
      * Set label to translation.
      *
-     * @param bool $translate
-     *
      * @return static
      */
     public function setTranslateLabel(bool $translate)
@@ -371,12 +357,10 @@ class Column
 
     /**
      * Column label should be translated ?
-     *
-     * @return bool
      */
     public function getTranslateLabel(): bool
     {
-        return !is_null($this->translateDomain);
+        return null !== $this->translateDomain;
     }
 
     /**
@@ -457,8 +441,6 @@ class Column
     /**
      * Set display format parameters.
      *
-     * @param mixed $displayFormatParams
-     *
      * @return static
      */
     public function setDisplayFormatParams($displayFormatParams)
@@ -519,8 +501,6 @@ class Column
 
     /**
      * Get display callback method.
-     *
-     * @return mixed
      */
     public function getDisplayCallback()
     {
@@ -544,8 +524,6 @@ class Column
 
     /**
      * Get export callback method.
-     *
-     * @return mixed
      */
     public function getExportCallback()
     {
@@ -623,12 +601,8 @@ class Column
      * - known formats
      * - default (raw text)
      *
-     * @param       $row
-     * @param array $rows
-     *
-     * @return string
-     *
      * @throws \Exception
+     * @return string
      */
     public function getValue(array $row, array $rows = [])
     {
@@ -639,34 +613,33 @@ class Column
         }
         // if a callback is set
         $callback = $this->getDisplayCallback();
-        if (!is_null($callback)) {
+        if (null !== $callback) {
             if (!is_callable($callback)) {
                 throw new \Exception('displayCallback is not callable');
             }
 
             return $callback($rawValue, $row, $rows);
-        } else {
-            switch ($this->getDisplayFormat()) {
-                case static::FORMAT_DATE:
-                    $formatParams = $this->getDisplayFormatParams();
-                    if (is_null($formatParams)) {
-                        $formatParams = 'Y-m-d H:i:s';
-                    }
-                    if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
-                        return $rawValue->format($formatParams);
-                    } else {
-                        return '';
-                    }
-                    break;
-                case static::FORMAT_TEXT:
-                default:
-                    if (is_array($rawValue)) {
-                        return implode(',', $rawValue);
-                    } else {
-                        return $rawValue;
-                    }
-                    break;
-            }
+        }
+        switch ($this->getDisplayFormat()) {
+            case static::FORMAT_DATE:
+                $formatParams = $this->getDisplayFormatParams();
+                if (null === $formatParams) {
+                    $formatParams = 'Y-m-d H:i:s';
+                }
+                if (null !== $rawValue && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
+                    return $rawValue->format($formatParams);
+                }
+
+                return '';
+                break;
+            case static::FORMAT_TEXT:
+            default:
+                if (is_array($rawValue)) {
+                    return implode(',', $rawValue);
+                }
+
+                return $rawValue;
+                break;
         }
     }
 
@@ -678,12 +651,8 @@ class Column
      * - known formats
      * - default (raw text)
      *
-     * @param array $row
-     * @param array $rows
-     *
-     * @return string
-     *
      * @throws \Exception
+     * @return string
      */
     public function getExportValue(array $row, array $rows = [])
     {
@@ -691,34 +660,33 @@ class Column
             $rawValue = $row[$this->getName()];
             // if a callback is set
             $callback = $this->getExportCallback();
-            if (!is_null($callback)) {
+            if (null !== $callback) {
                 if (!is_callable($callback)) {
                     throw new \Exception('exportCallback is not callable');
                 }
 
                 return $callback($rawValue, $row, $rows);
-            } else {
-                switch ($this->getDisplayFormat()) {
-                    case static::FORMAT_DATE:
-                        $formatParams = $this->getDisplayFormatParams();
-                        if (is_null($formatParams)) {
-                            $formatParams = 'Y-m-d H:i:s';
-                        }
-                        if (!is_null($rawValue) && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
-                            return $rawValue->format($formatParams);
-                        } else {
-                            return '';
-                        }
-                        break;
-                    case static::FORMAT_TEXT:
-                    default:
-                        if (is_array($rawValue)) {
-                            return implode(',', $rawValue);
-                        } else {
-                            return $rawValue;
-                        }
-                        break;
-                }
+            }
+            switch ($this->getDisplayFormat()) {
+                case static::FORMAT_DATE:
+                    $formatParams = $this->getDisplayFormatParams();
+                    if (null === $formatParams) {
+                        $formatParams = 'Y-m-d H:i:s';
+                    }
+                    if (null !== $rawValue && is_object($rawValue) && $rawValue instanceof \DateTimeInterface) {
+                        return $rawValue->format($formatParams);
+                    }
+
+                    return '';
+                    break;
+                case static::FORMAT_TEXT:
+                default:
+                    if (is_array($rawValue)) {
+                        return implode(',', $rawValue);
+                    }
+
+                    return $rawValue;
+                    break;
             }
         } else {
             return '';
@@ -809,9 +777,6 @@ class Column
         return $this->filterClass;
     }
 
-    /**
-     * @param string $cellTemplate
-     */
     public function setCellTemplate(string $cellTemplate)
     {
         $this->cellTemplate = $cellTemplate;
@@ -819,9 +784,6 @@ class Column
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getCellTemplate(): ?string
     {
         return $this->cellTemplate;
