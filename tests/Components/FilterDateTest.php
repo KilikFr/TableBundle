@@ -17,7 +17,6 @@ class FilterDateTest extends TestCase
             if (null === $class) {
                 $class = new \ReflectionClass(FilterDate::class);
                 $method = $class->getMethod('getPeriodFromInput');
-                $method->setAccessible(true);
             }
 
             $result = $method->invoke($filter, $input);
@@ -58,7 +57,6 @@ class FilterDateTest extends TestCase
     {
         $class = new \ReflectionClass(FilterDate::class);
         $method = $class->getMethod('getPeriodFromInput');
-        $method->setAccessible(true);
 
         $filter = (new FilterDate())->setInputFormat(FilterDate::INPUT_FORMAT_BIG_ENDIAN);
         $this->assertNull($method->invoke($filter, '2024ZZ'));
@@ -88,7 +86,6 @@ class FilterDateTest extends TestCase
             if (null === $class) {
                 $class = new \ReflectionClass(FilterDate::class);
                 $method = $class->getMethod('buildWhereQuery');
-                $method->setAccessible(true);
             }
 
             $result = $method->invoke($filter, $operator);
