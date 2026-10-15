@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class TableService extends AbstractTableService
 {
+    use RequestParameterTrait;
+
     public const TOTAL_PREFIX = 'TOTAL_';
 
     /**
@@ -19,10 +21,10 @@ class TableService extends AbstractTableService
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
-        $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
-        $table->setPage((int) $request->get('page', 1));
+        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
-        foreach ((array) $request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+        foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
             $column = $table->getColumnByName($hiddenColumnName);
             if (null !== $column) {
                 $column->setHidden(true);
@@ -51,7 +53,7 @@ class TableService extends AbstractTableService
         $this->addSearch($table, $request, $qb);
 
         // handle ordering
-        $queryParams = $request->get($table->getFormId());
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
 
         if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
             $column = $table->getColumnByName($queryParams['sortColumn']);
@@ -252,7 +254,7 @@ class TableService extends AbstractTableService
 
     private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder)
     {
-        $queryParams = $request->get($table->getFormId());
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
 
         foreach ($table->getAllFilters() as $filter) {
             if (!isset($queryParams[$filter->getName()])) {

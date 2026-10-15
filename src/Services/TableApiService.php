@@ -11,16 +11,18 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class TableApiService extends AbstractTableService
 {
+    use RequestParameterTrait;
+
     /**
      * {@inheritdoc}
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
         /* @var ApiTable $table */
-        $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
-        $table->setPage((int) $request->get('page', 1));
+        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
-        foreach ((array) $request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+        foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
             $column = $table->getColumnByName($hiddenColumnName);
             if (null !== $column) {
                 $column->setHidden(true);
@@ -67,7 +69,7 @@ class TableApiService extends AbstractTableService
     {
         $filters = [];
 
-        $queryParams = $request->get($table->getFormId());
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
 
         foreach ($table->getAllFilters() as $filter) {
             if (isset($queryParams[$filter->getName()])) {
@@ -90,7 +92,7 @@ class TableApiService extends AbstractTableService
     {
         $orderBy = [];
 
-        $queryParams = $request->get($table->getFormId());
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
 
         if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
             $column = $table->getColumnByName($queryParams['sortColumn']);
