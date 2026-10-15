@@ -69,48 +69,48 @@ function KilikTable(id, path, options) {
         $table.trigger('kilik:init:start', [table]);
 
         // bouton pour forcer une actualisation
-        $table.find("#" + id + "_submit").click(function () {
+        $table.find("#" + id + "_submit").on('click', function () {
             table.doReload();
         });
 
         // bouton pour vider les filtres
-        $buttonClearFilters.click(function () {
+        $buttonClearFilters.on('click', function () {
             table.clearFilters();
         });
 
         // boutons pour la pagination
         // bouton début
-        $table.find("#" + id + "_pagination_start").click(function () {
+        $table.find("#" + id + "_pagination_start").on('click', function () {
             table.page = 1;
             table.doReload();
         });
         // bouton précedent
-        $table.find("#" + id + "_pagination_previous").click(function () {
+        $table.find("#" + id + "_pagination_previous").on('click', function () {
             if (table.page > 1) {
                 table.page--;
             }
             table.doReload();
         });
         // bouton suivant
-        $table.find("#" + id + "_pagination_next").click(function () {
+        $table.find("#" + id + "_pagination_next").on('click', function () {
             table.page++;
             table.doReload();
         });
         // bouton fin
-        $table.find("#" + id + "_pagination_end").click(function () {
+        $table.find("#" + id + "_pagination_end").on('click', function () {
             table.page = table.lastPage;
             table.doReload();
         });
 
         var $form = $("form[name='" + this.getFormName() + "']");
         // filtering
-        $form.find(".refreshOnChange").change(function () {
+        $form.find(".refreshOnChange").on('change', function () {
             table.askForReload();
         });
-        $form.find(".refreshOnKeyup").keyup(function () {
+        $form.find(".refreshOnKeyup").on('keyup', function () {
             // delayed reload
             table.askForReload();
-        }).keydown(function (e) {
+        }).on('keydown', function (e) {
             // prevent reload on press enter (for configuration dropdown)
             if (e.keyCode == 13) {
                 return false;
@@ -118,12 +118,12 @@ function KilikTable(id, path, options) {
         });
 
         // force reload (on click)
-        $form.find(".refreshOnClick").click(function () {
+        $form.find(".refreshOnClick").on('click', function () {
             table.doReload();
         });
 
         // ordering binding
-        $table.find(".columnSortable").click(function (event) {
+        $table.find(".columnSortable").on('click', function (event) {
             event.preventDefault();
             var a = $(this);
             var sortColumn = a.attr("data-sort-column");
@@ -141,7 +141,7 @@ function KilikTable(id, path, options) {
         });
 
         // selectable rows per page
-        $("#" + id + "_rows_per_page").change(function () {
+        $("#" + id + "_rows_per_page").on('change', function () {
             table.rowsPerPage = this.value;
             table.doReload();
         });
@@ -211,7 +211,7 @@ function KilikTable(id, path, options) {
             $table.find("td[data-column='" + hiddenColumn + "']").hide();
         }
         // bind change
-        $("*[data-setup='" + id + "']:input").change(function () {
+        $("*[data-setup='" + id + "']:input").on('change', function () {
             var input = $(this);
             var checked = input.prop("checked");
             var name = input.attr("data-column");
@@ -450,7 +450,7 @@ function KilikTable(id, path, options) {
                 table.lastPage = data.lastPage;
 
                 // rebind click on pagination buttons
-                $("#" + id + "_pagination .tablePaginationButton").click(function (event) {
+                $("#" + id + "_pagination .tablePaginationButton").on('click', function (event) {
                     event.preventDefault();
                     var button = $(this);
                     table.page = button.attr("data-table-page");
@@ -514,7 +514,7 @@ function KilikTable(id, path, options) {
                 });
                 if (action !== '') {
                     form.attr("action", action);
-                    form.submit();
+                    form.trigger('submit');
                 } else {
                     eventDetails = {'checked': checkedRows, 'action': massActionName};
                     $table.trigger('kilik:massAction', [eventDetails]);
