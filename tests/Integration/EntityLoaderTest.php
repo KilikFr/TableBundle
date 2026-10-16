@@ -242,6 +242,112 @@ final class EntityLoaderTest extends IntegrationTestCase
         $this->tableService()->loadRowsById($this->productTable(), [1, 2]);
     }
 
+    /**
+     * @dataProvider legacyTableProvider
+     */
+    public function testLoaderLegacyRowsHaveTheValuesOfTheRowsWithoutObjects(string $table): void
+    {
+        $createTable = fn (): Table => match ($table) {
+            'products' => $this->productTable(),
+            'categories' => $this->categoryTable(),
+            'documents' => $this->documentTable(),
+        };
+        $withObjectsTable = $createTable();
+        $withoutObjectsTable = $createTable();
+
+        $withObjects = $this->tableService()->getRows($withObjectsTable, $this->postRequest($withObjectsTable, [], ['rowsPerPage' => '100']));
+        $withoutObjects = $this->tableService()->getRows($withoutObjectsTable, $this->postRequest($withoutObjectsTable, [], ['rowsPerPage' => '100']), true, false);
+
+        $this->assertNotEmpty($withObjects);
+        $this->assertSame(self::exportValues($withoutObjects), self::exportValues(array_map(static function (array $row): array {
+            unset($row['object']);
+
+            return $row;
+        }, $withObjects)));
+    }
+
+    public function legacyTableProvider(): iterable
+    {
+        yield 'entities' => ['products'];
+        yield 'entities and scalars' => ['categories'];
+        yield 'uuid identifiers' => ['documents'];
+    }
+
+    public function testLoaderLegacyAttachesTheManagedEntities(): void
+    {
+        $table = $this->productTable();
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        foreach ($rows as $row) {
+            $this->assertSame(static::$em->find(Product::class, $row['p_id']), $row['object']);
+        }
+    }
+
+    public function testLoaderLegacyWithQueryParameters(): void
+    {
+        $queryBuilder = $this->productQueryBuilder()
+            ->andWhere('p.category = :category')
+            ->andWhere('p.createdAt >= :date')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('category', static::$em->getRepository(Category::class)->findOneBy(['name' => 'fruits']))
+            ->setParameter('date', new \DateTimeImmutable('2024-02-01'))
+            ->setParameter('statuses', ['new', 'validated']);
+        $table = $this->productTable()->setQueryBuilder($queryBuilder, 'p');
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => '100']));
+
+        $expectedIds = self::fixtureIds(static fn (array $product): bool => 'fruits' === $product[6]
+            && $product[5] >= '2024-02-01'
+            && \in_array($product[2], ['new', 'validated'], true));
+        $this->assertNotEmpty($expectedIds);
+        $this->assertSame($expectedIds, self::productIds($rows));
+        foreach ($rows as $row) {
+            $this->assertSame($row['p_id'], $row['object']->getId());
+        }
+    }
+
+    public function testLoaderLegacyWithAParameterThatCannotBeSerialized(): void
+    {
+        $name = new class() {
+            private \Closure $value;
+
+            public function __construct()
+            {
+                $this->value = static fn (): string => 'red apple';
+            }
+
+            public function __toString(): string
+            {
+                return ($this->value)();
+            }
+        };
+        $queryBuilder = $this->productQueryBuilder()->andWhere('p.name = :name')->setParameter('name', $name);
+        $table = $this->productTable()->setQueryBuilder($queryBuilder, 'p');
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $this->assertSame([1], self::productIds($rows));
+        $this->assertSame(1, $rows[0]['object']->getId());
+    }
+
+    /**
+     * Rows with objects replaced by comparable values.
+     *
+     * @param list<array<string, mixed>> $rows
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function exportValues(array $rows): array
+    {
+        return array_map(static fn (array $row): array => array_map(static function ($value) {
+            if ($value instanceof \DateTimeInterface) {
+                return [$value::class, $value->format(\DateTimeInterface::ATOM)];
+            }
+
+            return \is_object($value) ? [$value::class, (string) $value] : $value;
+        }, $row), $rows);
+    }
+
     private function documentTable(): Table
     {
         $queryBuilder = static::$em->createQueryBuilder()->select('d')->from(Document::class, 'd');
