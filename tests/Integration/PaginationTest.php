@@ -131,6 +131,37 @@ final class PaginationTest extends IntegrationTestCase
         $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => '0']));
     }
 
+    /**
+     * @dataProvider maxRowsPerPageProvider
+     */
+    public function testMaxRowsPerPage(string $rowsPerPage, int $expectedRowsPerPage): void
+    {
+        $table = $this->productTable()->setMaxRowsPerPage(20);
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => $rowsPerPage]));
+
+        $this->assertSame($expectedRowsPerPage, $table->getRowsPerPage());
+        $this->assertCount($expectedRowsPerPage, $rows);
+        $this->assertSame((int) ceil(25 / $expectedRowsPerPage), $table->getLastPage());
+    }
+
+    public function maxRowsPerPageProvider(): iterable
+    {
+        yield 'below the maximum' => ['5', 5];
+        yield 'the maximum' => ['20', 20];
+        yield 'above the maximum' => ['100000', 20];
+        yield 'zero' => ['0', 1];
+        yield 'negative' => ['-5', 1];
+    }
+
+    public function testMaxRowsPerPageMustBePositive(): void
+    {
+        $this->assertNull((new Table())->getMaxRowsPerPage());
+        $this->assertNull((new Table())->setMaxRowsPerPage(10)->setMaxRowsPerPage(null)->getMaxRowsPerPage());
+
+        $this->expectException(\InvalidArgumentException::class);
+        (new Table())->setMaxRowsPerPage(0);
+    }
+
     public function testFilteredRowsAndTotalRows(): void
     {
         $table = $this->productTable($this->filteredColumn('p.name'));

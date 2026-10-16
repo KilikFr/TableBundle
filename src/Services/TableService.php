@@ -230,7 +230,7 @@ class TableService extends AbstractTableService
      */
     private function prepareQueryBuilder(TableInterface $table, Request $request, $paginate): QueryBuilder
     {
-        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setRowsPerPage($this->getRequestedRowsPerPage($table, $request));
         $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
         foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {

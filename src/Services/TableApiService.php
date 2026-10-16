@@ -19,7 +19,7 @@ class TableApiService extends AbstractTableService
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
         /** @var ApiTable $table */
-        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setRowsPerPage($this->getRequestedRowsPerPage($table, $request));
         $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
         foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {

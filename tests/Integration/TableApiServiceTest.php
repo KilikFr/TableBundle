@@ -93,6 +93,17 @@ final class TableApiServiceTest extends KernelTestCase
         $this->assertTrue($table->getColumnByName('status')->getHidden());
     }
 
+    public function testMaxRowsPerPage(): void
+    {
+        [$table, $api] = $this->apiTable();
+        $table->setMaxRowsPerPage(5);
+
+        $this->service()->getRows($table, new Request([], ['rowsPerPage' => '100']));
+        $this->service()->getRows($table, new Request([], ['rowsPerPage' => '0']));
+
+        $this->assertSame([5, 1], array_column($api->calls, 'limit'));
+    }
+
     /**
      * @group known-bug
      */

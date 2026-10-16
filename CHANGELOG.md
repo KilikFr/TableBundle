@@ -9,6 +9,8 @@ All notable changes are documented in this file. Changes of earlier versions are
 
 - `TableService::exportAsCsvResponse()`: the CSV export as a streamed response, which reads the rows one by one
   instead of loading them all in memory.
+- `AbstractTable::setMaxRowsPerPage()`: an optional maximum number of rows per page accepted from the requests,
+  which are not limited by default.
 
 ### Performance
 

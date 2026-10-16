@@ -2,6 +2,8 @@
 
 namespace Kilik\TableBundle\Services;
 
+use Kilik\TableBundle\Components\AbstractTable;
+use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -24,5 +26,16 @@ trait RequestParameterTrait
         }
 
         return $default;
+    }
+
+    /**
+     * Number of rows per page of the request, limited to the maximum of the table if any.
+     */
+    private function getRequestedRowsPerPage(TableInterface $table, Request $request): int
+    {
+        $rowsPerPage = (int) $this->getRequestParameter($request, 'rowsPerPage', 10);
+        $maxRowsPerPage = $table instanceof AbstractTable ? $table->getMaxRowsPerPage() : null;
+
+        return null === $maxRowsPerPage ? $rowsPerPage : max(1, min($rowsPerPage, $maxRowsPerPage));
     }
 }

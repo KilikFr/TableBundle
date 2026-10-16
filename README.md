@@ -293,6 +293,15 @@ $table
 ;
 ```
 
+### Limit the rows per page
+
+The number of rows per page comes from the request: any value is accepted, so that a request can load every row.
+To limit it, set a maximum (the requested number is then also at least 1):
+
+```php
+$table->setMaxRowsPerPage(100);
+```
+
 ### Filter date columns
 
 ```php
