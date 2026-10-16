@@ -8,7 +8,10 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\SqlOutputWalker;
 use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\QueryBuilder;
+use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
+use Kilik\TableBundle\Services\TableService;
 use Kilik\TableBundle\Tests\Fixtures\Entity\Category;
 
 /**
@@ -137,6 +140,59 @@ final class PaginationTest extends IntegrationTestCase
         $this->assertSame(3, $table->getFilteredRows());
         $this->assertSame(1, $table->getLastPage());
         $this->assertSame(3, $table->getLastRow());
+    }
+
+    public function testFiltersWithoutValueKeepAllRows(): void
+    {
+        $table = $this->productTable($this->filteredColumn('p.name'), $this->filteredColumn('p.status'));
+        $this->tableService()->getRows($table, $this->postRequest($table, ['p_name' => '  ', 'p_status' => '']));
+
+        $this->assertSame(25, $table->getTotalRows());
+        $this->assertSame(25, $table->getFilteredRows());
+        $this->assertSame(3, $table->getLastPage());
+    }
+
+    public function testQueryPartBuilderCalledWithoutValueFiltersTheRows(): void
+    {
+        $filter = (new Filter())->setQueryPartBuilder(static function (Filter $filter, Table $table, QueryBuilder $queryBuilder): void {
+            $queryBuilder->andWhere("p.status = 'cancelled'");
+        });
+        $table = $this->productTable($this->filteredColumn('p.status', $filter));
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, ['p_status' => '']));
+
+        $this->assertSame([4, 6, 12, 19], self::productIds($rows));
+        $this->assertSame(25, $table->getTotalRows());
+        $this->assertSame(4, $table->getFilteredRows());
+    }
+
+    public function testOverriddenTotalRowsDoNotChangeTheFilteredRows(): void
+    {
+        $service = new class(static::getContainer()->get('twig'), static::getContainer()->get('form.factory')) extends TableService {
+            protected function setTotalRows(Table $table)
+            {
+                $table->setTotalRows(1000);
+            }
+        };
+        $table = $this->productTable();
+        $service->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(1000, $table->getTotalRows());
+        $this->assertSame(25, $table->getFilteredRows());
+    }
+
+    public function testOverriddenCountRowsCountsTheTotalAndFilteredRows(): void
+    {
+        $service = new class(static::getContainer()->get('twig'), static::getContainer()->get('form.factory')) extends TableService {
+            protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
+            {
+                return 42;
+            }
+        };
+        $table = $this->productTable();
+        $service->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(42, $table->getTotalRows());
+        $this->assertSame(42, $table->getFilteredRows());
     }
 
     public function testNoResult(): void
