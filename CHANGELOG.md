@@ -27,3 +27,6 @@ All notable changes are documented in this file. Changes of earlier versions are
   in Symfony 7.4 applications getting http-foundation 8.
 - PHP 8.4 deprecation of the implicitly nullable parameter of `Column::setFilter()`.
 - `KilikTable.js` used `$.parseJSON()`, removed in jQuery 4.
+- The CSV export of tables loaded from an API (`ApiTable`) failed with an undefined method error.
+- A "words" filter (`TYPE_LIKE_WORDS_AND`, `TYPE_LIKE_WORDS_OR`) given a value without any word, like `0`, raised a
+  PHP warning, or added the condition of the previous filter again; it is now ignored.
