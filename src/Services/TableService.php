@@ -293,6 +293,7 @@ class TableService extends AbstractTableService
 
             list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
 
+            $sql = null;
             // depending on operator
             switch ($searchOperator) {
                 case Filter::TYPE_GREATER:
