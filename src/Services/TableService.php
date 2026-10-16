@@ -23,6 +23,13 @@ class TableService extends AbstractTableService
     private static ?bool $sortDirectionSupported = null;
 
     /**
+     * Count computed by setTotalRows(), reused by setFilteredRows() when no filter changes the query.
+     *
+     * @var array{queryBuilder: \WeakReference<QueryBuilder>, state: array<mixed>, count: int|float}|null
+     */
+    private ?array $totalRowsCount = null;
+
+    /**
      * {@inheritdoc}
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
@@ -233,6 +240,7 @@ class TableService extends AbstractTableService
         $identifiers = $table->getIdentifierFieldNames();
         $count = $this->countRows($qbtr, $identifiers);
 
+        $this->totalRowsCount = ['queryBuilder' => \WeakReference::create($qb), 'state' => self::getQueryBuilderState($qb), 'count' => $count];
         $table->setTotalRows($count);
     }
 
@@ -266,9 +274,13 @@ class TableService extends AbstractTableService
         }
     }
 
-    private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder)
+    /**
+     * @return bool whether the query builder may have been changed
+     */
+    private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder): bool
     {
         $queryParams = $this->getRequestParameter($request, $table->getFormId());
+        $searchApplied = false;
 
         foreach ($table->getAllFilters() as $filter) {
             if (!isset($queryParams[$filter->getName()])) {
@@ -280,6 +292,7 @@ class TableService extends AbstractTableService
                 if (is_callable($filter->getQueryPartBuilder())) {
                     $callback = $filter->getQueryPartBuilder();
                     $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                    $searchApplied = true;
                 }
                 continue;
             }
@@ -290,6 +303,7 @@ class TableService extends AbstractTableService
             if (is_callable($filter->getQueryPartBuilder())) {
                 $callback = $filter->getQueryPartBuilder();
                 $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                $searchApplied = true;
                 continue;
             }
 
@@ -373,7 +387,10 @@ class TableService extends AbstractTableService
             }
 
             $filter->getHaving() ? $queryBuilder->andHaving($sql) : $queryBuilder->andWhere($sql);
+            $searchApplied = true;
         }
+
+        return $searchApplied;
     }
 
     /**
@@ -383,12 +400,40 @@ class TableService extends AbstractTableService
     {
         $qb = $table->getQueryBuilder();
         $qbfr = clone $qb;
-        $this->addSearch($table, $request, $qbfr);
+        $searchApplied = $this->addSearch($table, $request, $qbfr);
+
+        // without any filter, the query is the one counted by setTotalRows()
+        $totalRowsCount = $this->totalRowsCount;
+        $this->totalRowsCount = null;
+        if (!$searchApplied
+            && null !== $totalRowsCount
+            && $totalRowsCount['queryBuilder']->get() === $qb
+            && $totalRowsCount['state'] === self::getQueryBuilderState($qb)
+        ) {
+            $table->setFilteredRows($totalRowsCount['count']);
+
+            return;
+        }
 
         $identifiers = $table->getIdentifierFieldNames();
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * Everything the count of a query builder depends on.
+     *
+     * @return array<mixed>
+     */
+    private static function getQueryBuilderState(QueryBuilder $queryBuilder): array
+    {
+        $parameters = [];
+        foreach ($queryBuilder->getParameters() as $parameter) {
+            $parameters[] = [$parameter->getName(), $parameter->getValue(), $parameter->getType()];
+        }
+
+        return [$queryBuilder->getDQL(), $parameters, $queryBuilder->getFirstResult(), $queryBuilder->getMaxResults()];
     }
 
     /**
