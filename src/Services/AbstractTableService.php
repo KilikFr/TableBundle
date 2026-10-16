@@ -87,38 +87,8 @@ abstract class AbstractTableService implements TableServiceInterface
         $rows = $this->getRows($table, $request, false, false);
         // tables loaded from an API have no total columns
         $haveTotalColumns = method_exists($table, 'haveTotalColumns') && $table->haveTotalColumns();
-        // first line: keys
-        if (count($rows) > 0) {
-            $headers = array_map(static function ($column) {
-                return $column->getExportName() ?? $column->getName();
-            }, $table->getColumns());
-
-            if ($haveTotalColumns) {
-                $headers = array_merge([''], $headers);
-            }
-
-            fputcsv($stream, $headers, ';', '"', '\\');
-        }
-
-        foreach ($rows as $row) {
-            $line = array_map(static function ($column) use ($row, $rows) {
-                return $column->getExportValue($row, $rows);
-            }, $table->getColumns());
-
-            if ($haveTotalColumns) {
-                $line = array_merge([''], $line);
-            }
-
-            fputcsv($stream, $line, ';', '"', '\\');
-        }
-
-        if ($haveTotalColumns) {
-            $total = array_map(static function ($column) {
-                return $column->getTotal();
-            }, $table->getColumns());
-
-            fputcsv($stream, array_merge(['Total'], $total), ';', '"', '\\');
-        }
+        // as before, rows that cannot be counted are rejected
+        CsvWriter::write($stream, $table, count($rows) > 0 ? $rows : [], $rows, $haveTotalColumns);
 
         rewind($stream);
         $buffer = stream_get_contents($stream);
