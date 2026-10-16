@@ -350,6 +350,16 @@ final class PaginationTest extends IntegrationTestCase
             'distinct' => $this->productQueryBuilder()->distinct(),
             'computed scalar' => $this->productQueryBuilder()->addSelect('p.price * 2 AS doublePrice'),
             'hidden scalar' => $this->productQueryBuilder()->addSelect('LENGTH(p.name) AS HIDDEN nameLength')->orderBy('nameLength'),
+            'ordered' => $this->productQueryBuilder()->orderBy('p.name'),
+            'ordered with a parameter' => $this->productQueryBuilder()
+                ->orderBy('CASE WHEN p.status = :status THEN 0 ELSE 1 END')
+                ->setParameter('status', 'new'),
+            'grouped and ordered' => static::$em->createQueryBuilder()
+                ->select('c', 'COUNT(p.id) AS nbProducts')
+                ->from(Category::class, 'c')
+                ->leftJoin('c.products', 'p')
+                ->groupBy('c.id')
+                ->orderBy('nbProducts'),
         };
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $table = (new Table())
@@ -380,6 +390,9 @@ final class PaginationTest extends IntegrationTestCase
         yield 'distinct' => ['distinct', 'p.name', ['p_name' => 'apple'], 25, 3];
         yield 'computed scalar' => ['computed scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
         yield 'hidden scalar ordering the rows' => ['hidden scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'ordered' => ['ordered', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'ordered with a parameter' => ['ordered with a parameter', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'grouped and ordered' => ['grouped and ordered', 'c.name', ['c_name' => 'o'], 4, 1];
     }
 
     /**
