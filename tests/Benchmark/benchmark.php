@@ -97,6 +97,11 @@ $scenarios = [
         $table = $productTable();
         $service->getRows($table, $post($table, ['sortColumn' => 'p_name', 'sortReverse' => '1'], ['page' => '100']));
     },
+    'refresh_initial_order_by' => static function () use ($service, $productTable, $post) {
+        $table = $productTable();
+        $table->getQueryBuilder()->orderBy('p.name');
+        $service->getRows($table, $post($table));
+    },
     'refresh_repository' => static function () use ($service, $productTable, $post) {
         $table = $productTable()->setEntityLoaderRepository(Product::class);
         $service->getRows($table, $post($table));
