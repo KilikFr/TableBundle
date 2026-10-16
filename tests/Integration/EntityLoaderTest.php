@@ -200,8 +200,8 @@ final class EntityLoaderTest extends IntegrationTestCase
      *
      * @dataProvider looseIdentifierProvider
      *
-     * @param list<mixed>             $entityIdentifiers
-     * @param array<int, int|null>    $expectedEntityIndexes entity index by row identifier
+     * @param list<mixed>          $entityIdentifiers
+     * @param array<int, int|null> $expectedEntityIndexes entity index by row identifier
      */
     public function testCallbackModeAttachesTheFirstLooselyEqualEntity(array $entityIdentifiers, array $expectedEntityIndexes): void
     {
