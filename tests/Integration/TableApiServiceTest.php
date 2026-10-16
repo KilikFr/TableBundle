@@ -118,16 +118,30 @@ final class TableApiServiceTest extends KernelTestCase
     }
 
     /**
+     * Before 3.5.0, the export called Table::haveTotalColumns(), which ApiTable does not have.
+     */
+    public function testExportAsCsv(): void
+    {
+        [$table, $api] = $this->apiTable();
+
+        $csv = $this->service()->exportAsCsv($table, new Request([], ['api_form' => ['status' => 'new']]));
+
+        $this->assertSame("name;status\nalpha;new\nbeta;validated\n", $csv);
+        $this->assertSame([['filters' => ['status' => 'new'], 'orderBy' => [], 'page' => null, 'limit' => null]], $api->calls);
+    }
+
+    /**
      * @group known-bug
      *
-     * Current behavior: the export calls Table::haveTotalColumns(), which ApiTable does not have.
+     * Current behavior: a result without any row returns null rows, which the export counts.
      */
-    public function testExportAsCsvThrows(): void
+    public function testExportAsCsvWithoutRowsThrows(): void
     {
-        [$table] = $this->apiTable();
+        $table = (new ApiTable())->setId('api')->setPath('/api')->setApi(new FakeApi([], 0, 0))->addColumn((new Column())->setName('name'));
 
-        $this->expectException(\Error::class);
-        $this->expectExceptionMessage('haveTotalColumns()');
+        $this->assertNull($this->service()->getRows($table, new Request()));
+        $this->expectException(\TypeError::class);
+        $this->expectExceptionMessage('count()');
         $this->service()->exportAsCsv($table, new Request());
     }
 

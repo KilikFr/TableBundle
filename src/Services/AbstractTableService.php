@@ -85,13 +85,15 @@ abstract class AbstractTableService implements TableServiceInterface
         $stream = fopen('php://memory', 'w+');
         // execute query with filters, without pagination, only scalar results
         $rows = $this->getRows($table, $request, false, false);
+        // tables loaded from an API have no total columns
+        $haveTotalColumns = method_exists($table, 'haveTotalColumns') && $table->haveTotalColumns();
         // first line: keys
         if (count($rows) > 0) {
             $headers = array_map(static function ($column) {
                 return $column->getExportName() ?? $column->getName();
             }, $table->getColumns());
 
-            if ($table->haveTotalColumns()) {
+            if ($haveTotalColumns) {
                 $headers = array_merge([''], $headers);
             }
 
@@ -103,14 +105,14 @@ abstract class AbstractTableService implements TableServiceInterface
                 return $column->getExportValue($row, $rows);
             }, $table->getColumns());
 
-            if ($table->haveTotalColumns()) {
+            if ($haveTotalColumns) {
                 $line = array_merge([''], $line);
             }
 
             fputcsv($stream, $line, ';', '"', '\\');
         }
 
-        if ($table->haveTotalColumns()) {
+        if ($haveTotalColumns) {
             $total = array_map(static function ($column) {
                 return $column->getTotal();
             }, $table->getColumns());
