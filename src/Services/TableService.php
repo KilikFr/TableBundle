@@ -264,7 +264,7 @@ class TableService extends AbstractTableService
 
                 return (int) $nativeQuery->getSingleScalarResult();
             case null === $identifiers:
-                $paginatorFiltered = new Paginator($qb->getQuery());
+                $paginatorFiltered = new Paginator(self::withoutOrderBy($qb)->getQuery());
 
                 return $paginatorFiltered->count();
             default:
@@ -419,6 +419,22 @@ class TableService extends AbstractTableService
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * A copy of the query builder without ORDER BY, needless to count the rows, unless it contains parameters.
+     *
+     * The paginator output walker keeps the ORDER BY in its subquery, and makes the database sort the rows.
+     */
+    private static function withoutOrderBy(QueryBuilder $queryBuilder): QueryBuilder
+    {
+        foreach ($queryBuilder->getDQLPart('orderBy') as $orderBy) {
+            if (1 === preg_match('/[:?]/', (string) $orderBy)) {
+                return $queryBuilder;
+            }
+        }
+
+        return (clone $queryBuilder)->resetDQLPart('orderBy');
     }
 
     /**
