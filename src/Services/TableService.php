@@ -8,6 +8,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
+use Kilik\TableBundle\Doctrine\SharedResult;
 use Symfony\Component\HttpFoundation\Request;
 
 class TableService extends AbstractTableService
@@ -108,9 +109,12 @@ class TableService extends AbstractTableService
         }
 
         $query = $qb->getQuery();
+        $sharedResult = null;
 
         // if we need to get objects, LEGACY mode
         if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
+            // execute the query once: the rows fetched for the objects are hydrated as scalars too
+            $sharedResult = SharedResult::share($query);
             if (null !== $qb->getDQLPart('groupBy')) {
                 // results as objects
                 $objects = [];
@@ -128,6 +132,9 @@ class TableService extends AbstractTableService
         }
 
         $rows = $query->getResult(Query::HYDRATE_SCALAR);
+        if (null !== $sharedResult) {
+            $rows = $sharedResult->cleanScalarRows($rows);
+        }
 
         // if we need to get objects
         if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
