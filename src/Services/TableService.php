@@ -164,14 +164,9 @@ class TableService extends AbstractTableService
 
                 // associate objects to rows
                 if (count($entities) > 0) {
+                    $entityIndex = new LooseIdentifierIndex($entities);
                     foreach ($rows as &$row) {
-                        $row['object'] = null;
-                        foreach ($entities as $entity) {
-                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
-                                $row['object'] = $entity;
-                                break;
-                            }
-                        }
+                        $row['object'] = $entityIndex->find($row[$table->getAlias().'_id']);
                     }
                 }
             }
