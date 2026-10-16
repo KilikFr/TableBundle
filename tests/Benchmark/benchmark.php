@@ -139,6 +139,20 @@ $scenarios = [
         $table = $categoryTable();
         $service->getRows($table, $post($table));
     },
+    'refresh_many_groups_with_totals' => static function () use ($service, $em, $post) {
+        $queryBuilder = $em->createQueryBuilder()
+            ->select('p', 'SUM(c.id) AS categoryId')
+            ->from(Product::class, 'p')
+            ->leftJoin('p.category', 'c')
+            ->groupBy('p.id');
+        $table = (new Table())
+            ->setId('products')
+            ->setPath('/products')
+            ->setQueryBuilder($queryBuilder, 'p')
+            ->addColumn((new Column())->setName('p_name'))
+            ->addColumn((new Column())->setName('p_price')->setFilter((new Filter())->setName('p_price')->setField('p.price'))->useTotal());
+        $service->getRows($table, $post($table));
+    },
     'handle_request' => static function () use ($service, $productTable, $post) {
         $table = $productTable();
         $service->handleRequest($table, $post($table, ['p_name' => 'item']));
