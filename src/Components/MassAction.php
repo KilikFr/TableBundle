@@ -35,7 +35,7 @@ class MassAction
         $name,
         $label = 'action',
         $class = '',
-        $action = ''
+        $action = '',
     ) {
         $this->name = $name;
         $this->label = $label;
@@ -98,6 +98,7 @@ class MassAction
     public function setClass($class)
     {
         $this->class = $class;
+
         return $this;
     }
 

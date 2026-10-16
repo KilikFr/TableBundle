@@ -1,0 +1,3 @@
+# Formatting-only commits, ignored by git blame (git config blame.ignoreRevsFile .git-blame-ignore-revs)
+# style: apply PHP CS Fixer
+a6b6c10d07462852c0065421d8767b6d83ca76dd

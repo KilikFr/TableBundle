@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Kilik\TableBundle\Tests\Components;
 
 use Kilik\TableBundle\Components\Column;
-use Kilik\TableBundle\Components\Table;
 use PHPUnit\Framework\TestCase;
 
 class ColumnTest extends TestCase
@@ -26,17 +25,17 @@ class ColumnTest extends TestCase
         $column->setSortReverse(['field2' => 'DESC', 'field1' => 'DESC']);
         $this->assertEquals(['field2' => 'DESC', 'field1' => 'DESC'], $column->getSortReverse());
 
-        $this->assertEquals(false, $column->getTranslateLabel());
+        $this->assertFalse($column->getTranslateLabel());
         $this->assertNull($column->getTranslateDomain());
         $column->setTranslateLabel(true);
-        $this->assertEquals(true, $column->getTranslateLabel());
+        $this->assertTrue($column->getTranslateLabel());
         $this->assertEquals('messages', $column->getTranslateDomain());
         $column->setTranslateDomain('other_domain');
         $this->assertEquals('other_domain', $column->getTranslateDomain());
 
-        $this->assertEquals(false, $column->getRaw());
+        $this->assertFalse($column->getRaw());
         $column->setRaw(true);
-        $this->assertEquals(true, $column->getRaw());
+        $this->assertTrue($column->getRaw());
 
         $this->assertEquals('text', $column->getDisplayFormat());
         $column->setDisplayFormat('date');
@@ -104,7 +103,7 @@ class ColumnTest extends TestCase
             ],
             [
                 'VALUE1',
-                (new Column())->setName('field1')->setDisplayCallback(function ($value, $row, $rows) { return strtoupper($value); }),
+                (new Column())->setName('field1')->setDisplayCallback(static function ($value, $row, $rows) { return strtoupper($value); }),
             ],
             [
                 '2020-08-03 11:34:00',

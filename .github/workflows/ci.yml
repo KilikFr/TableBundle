@@ -25,16 +25,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.2', symfony: '6.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
+          - { php: '8.2', symfony: '6.4.*', orm: '^2.17', database: sqlite, dependencies: lowest }
           - { php: '8.2', symfony: '6.4.*', orm: '^3.2', database: sqlite, dependencies: highest }
           # ORM 2.x on PHP >= 8.4 triggers unavoidable symfony/var-exporter deprecations (lazy ghost proxies)
           - { php: '8.3', symfony: '7.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
-          # symfony/polyfill-php86 installed with an ORM that does not accept \SortDirection yet
-          - { php: '8.4', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest, extra: 'symfony/polyfill-php86' }
-          - { php: '8.5', symfony: '7.4.*', orm: '^3.7', database: sqlite, dependencies: highest }
-          - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: mysql, dependencies: highest }
-          - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: mariadb, dependencies: highest }
-          - { php: '8.3', symfony: '6.4.*', orm: '3.6.*', database: postgresql, dependencies: highest }
+          # ORM < 3.7 with symfony/polyfill-php86 installed: \SortDirection exists but is not accepted by the ORM
+          - { php: '8.4', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest }
+          # lowest Symfony 8 versions not affected by security advisories (Composer blocks the others)
+          - { php: '8.4', symfony: '8.*', orm: '^3.2', database: sqlite, dependencies: lowest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', database: sqlite, dependencies: highest }
+          - { php: '8.4', symfony: '7.4.*', orm: '^3.7', database: mysql, dependencies: highest }
+          - { php: '8.3', symfony: '6.4.*', orm: '^2.20', database: mariadb, dependencies: highest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', database: postgresql, dependencies: highest }
     services:
       mysql:
         image: ${{ matrix.database == 'mysql' && 'mysql:8.4' || '' }}
@@ -82,9 +84,7 @@ jobs:
           tools: flex
 
       - name: Restrict the Doctrine ORM version
-        run: |
-          composer require --no-update --no-interaction "doctrine/orm:${{ matrix.orm }}"
-          if [ -n "${{ matrix.extra }}" ]; then composer require --dev --no-update --no-interaction ${{ matrix.extra }}; fi
+        run: composer require --no-update --no-interaction "doctrine/orm:${{ matrix.orm }}"
 
       - name: Get the Composer cache directory
         id: composer-cache
@@ -108,19 +108,27 @@ jobs:
         run: vendor/bin/phpunit
 
   phpstan:
-    name: PHPStan
+    name: PHPStan · ${{ matrix.dependencies }} dependencies
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', symfony: '6.4.*', orm: '^2.17', dependencies: lowest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', dependencies: highest }
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: ${{ matrix.php }}
           coverage: none
           tools: flex
+      - name: Restrict the Doctrine ORM version
+        run: composer require --no-update --no-interaction "doctrine/orm:${{ matrix.orm }}"
       - name: Install dependencies
         env:
-          SYMFONY_REQUIRE: '7.4.*'
-        run: composer update --no-interaction --no-progress --prefer-dist --prefer-stable
+          SYMFONY_REQUIRE: ${{ matrix.symfony }}
+        run: composer update --no-interaction --no-progress --prefer-dist --prefer-stable ${{ matrix.dependencies == 'lowest' && '--prefer-lowest' || '' }}
       - run: vendor/bin/phpstan analyse --no-progress
 
   coding-standards:

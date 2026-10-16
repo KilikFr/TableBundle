@@ -40,6 +40,20 @@ Planned features:
 - more translations
 - add advanced templates
 
+Supported versions
+------------------
+
+| Dependency     | Versions                                   |
+|----------------|--------------------------------------------|
+| PHP            | 8.2 to 8.5                                 |
+| Symfony        | 6.4, 7.4, 8.1+                             |
+| Doctrine ORM   | 2.17+, 3.2+ (Symfony 8 requires ORM 3)     |
+| DoctrineBundle | 2.11+, 3.1+ (Symfony 8 requires 3.x)       |
+| Twig           | 3.30+                                      |
+| jQuery         | 3.x, 4.x                                   |
+
+Version 3.4 supports older PHP, Symfony, Doctrine and Twig versions. See the [changelog](CHANGELOG.md).
+
 Installation
 ------------
 ```sh
@@ -260,6 +274,23 @@ When a filter is filled, class <em>table-filter-filled</em> is added on field. B
 .table-filter-filled {
     ...
 }
+```
+
+### Sort columns
+
+A column sort is a list of fields with their direction, `"asc"` or `"desc"`. With Doctrine ORM 3.7, you can also use
+the `\SortDirection` enum (PHP 8.6, or `symfony/polyfill-php86`):
+
+```php
+$table
+    ->addColumn(
+        (new Column())
+            ->setName('p_name')
+            ->setSort(['p.name' => 'asc', 'p.id' => \SortDirection::Descending])
+            // optional, the sort is inverted automatically otherwise
+            ->setSortReverse(['p.name' => 'desc'])
+    )
+;
 ```
 
 ### Filter date columns

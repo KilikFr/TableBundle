@@ -6,3 +6,9 @@ parameters:
     level: 5
     paths:
         - src
+    ignoreErrors:
+        -
+            # the $action argument has always been ignored: using it would change existing pages (planned for 4.0)
+            identifier: constructor.unusedParameter
+            path: src/Components/MassAction.php
+            count: 1

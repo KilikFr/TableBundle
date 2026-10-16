@@ -201,7 +201,11 @@ final class EntityLoaderTest extends IntegrationTestCase
         $table = $this->documentTable()->setEntityLoaderCallback(static function (array $identifiers) use (&$received) {
             $received = $identifiers;
 
-            return static::$em->getRepository(Document::class)->findBy(['id' => $identifiers]);
+            // filtered in PHP: older ORM 2.x versions do not convert Uuid objects in findBy()
+            return array_values(array_filter(
+                static::$em->getRepository(Document::class)->findAll(),
+                static fn (Document $document) => \in_array((string) $document->getId(), array_map('strval', $identifiers), true)
+            ));
         });
 
         $rows = $this->tableService()->getRows($table, $this->postRequest($table));

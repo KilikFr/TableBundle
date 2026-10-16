@@ -2,27 +2,266 @@
 
 namespace Kilik\TableBundle\Services;
 
-use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Kilik\TableBundle\Components\Filter;
+use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Kilik\TableBundle\Components\Table;
-use Kilik\TableBundle\Components\Filter;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class TableService extends AbstractTableService
 {
+    use RequestParameterTrait;
+
     public const TOTAL_PREFIX = 'TOTAL_';
 
     /**
-     * @param Table        $table
-     * @param Request      $request
-     * @param QueryBuilder $queryBuilder
+     * Whether QueryBuilder::addOrderBy() accepts \SortDirection (Doctrine ORM >= 3.7).
      */
+    private static ?bool $sortDirectionSupported = null;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
+    {
+        /** @var Table $table */
+        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
+
+        foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+            $column = $table->getColumnByName($hiddenColumnName);
+            if (null !== $column) {
+                $column->setHidden(true);
+            }
+        }
+
+        $qb = $table->getQueryBuilder();
+
+        if ($paginate) {
+            // @todo: had possibility to define custom count queries
+            $this->setTotalRows($table);
+            $this->setFilteredRows($table, $request);
+
+            // compute last page and floor curent page
+            $table->setLastPage((int) ceil($table->getFilteredRows() / $table->getRowsPerPage()));
+
+            if ($table->getPage() > $table->getLastPage()) {
+                $table->setPage($table->getLastPage());
+            }
+
+            $qb->setMaxResults($table->getRowsPerPage());
+            $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
+        }
+
+        // add filters
+        $this->addSearch($table, $request, $qb);
+
+        // handle ordering
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
+
+        if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
+            $column = $table->getColumnByName($queryParams['sortColumn']);
+            // if column exists
+            if (null !== $column) {
+                if (null !== $column->getSort()) {
+                    $qb->resetDQLPart('orderBy');
+                    if (isset($queryParams['sortReverse'])) {
+                        $sortReverse = $queryParams['sortReverse'];
+                    } else {
+                        $sortReverse = false;
+                    }
+                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
+                        $qb->addOrderBy($sortField, $this->toOrmSortDirection($sortOrder));
+                    }
+                }
+            }
+        }
+
+        // force a final ordering by id
+        $qb->addOrderBy($table->getAlias().'.id', $this->toOrmSortDirection('asc'));
+
+        if ($table->haveTotalColumns()) {
+            $totalQueryBuilder = clone $qb;
+            $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
+            foreach ($table->getColumns() as $column) {
+                if ($column->isUseTotal()) {
+                    $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField().') AS '.self::TOTAL_PREFIX.$column->getName());
+                }
+            }
+            $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
+            foreach ($table->getColumns() as $column) {
+                $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
+                if ($column->isUseTotal()) {
+                    $callback = $column->getDisplayCallback();
+                    if (null !== $callback) {
+                        if (!is_callable($callback)) {
+                            throw new \Exception('displayCallback is not callable');
+                        }
+                        $column->setTotal($callback($totalResults[$totalColumnResultName]) ?? 0);
+                    } else {
+                        $column->setTotal($totalResults[$totalColumnResultName] ?? 0);
+                    }
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        // if we need to get objects, LEGACY mode
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
+            if (null !== $qb->getDQLPart('groupBy')) {
+                // results as objects
+                $objects = [];
+                foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
+                    if (is_object($object)) {
+                        $index = is_int($object->getId()) ? $object->getId() : (string) $object->getId();
+                        $objects[$index] = $object;
+                    } // when results are mixed with objects and scalar
+                    elseif (isset($object[0]) && is_object($object[0])) {
+                        $index = is_int($object[0]->getId()) ? $object[0]->getId() : (string) $object[0]->getId();
+                        $objects[$index] = $object[0];
+                    }
+                }
+            }
+        }
+
+        $rows = $query->getResult(Query::HYDRATE_SCALAR);
+
+        // if we need to get objects
+        if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
+            // create entities identifiers list from scalar rows
+            $identifiers = [];
+            // results as scalar
+            foreach ($rows as $row) {
+                // add row identifier to array
+                $identifiers[] = $row[$table->getAlias().'_id'];
+            }
+
+            // if at least one identifier should be used to load entities
+            if (count($identifiers) > 0) {
+                // loaded entities
+                $entities = $this->loadRowsById($table, $identifiers);
+
+                // associate objects to rows
+                if (count($entities) > 0) {
+                    foreach ($rows as &$row) {
+                        $row['object'] = null;
+                        foreach ($entities as $entity) {
+                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
+                                $row['object'] = $entity;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // if we need to get objects (legacy mode)
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
+            // results as scalar
+            foreach ($rows as &$row) {
+                $index = is_int($row[$table->getAlias().'_id'])
+                    ? $row[$table->getAlias().'_id']
+                    : (string) $row[$table->getAlias().'_id'];
+
+                if (isset($objects[$index])) {
+                    $row['object'] = $objects[$index];
+                }
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loadRowsById(TableInterface $table, $identifiers)
+    {
+        /** @var Table $table */
+        $entities = [];
+        // if we need to use repository name
+        if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
+            // if repository name is missing
+            if (!$table->getEntityLoaderRepository()) {
+                throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+            }
+
+            // load entities from identifiers
+            $loaderQueryBuilder = $table->getQueryBuilder()
+                ->getEntityManager()
+                ->getRepository($table->getEntityLoaderRepository())
+                ->createQueryBuilder('e')
+                ->select('e')
+                ->where('e.id IN (:identifiers)')
+                ->setParameter('identifiers', $identifiers);
+
+            $entities = $loaderQueryBuilder->getQuery()->getResult();
+        } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
+            // if repository callback is missing
+            if (!is_callable($table->getEntityLoaderCallback())) {
+                throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
+            }
+            // else, load entities from callback method
+            $callback = $table->getEntityLoaderCallback();
+            $entities = $callback($identifiers);
+        } else {
+            throw new \InvalidArgumentException('unsupported entity loader mode');
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Set total rows count without filters.
+     */
+    protected function setTotalRows(Table $table)
+    {
+        $qb = $table->getQueryBuilder();
+        $qbtr = clone $qb;
+
+        $identifiers = $table->getIdentifierFieldNames();
+        $count = $this->countRows($qbtr, $identifiers);
+
+        $table->setTotalRows($count);
+    }
+
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return float|int
+     */
+    protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
+    {
+        switch (true) {
+            case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && null === $identifiers:
+                $em = $qb->getEntityManager();
+                $sql = $qb->getQuery()->getSQL();
+                $rsm = new Query\ResultSetMapping();
+                $rsm->addScalarResult('dctrn_count', 'count');
+                $nativeQuery = $em->createNativeQuery(sprintf('SELECT COUNT(*) AS dctrn_count FROM (%s) AS dctrn_table', $sql), $rsm);
+                foreach ($qb->getParameters() as $key => $item) {
+                    $nativeQuery->setParameter($key + 1, $item->getValue());
+                }
+
+                return (int) $nativeQuery->getSingleScalarResult();
+            case null === $identifiers:
+                $paginatorFiltered = new Paginator($qb->getQuery());
+
+                return $paginatorFiltered->count();
+            default:
+                $qb->select($qb->expr()->count($identifiers));
+
+                return (int) $qb->getQuery()->getSingleScalarResult();
+        }
+    }
+
     private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder)
     {
-        $queryParams = $request->get($table->getFormId());
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
 
         foreach ($table->getAllFilters() as $filter) {
             if (!isset($queryParams[$filter->getName()])) {
@@ -48,12 +287,13 @@ class TableService extends AbstractTableService
             }
 
             list($operator, $searchParam) = $filter->getOperatorAndValue($searchParamRaw);
-            if ('' === (string)$searchParam) {
+            if ('' === (string) $searchParam) {
                 continue;
             }
 
             list($searchOperator, $formattedSearch) = $filter->getFormattedInput($operator, $searchParam);
 
+            $sql = null;
             // depending on operator
             switch ($searchOperator) {
                 case Filter::TYPE_GREATER:
@@ -94,11 +334,11 @@ class TableService extends AbstractTableService
                     $values = is_array($formattedSearch) ? $formattedSearch : explode(',', $formattedSearch);
                     $queryBuilder->setParameter('filter_'.$filter->getName(), $values);
                     break;
-                // when filtering on 'description LIKE WORDS "house red blue"'
-                // results are: description LIKE '%house%' AND
+                    // when filtering on 'description LIKE WORDS "house red blue"'
+                    // results are: description LIKE '%house%' AND
                 case Filter::TYPE_LIKE_WORDS_AND:
                 case Filter::TYPE_LIKE_WORDS_OR:
-                    $binaryOperator =  Filter::TYPE_LIKE_WORDS_OR == $searchOperator ? 'OR' : 'AND';
+                    $binaryOperator = Filter::TYPE_LIKE_WORDS_OR == $searchOperator ? 'OR' : 'AND';
                     $words = array_filter(array_map('trim', explode(' ', trim($formattedSearch))));
                     if (empty($words)) {
                         break;
@@ -130,26 +370,7 @@ class TableService extends AbstractTableService
     }
 
     /**
-     * Set total rows count without filters.
-     *
-     * @param Table $table
-     */
-    protected function setTotalRows(Table $table)
-    {
-        $qb = $table->getQueryBuilder();
-        $qbtr = clone $qb;
-
-        $identifiers = $table->getIdentifierFieldNames();
-        $count = $this->countRows($qbtr, $identifiers);
-
-        $table->setTotalRows($count);
-    }
-
-    /**
      * Set total rows count with filters.
-     *
-     * @param Table   $table
-     * @param Request $request
      */
     private function setFilteredRows(Table $table, Request $request)
     {
@@ -164,228 +385,40 @@ class TableService extends AbstractTableService
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
-    {
-        $table->setRowsPerPage((int) $request->get('rowsPerPage', 10));
-        $table->setPage((int) $request->get('page', 1));
-
-        foreach ((array)$request->get('hiddenColumns', []) as $hiddenColumnName => $notUsed) {
-            $column = $table->getColumnByName($hiddenColumnName);
-            if (!is_null($column)) {
-                $column->setHidden(true);
-            }
-        }
-
-        $qb = $table->getQueryBuilder();
-
-        if ($paginate) {
-            // @todo: had possibility to define custom count queries
-            $this->setTotalRows($table);
-            $this->setFilteredRows($table, $request);
-
-            // compute last page and floor curent page
-            $table->setLastPage(ceil($table->getFilteredRows() / $table->getRowsPerPage()));
-
-            if ($table->getPage() > $table->getLastPage()) {
-                $table->setPage($table->getLastPage());
-            }
-
-            $qb->setMaxResults($table->getRowsPerPage());
-            $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
-        }
-
-        // add filters
-        $this->addSearch($table, $request, $qb);
-
-        // handle ordering
-        $queryParams = $request->get($table->getFormId());
-
-        if (isset($queryParams['sortColumn']) && $queryParams['sortColumn'] != '') {
-            $column = $table->getColumnByName($queryParams['sortColumn']);
-            // if column exists
-            if (!is_null($column)) {
-                if (!is_null($column->getSort())) {
-                    $qb->resetDQLPart('orderBy');
-                    if (isset($queryParams['sortReverse'])) {
-                        $sortReverse = $queryParams['sortReverse'];
-                    } else {
-                        $sortReverse = false;
-                    }
-                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $qb->addOrderBy($sortField, $sortOrder);
-                    }
-                }
-            }
-        }
-
-        // force a final ordering by id
-        $qb->addOrderBy($table->getAlias().'.id', 'asc');
-
-        if ($table->haveTotalColumns()) {
-            $totalQueryBuilder = clone ($qb);
-            $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
-            foreach ($table->getColumns() as $column) {
-                if ($column->isUseTotal()) {
-                    $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField(). ') AS ' . self::TOTAL_PREFIX.$column->getName());
-                }
-            }
-            $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
-            foreach ($table->getColumns() as $column) {
-                $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
-                if ($column->isUseTotal()) {
-                    $callback = $column->getDisplayCallback();
-                    if (!is_null($callback)) {
-                        if (!is_callable($callback)) {
-                            throw new \Exception('displayCallback is not callable');
-                        }
-                        $column->setTotal($callback($totalResults[$totalColumnResultName]) ?? 0);
-                    } else {
-                        $column->setTotal($totalResults[$totalColumnResultName] ?? 0);
-                    }
-                }
-            }
-        }
-
-        $query = $qb->getQuery();
-
-        // if we need to get objects, LEGACY mode
-        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
-            if (!is_null($qb->getDQLPart('groupBy'))) {
-                // results as objects
-                $objects = [];
-                foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
-                    if (is_object($object)) {
-                        $index = is_int($object->getId()) ? $object->getId() : (string) $object->getId();
-                        $objects[$index] = $object;
-                    } // when results are mixed with objects and scalar
-                    elseif (isset($object[0]) && is_object($object[0])) {
-                        $index = is_int($object[0]->getId()) ? $object[0]->getId() : (string) $object[0]->getId();
-                        $objects[$index] = $object[0];
-                    }
-                }
-            }
-        }
-
-        $rows = $query->getResult(Query::HYDRATE_SCALAR);
-
-        // if we need to get objects
-        if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
-            // create entities identifiers list from scalar rows
-            $identifiers = [];
-            // results as scalar
-            foreach ($rows as $row) {
-                // add row identifier to array
-                $identifiers[] = $row[$table->getAlias().'_id'];
-            }
-
-            // if at least one identifier should be used to load entities
-            if (count($identifiers) > 0) {
-
-                // loaded entities
-                $entities = $this->loadRowsById($table, $identifiers);
-
-                // associate objects to rows
-                if (count($entities) > 0) {
-                    foreach ($rows as &$row) {
-                        $row['object'] = null;
-                        foreach ($entities as $entity) {
-                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
-                                $row['object'] = $entity;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // if we need to get objects (legacy mode)
-        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
-            // results as scalar
-            foreach ($rows as &$row) {
-                $index = is_int($row[$table->getAlias().'_id'])
-                    ? $row[$table->getAlias().'_id']
-                    : (string) $row[$table->getAlias().'_id'];
-
-                if (isset($objects[$index])) {
-                    $row['object'] = $objects[$index];
-                }
-            }
-        }
-
-        return $rows;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function loadRowsById(TableInterface $table, $identifiers)
-    {
-        $entities = [];
-        // if we need to use repository name
-        if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
-            // if repository name is missing
-            if (!$table->getEntityLoaderRepository()) {
-                throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
-            }
-
-            // load entities from identifiers
-            $loaderQueryBuilder = $table->getQueryBuilder()
-                ->getEntityManager()
-                ->getRepository($table->getEntityLoaderRepository())
-                ->createQueryBuilder('e')
-                ->select('e')
-                ->where('e.id IN (:identifiers)')
-                ->setParameter('identifiers', $identifiers);
-
-            $entities = $loaderQueryBuilder->getQuery()->getResult();
-        } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
-            // if repository callback is missing
-            if (!is_callable($table->getEntityLoaderCallback())) {
-                throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
-            }
-            // else, load entities from callback method
-            $callback = $table->getEntityLoaderCallback();
-            $entities = $callback($identifiers);
-        } else {
-            throw new \InvalidArgumentException('unsupported entity loader mode');
-        }
-
-        return $entities;
-    }
-
-    /**
-     * @param QueryBuilder $qb
-     * @param string|null  $identifiers
+     * Converts a sort direction to the type expected by the installed Doctrine ORM.
      *
-     * @return float|int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * Doctrine ORM 3.7 deprecates string directions in favor of \SortDirection, which older versions do not accept
+     * (even when symfony/polyfill-php86 provides the enum). "asc" and "desc" are converted case-insensitively, as
+     * the ORM does; any other value is passed unchanged.
+     *
+     * @param string|\SortDirection $order
+     *
+     * @return string|\SortDirection
      */
-    protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
+    private function toOrmSortDirection($order)
     {
-        switch (true) {
-            case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && is_null($identifiers):
-                $em = $qb->getEntityManager();
-                $sql = $qb->getQuery()->getSQL();
-                $rsm = new Query\ResultSetMapping();
-                $rsm->addScalarResult('dctrn_count', 'count');
-                $nativeQuery = $em->createNativeQuery(sprintf('SELECT COUNT(*) AS dctrn_count FROM (%s) AS dctrn_table', $sql), $rsm);
-                foreach ($qb->getParameters() as $key => $item) {
-                    $nativeQuery->setParameter($key + 1, $item->getValue());
-                }
-
-                return (int)$nativeQuery->getSingleScalarResult();
-            case is_null($identifiers):
-                $paginatorFiltered = new Paginator($qb->getQuery());
-
-                return $paginatorFiltered->count();
-            default:
-                $qb->select($qb->expr()->count($identifiers));
-
-                return (int)$qb->getQuery()->getSingleScalarResult();
+        if (null === self::$sortDirectionSupported) {
+            $type = (new \ReflectionMethod(QueryBuilder::class, 'addOrderBy'))->getParameters()[1]->getType();
+            self::$sortDirectionSupported = null !== $type && str_contains((string) $type, 'SortDirection');
         }
+
+        if (self::$sortDirectionSupported) {
+            if (\is_string($order)) {
+                switch (strtolower($order)) {
+                    case 'asc':
+                        return \SortDirection::Ascending;
+                    case 'desc':
+                        return \SortDirection::Descending;
+                }
+            }
+
+            return $order;
+        }
+
+        if ($order instanceof \SortDirection) {
+            return \SortDirection::Ascending === $order ? 'ASC' : 'DESC';
+        }
+
+        return $order;
     }
 }

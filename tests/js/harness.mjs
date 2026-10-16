@@ -10,7 +10,7 @@ import { JSDOM } from 'jsdom';
 export const jqueryPackage = process.env.JQUERY ?? 'jquery3';
 
 // read from node_modules: jQuery 4 does not export its dist files
-const jquerySource = readFileSync(new URL(`../../node_modules/${jqueryPackage}/dist/jquery.js`, import.meta.url), 'utf8');
+const readPackageFile = (path) => readFileSync(new URL(`../../node_modules/${path}`, import.meta.url), 'utf8');
 const kilikTableSource = readFileSync(new URL('../../src/Resources/public/js/KilikTable.js', import.meta.url), 'utf8');
 const snapshotsDir = new URL('../__snapshots__/', import.meta.url);
 
@@ -38,7 +38,13 @@ export function responseFromSnapshot(path) {
 /**
  * Creates a page containing a table rendered by TemplatesTest, with a fake server answering every AJAX request.
  */
-export function createPage({ template = '_defaultTable.html', storage = null, response = 'HandleRequestTest/template__defaultTable.txt' } = {}) {
+export function createPage({
+    template = '_defaultTable.html',
+    storage = null,
+    response = 'HandleRequestTest/template__defaultTable.txt',
+    jquery = jqueryPackage,
+    migrate = false,
+} = {}) {
     const dom = new JSDOM(
         `<!DOCTYPE html><html><head></head><body>${readSnapshot(`TemplatesTest/${template}`)}</body></html>`,
         { runScripts: 'outside-only', url: 'https://example.test/products' },
@@ -47,7 +53,13 @@ export function createPage({ template = '_defaultTable.html', storage = null, re
     if (null !== storage) {
         window.localStorage.setItem('kilik_table_products', storage);
     }
-    window.eval(jquerySource);
+    window.eval(readPackageFile(`${jquery}/dist/jquery.js`));
+    if (migrate) {
+        // jQuery Migrate records the use of removed or deprecated APIs in jQuery.migrateMessages
+        window.jQuery.migrateMute = true;
+        window.jQuery.migrateTrace = false;
+        window.eval(readPackageFile('jquery-migrate/dist/jquery-migrate.js'));
+    }
     window.eval(kilikTableSource);
 
     const $ = window.jQuery;
@@ -84,6 +96,7 @@ export function createPage({ template = '_defaultTable.html', storage = null, re
         requests,
         response: json,
         options: JSON.parse($('[data-kiliktable-id="products"]').html()),
+        migrateMessages: () => Array.from($.migrateMessages ?? []),
         createTable(constructorName = 'KilikTable', options = {}) {
             return new window[constructorName]('products', '/products/list', { ...this.options, ...options });
         },

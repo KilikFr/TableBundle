@@ -130,21 +130,29 @@ final class FilterTest extends IntegrationTestCase
     }
 
     /**
-     * @group known-bug
+     * "0" is removed from the word list, like spaces: without any word left, the filter is ignored.
      *
-     * Current behavior: "0" is removed from the word list and an undefined variable is read, which raises a PHP
-     * warning (an exception under the test and debug error handlers; in production the filter is ignored).
+     * Before 3.5.0, an undefined variable was read, which raised a PHP warning.
      */
-    public function testWordsFilterWithZeroOnly(): void
+    public function testWordsFilterWithZeroOnlyIsIgnored(): void
     {
         $table = $this->productTable($this->filteredColumn('p.name', (new Filter())->setType(Filter::TYPE_LIKE_WORDS_AND)));
 
-        try {
-            $this->getAllRows($table, ['p_name' => '0']);
-            $this->fail('A warning was expected.');
-        } catch (\Throwable $exception) {
-            $this->assertStringContainsString('Undefined variable $sql', $exception->getMessage());
-        }
+        $this->assertFilteredIds(range(1, 25), $table, ['p_name' => '0']);
+    }
+
+    /**
+     * Before 3.5.0, the condition of the previous filter was added again instead.
+     */
+    public function testWordsFilterWithZeroOnlyAfterAnotherFilterIsIgnored(): void
+    {
+        $table = $this->productTable(
+            $this->filteredColumn('p.status'),
+            $this->filteredColumn('p.name', (new Filter())->setType(Filter::TYPE_LIKE_WORDS_AND))
+        );
+
+        $validatedIds = self::fixtureIds(static fn (array $product): bool => 'validated' === $product[2]);
+        $this->assertFilteredIds($validatedIds, $table, ['p_status' => '==validated', 'p_name' => '0']);
     }
 
     public function testInvalidTypeIsRejected(): void
