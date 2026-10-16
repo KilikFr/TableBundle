@@ -195,6 +195,54 @@ final class EntityLoaderTest extends IntegrationTestCase
         $this->assertNull($rows[0]['object']);
     }
 
+    /**
+     * Each row gets the first entity whose identifier is loosely equal (==) to the row identifier.
+     *
+     * @dataProvider looseIdentifierProvider
+     *
+     * @param list<mixed>             $entityIdentifiers
+     * @param array<int, int|null>    $expectedEntityIndexes entity index by row identifier
+     */
+    public function testCallbackModeAttachesTheFirstLooselyEqualEntity(array $entityIdentifiers, array $expectedEntityIndexes): void
+    {
+        $entities = array_map(static fn ($identifier) => new class($identifier) {
+            public function __construct(private $identifier)
+            {
+            }
+
+            public function getId()
+            {
+                return $this->identifier;
+            }
+        }, $entityIdentifiers);
+        $table = $this->productTable()->setEntityLoaderCallback(static fn (array $identifiers) => $entities);
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $attached = [];
+        foreach ($rows as $row) {
+            $index = array_search($row['object'], $entities, true);
+            $attached[$row['p_id']] = false === $index ? null : $index;
+        }
+        $expected = [];
+        foreach (range(1, 10) as $identifier) {
+            $expected[$identifier] = $expectedEntityIndexes[$identifier] ?? null;
+        }
+        $this->assertSame($expected, $attached);
+    }
+
+    public function looseIdentifierProvider(): iterable
+    {
+        yield 'integers in another order, with a duplicate' => [[3, 1, 3, 2], [1 => 1, 2 => 3, 3 => 0]];
+        yield 'numeric strings' => [['1.0', ' 2', '3 ', '4e0', '0x5', '06'], [1 => 0, 2 => 1, 3 => 2, 4 => 3, 6 => 5]];
+        yield 'first of several equal strings' => [['01', '1', 1], [1 => 0]];
+        yield 'non-numeric strings' => [['1a', 'a1', ''], []];
+        yield 'floats' => [[1.0, 2.5, 3.0], [1 => 0, 3 => 2]];
+        yield 'null' => [[null], []];
+        yield 'true matches every row' => [[2, true], [1 => 1, 2 => 0, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, 8 => 1, 9 => 1, 10 => 1]];
+        yield 'integers after a boolean' => [[false, 4], [4 => 1]];
+    }
+
     public function testCallbackModeWithUuidIdentifiers(): void
     {
         $received = [];
