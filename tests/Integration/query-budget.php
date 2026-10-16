@@ -7,19 +7,20 @@
  * reduces the number of queries, never raise it without a reason.
  */
 return [
-    // total COUNT + filtered COUNT + page (objects) + page (scalars)
-    'refresh_legacy' => 4,
-    'refresh_legacy_filtered_sorted' => 4,
-    'refresh_legacy_group_by' => 4,
-    // total COUNT + filtered COUNT + page (scalars) + entities
-    'refresh_repository' => 4,
-    'refresh_callback' => 4,
-    // total COUNT + filtered COUNT + page (scalars)
-    'refresh_without_entities' => 3,
+    // total COUNT (also the filtered one, without filter) + page (objects, then scalars from the same result)
+    'refresh_legacy' => 2,
+    'refresh_legacy_group_by' => 2,
+    // total COUNT + filtered COUNT + page (objects, then scalars from the same result)
+    'refresh_legacy_filtered_sorted' => 3,
+    // total COUNT (also the filtered one, without filter) + page (scalars) + entities
+    'refresh_repository' => 3,
+    'refresh_callback' => 3,
+    // total COUNT (also the filtered one, without filter) + page (scalars)
+    'refresh_without_entities' => 2,
     'refresh_identifier_count' => 4,
     // refresh_legacy_group_by + totals
-    'refresh_with_totals' => 5,
-    'handle_request' => 4,
+    'refresh_with_totals' => 3,
+    'handle_request' => 3,
     // rows (scalars)
     'export_csv' => 1,
     // rows (scalars) + totals

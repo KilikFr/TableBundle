@@ -8,8 +8,12 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\SqlOutputWalker;
 use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\QueryBuilder;
+use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
+use Kilik\TableBundle\Services\TableService;
 use Kilik\TableBundle\Tests\Fixtures\Entity\Category;
+use Kilik\TableBundle\Tests\Fixtures\Fixtures;
 
 /**
  * Freezes pagination and row counting in TableService::getRows().
@@ -127,6 +131,37 @@ final class PaginationTest extends IntegrationTestCase
         $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => '0']));
     }
 
+    /**
+     * @dataProvider maxRowsPerPageProvider
+     */
+    public function testMaxRowsPerPage(string $rowsPerPage, int $expectedRowsPerPage): void
+    {
+        $table = $this->productTable()->setMaxRowsPerPage(20);
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => $rowsPerPage]));
+
+        $this->assertSame($expectedRowsPerPage, $table->getRowsPerPage());
+        $this->assertCount($expectedRowsPerPage, $rows);
+        $this->assertSame((int) ceil(25 / $expectedRowsPerPage), $table->getLastPage());
+    }
+
+    public function maxRowsPerPageProvider(): iterable
+    {
+        yield 'below the maximum' => ['5', 5];
+        yield 'the maximum' => ['20', 20];
+        yield 'above the maximum' => ['100000', 20];
+        yield 'zero' => ['0', 1];
+        yield 'negative' => ['-5', 1];
+    }
+
+    public function testMaxRowsPerPageMustBePositive(): void
+    {
+        $this->assertNull((new Table())->getMaxRowsPerPage());
+        $this->assertNull((new Table())->setMaxRowsPerPage(10)->setMaxRowsPerPage(null)->getMaxRowsPerPage());
+
+        $this->expectException(\InvalidArgumentException::class);
+        (new Table())->setMaxRowsPerPage(0);
+    }
+
     public function testFilteredRowsAndTotalRows(): void
     {
         $table = $this->productTable($this->filteredColumn('p.name'));
@@ -137,6 +172,59 @@ final class PaginationTest extends IntegrationTestCase
         $this->assertSame(3, $table->getFilteredRows());
         $this->assertSame(1, $table->getLastPage());
         $this->assertSame(3, $table->getLastRow());
+    }
+
+    public function testFiltersWithoutValueKeepAllRows(): void
+    {
+        $table = $this->productTable($this->filteredColumn('p.name'), $this->filteredColumn('p.status'));
+        $this->tableService()->getRows($table, $this->postRequest($table, ['p_name' => '  ', 'p_status' => '']));
+
+        $this->assertSame(25, $table->getTotalRows());
+        $this->assertSame(25, $table->getFilteredRows());
+        $this->assertSame(3, $table->getLastPage());
+    }
+
+    public function testQueryPartBuilderCalledWithoutValueFiltersTheRows(): void
+    {
+        $filter = (new Filter())->setQueryPartBuilder(static function (Filter $filter, Table $table, QueryBuilder $queryBuilder): void {
+            $queryBuilder->andWhere("p.status = 'cancelled'");
+        });
+        $table = $this->productTable($this->filteredColumn('p.status', $filter));
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, ['p_status' => '']));
+
+        $this->assertSame([4, 6, 12, 19], self::productIds($rows));
+        $this->assertSame(25, $table->getTotalRows());
+        $this->assertSame(4, $table->getFilteredRows());
+    }
+
+    public function testOverriddenTotalRowsDoNotChangeTheFilteredRows(): void
+    {
+        $service = new class(static::getContainer()->get('twig'), static::getContainer()->get('form.factory')) extends TableService {
+            protected function setTotalRows(Table $table)
+            {
+                $table->setTotalRows(1000);
+            }
+        };
+        $table = $this->productTable();
+        $service->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(1000, $table->getTotalRows());
+        $this->assertSame(25, $table->getFilteredRows());
+    }
+
+    public function testOverriddenCountRowsCountsTheTotalAndFilteredRows(): void
+    {
+        $service = new class(static::getContainer()->get('twig'), static::getContainer()->get('form.factory')) extends TableService {
+            protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
+            {
+                return 42;
+            }
+        };
+        $table = $this->productTable();
+        $service->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(42, $table->getTotalRows());
+        $this->assertSame(42, $table->getFilteredRows());
     }
 
     public function testNoResult(): void
@@ -279,6 +367,81 @@ final class PaginationTest extends IntegrationTestCase
     /**
      * Categories left joined to their products, without group by: one row per product.
      */
+    /**
+     * @dataProvider countedQueryProvider
+     *
+     * @param array<string, string> $filters
+     */
+    public function testRowsAreCountedOnDistinctRootEntities(string $query, string $filteredField, array $filters, int $expectedTotal, int $expectedFiltered): void
+    {
+        $queryBuilder = match ($query) {
+            'fetch joined to-one' => $this->productQueryBuilder()->addSelect('c')->leftJoin('p.category', 'c'),
+            'fetch joined to-many' => static::$em->createQueryBuilder()->select('c', 'p')->from(Category::class, 'c')->leftJoin('c.products', 'p'),
+            'joined to-many' => static::$em->createQueryBuilder()->select('c')->from(Category::class, 'c')->leftJoin('c.products', 'p'),
+            'distinct' => $this->productQueryBuilder()->distinct(),
+            'computed scalar' => $this->productQueryBuilder()->addSelect('p.price * 2 AS doublePrice'),
+            'hidden scalar' => $this->productQueryBuilder()->addSelect('LENGTH(p.name) AS HIDDEN nameLength')->orderBy('nameLength'),
+            'ordered' => $this->productQueryBuilder()->orderBy('p.name'),
+            'ordered with a parameter' => $this->productQueryBuilder()
+                ->orderBy('CASE WHEN p.status = :status THEN 0 ELSE 1 END')
+                ->setParameter('status', 'new'),
+            'grouped and ordered' => static::$em->createQueryBuilder()
+                ->select('c', 'COUNT(p.id) AS nbProducts')
+                ->from(Category::class, 'c')
+                ->leftJoin('c.products', 'p')
+                ->groupBy('c.id')
+                ->orderBy('nbProducts'),
+        };
+        $rootAlias = $queryBuilder->getRootAliases()[0];
+        $table = (new Table())
+            ->setId('counted')
+            ->setPath('/counted')
+            ->setQueryBuilder($queryBuilder, $rootAlias)
+            ->addColumn($this->filteredColumn($filteredField));
+
+        $this->tableService()->getRows($table, $this->postRequest($table, $filters));
+
+        $this->assertSame($expectedTotal, $table->getTotalRows());
+        $this->assertSame($expectedFiltered, $table->getFilteredRows());
+    }
+
+    public function countedQueryProvider(): iterable
+    {
+        $products = Fixtures::PRODUCTS;
+        // categories of the products whose name contains the word
+        $categoriesOf = static fn (string $word): int => \count(array_unique(array_filter(array_column(
+            array_filter($products, static fn (array $product): bool => str_contains($product[0], $word)),
+            6
+        ))));
+        $fruits = \count(array_filter($products, static fn (array $product): bool => 'fruits' === $product[6]));
+
+        yield 'fetch joined to-one' => ['fetch joined to-one', 'c.name', ['c_name' => '==fruits'], 25, $fruits];
+        yield 'fetch joined to-many' => ['fetch joined to-many', 'p.name', ['p_name' => 'apple'], 4, $categoriesOf('apple')];
+        yield 'joined to-many' => ['joined to-many', 'p.name', ['p_name' => 'e'], 4, $categoriesOf('e')];
+        yield 'distinct' => ['distinct', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'computed scalar' => ['computed scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'hidden scalar ordering the rows' => ['hidden scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'ordered' => ['ordered', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'ordered with a parameter' => ['ordered with a parameter', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'grouped and ordered' => ['grouped and ordered', 'c.name', ['c_name' => 'o'], 4, 1];
+    }
+
+    /**
+     * An aggregate without GROUP BY makes a single row, rejected by MySQL and PostgreSQL with the entity columns.
+     */
+    public function testAggregateWithoutGroupByIsCountedAsASingleRow(): void
+    {
+        $table = $this->productTable()->setQueryBuilder($this->productQueryBuilder()->addSelect('COUNT(p.id) AS nbProducts'), 'p');
+
+        if (\in_array(self::platform(), ['mysql', 'postgresql'], true)) {
+            $this->expectException(\Doctrine\DBAL\Exception::class);
+        }
+        $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(1, $table->getTotalRows());
+        $this->assertSame(1, $table->getFilteredRows());
+    }
+
     private function categoryJoinTable(): Table
     {
         $queryBuilder = static::$em->createQueryBuilder()

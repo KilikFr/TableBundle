@@ -195,6 +195,54 @@ final class EntityLoaderTest extends IntegrationTestCase
         $this->assertNull($rows[0]['object']);
     }
 
+    /**
+     * Each row gets the first entity whose identifier is loosely equal (==) to the row identifier.
+     *
+     * @dataProvider looseIdentifierProvider
+     *
+     * @param list<mixed>          $entityIdentifiers
+     * @param array<int, int|null> $expectedEntityIndexes entity index by row identifier
+     */
+    public function testCallbackModeAttachesTheFirstLooselyEqualEntity(array $entityIdentifiers, array $expectedEntityIndexes): void
+    {
+        $entities = array_map(static fn ($identifier) => new class($identifier) {
+            public function __construct(private $identifier)
+            {
+            }
+
+            public function getId()
+            {
+                return $this->identifier;
+            }
+        }, $entityIdentifiers);
+        $table = $this->productTable()->setEntityLoaderCallback(static fn (array $identifiers) => $entities);
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $attached = [];
+        foreach ($rows as $row) {
+            $index = array_search($row['object'], $entities, true);
+            $attached[$row['p_id']] = false === $index ? null : $index;
+        }
+        $expected = [];
+        foreach (range(1, 10) as $identifier) {
+            $expected[$identifier] = $expectedEntityIndexes[$identifier] ?? null;
+        }
+        $this->assertSame($expected, $attached);
+    }
+
+    public function looseIdentifierProvider(): iterable
+    {
+        yield 'integers in another order, with a duplicate' => [[3, 1, 3, 2], [1 => 1, 2 => 3, 3 => 0]];
+        yield 'numeric strings' => [['1.0', ' 2', '3 ', '4e0', '0x5', '06'], [1 => 0, 2 => 1, 3 => 2, 4 => 3, 6 => 5]];
+        yield 'first of several equal strings' => [['01', '1', 1], [1 => 0]];
+        yield 'non-numeric strings' => [['1a', 'a1', ''], []];
+        yield 'floats' => [[1.0, 2.5, 3.0], [1 => 0, 3 => 2]];
+        yield 'null' => [[null], []];
+        yield 'true matches every row' => [[2, true], [1 => 1, 2 => 0, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, 8 => 1, 9 => 1, 10 => 1]];
+        yield 'integers after a boolean' => [[false, 4], [4 => 1]];
+    }
+
     public function testCallbackModeWithUuidIdentifiers(): void
     {
         $received = [];
@@ -240,6 +288,122 @@ final class EntityLoaderTest extends IntegrationTestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('unsupported entity loader mode');
         $this->tableService()->loadRowsById($this->productTable(), [1, 2]);
+    }
+
+    /**
+     * @dataProvider legacyTableProvider
+     */
+    public function testLoaderLegacyRowsHaveTheValuesOfTheRowsWithoutObjects(string $table): void
+    {
+        $createTable = fn (): Table => match ($table) {
+            'products' => $this->productTable(),
+            'categories' => $this->categoryTable(),
+            'documents' => $this->documentTable(),
+            'products with categories' => $this->productTable()->setQueryBuilder(
+                $this->productQueryBuilder()->addSelect('c')->leftJoin('p.category', 'c'),
+                'p'
+            ),
+            'products with a scalar named like a foreign key' => $this->productTable()->setQueryBuilder(
+                $this->productQueryBuilder()->addSelect('p.price AS p_category_id'),
+                'p'
+            ),
+        };
+        $withObjectsTable = $createTable();
+        $withoutObjectsTable = $createTable();
+
+        $withObjects = $this->tableService()->getRows($withObjectsTable, $this->postRequest($withObjectsTable, [], ['rowsPerPage' => '100']));
+        $withoutObjects = $this->tableService()->getRows($withoutObjectsTable, $this->postRequest($withoutObjectsTable, [], ['rowsPerPage' => '100']), true, false);
+
+        $this->assertNotEmpty($withObjects);
+        $this->assertSame(self::exportValues($withoutObjects), self::exportValues(array_map(static function (array $row): array {
+            unset($row['object']);
+
+            return $row;
+        }, $withObjects)));
+    }
+
+    public function legacyTableProvider(): iterable
+    {
+        yield 'entities' => ['products'];
+        yield 'entities and scalars' => ['categories'];
+        yield 'uuid identifiers' => ['documents'];
+        yield 'fetch join' => ['products with categories'];
+        yield 'scalar named like a foreign key' => ['products with a scalar named like a foreign key'];
+    }
+
+    public function testLoaderLegacyAttachesTheManagedEntities(): void
+    {
+        $table = $this->productTable();
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        foreach ($rows as $row) {
+            $this->assertSame(static::$em->find(Product::class, $row['p_id']), $row['object']);
+        }
+    }
+
+    public function testLoaderLegacyWithQueryParameters(): void
+    {
+        $queryBuilder = $this->productQueryBuilder()
+            ->andWhere('p.category = :category')
+            ->andWhere('p.createdAt >= :date')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('category', static::$em->getRepository(Category::class)->findOneBy(['name' => 'fruits']))
+            ->setParameter('date', new \DateTimeImmutable('2024-02-01'))
+            ->setParameter('statuses', ['new', 'validated']);
+        $table = $this->productTable()->setQueryBuilder($queryBuilder, 'p');
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table, [], ['rowsPerPage' => '100']));
+
+        $expectedIds = self::fixtureIds(static fn (array $product): bool => 'fruits' === $product[6]
+            && $product[5] >= '2024-02-01'
+            && \in_array($product[2], ['new', 'validated'], true));
+        $this->assertNotEmpty($expectedIds);
+        $this->assertSame($expectedIds, self::productIds($rows));
+        foreach ($rows as $row) {
+            $this->assertSame($row['p_id'], $row['object']->getId());
+        }
+    }
+
+    public function testLoaderLegacyWithAParameterThatCannotBeSerialized(): void
+    {
+        $name = new class {
+            private \Closure $value;
+
+            public function __construct()
+            {
+                $this->value = static fn (): string => 'red apple';
+            }
+
+            public function __toString(): string
+            {
+                return ($this->value)();
+            }
+        };
+        $queryBuilder = $this->productQueryBuilder()->andWhere('p.name = :name')->setParameter('name', $name);
+        $table = $this->productTable()->setQueryBuilder($queryBuilder, 'p');
+
+        $rows = $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $this->assertSame([1], self::productIds($rows));
+        $this->assertSame(1, $rows[0]['object']->getId());
+    }
+
+    /**
+     * Rows with objects replaced by comparable values.
+     *
+     * @param list<array<string, mixed>> $rows
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function exportValues(array $rows): array
+    {
+        return array_map(static fn (array $row): array => array_map(static function ($value) {
+            if ($value instanceof \DateTimeInterface) {
+                return [$value::class, $value->format(\DateTimeInterface::ATOM)];
+            }
+
+            return \is_object($value) ? [$value::class, (string) $value] : $value;
+        }, $row), $rows);
     }
 
     private function documentTable(): Table

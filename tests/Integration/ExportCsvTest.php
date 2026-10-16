@@ -9,6 +9,7 @@ use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Tests\SnapshotTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Freezes the CSV export (AbstractTableService::exportAsCsv()).
@@ -116,6 +117,119 @@ final class ExportCsvTest extends IntegrationTestCase
         $this->tableService()->exportAsCsv($table, $this->getRequest($table));
 
         $this->assertCount(1, static::$queryLogger->getQueries());
+    }
+
+    /**
+     * @dataProvider streamedExportProvider
+     */
+    public function testStreamedExportIsTheSameAsTheExport(string $scenario): void
+    {
+        [$table, $request] = $this->exportScenario($scenario);
+        $expected = $this->tableService()->exportAsCsv($table, $request);
+
+        [$table, $request] = $this->exportScenario($scenario);
+        $response = $this->tableService()->exportAsCsvResponse($table, $request);
+
+        $this->assertSame($expected, self::sendContent($response));
+    }
+
+    public function streamedExportProvider(): iterable
+    {
+        yield 'filtered' => ['filtered'];
+        yield 'sorted, with hidden columns' => ['sorted'];
+        yield 'escaping' => ['escaping'];
+        yield 'without result' => ['without result'];
+        yield 'entities and scalars, with totals' => ['totals'];
+        yield 'totals without result' => ['totals without result'];
+    }
+
+    public function testStreamedExportHeaders(): void
+    {
+        $table = $this->exportTable();
+
+        $response = $this->tableService()->exportAsCsvResponse($table, $this->getRequest($table));
+        $this->assertSame('text/csv; charset=UTF-8', $response->headers->get('Content-Type'));
+        $this->assertSame('attachment; filename=export.csv', $response->headers->get('Content-Disposition'));
+
+        $response = $this->tableService()->exportAsCsvResponse($table, $this->getRequest($table), 'produits été.csv');
+        $this->assertSame(
+            'attachment; filename="produits _t_.csv"; filename*=utf-8\'\'produits%20%C3%A9t%C3%A9.csv',
+            $response->headers->get('Content-Disposition')
+        );
+    }
+
+    public function testStreamedExportCallbacksReceiveNoRows(): void
+    {
+        $calls = [];
+        $table = $this->productTable(
+            $this->filteredColumn('p.name')->setExportCallback(static function ($value, array $row, array $rows) use (&$calls) {
+                $calls[] = [$value, $row['p_id'], $rows];
+
+                return $value;
+            })
+        );
+
+        self::sendContent($this->tableService()->exportAsCsvResponse($table, $this->getRequest($table, ['p_name' => 'apple'])));
+
+        $this->assertSame([['red apple', 1, []], ['green apple', 2, []], ['apple pie', 3, []]], $calls);
+    }
+
+    public function testStreamedExportReadsTheRowsWhenTheResponseIsSent(): void
+    {
+        [$table, $request] = $this->exportScenario('totals');
+
+        $response = $this->tableService()->exportAsCsvResponse($table, $request);
+        // the totals are computed first
+        $this->assertCount(1, static::$queryLogger->getQueries());
+
+        self::sendContent($response);
+        $this->assertCount(2, static::$queryLogger->getQueries());
+    }
+
+    /**
+     * @return array{Table, Request}
+     */
+    private function exportScenario(string $scenario): array
+    {
+        switch ($scenario) {
+            case 'filtered':
+                $table = $this->exportTable();
+
+                return [$table, $this->getRequest($table, ['p_status' => '==validated'])];
+            case 'sorted':
+                $table = $this->exportTable();
+
+                return [$table, $this->getRequest($table, ['sortColumn' => 'p_name', 'sortReverse' => '1'], ['hiddenColumns' => ['p_name' => '1']])];
+            case 'escaping':
+                $table = $this->productTable(
+                    (new Column())->setName('p_name')->setExportCallback(static fn ($value, array $row) => 1 === $row['p_id'] ? "semi;colon \"quoted\"\nline" : $value)
+                );
+
+                return [$table, $this->getRequest($table)];
+            case 'without result':
+                $table = $this->exportTable();
+
+                return [$table, $this->getRequest($table, ['p_name' => 'nothing matches'])];
+            case 'totals':
+            case 'totals without result':
+                $table = $this->categoryTable(
+                    $this->filteredColumn('c.name')->setExportName('Category'),
+                    (new Column())->setName('nbProducts'),
+                    (new Column())->setName('sumPrice')->setFilter((new Filter())->setName('sumPrice')->setField('p.price'))->useTotal(),
+                );
+
+                return [$table, $this->getRequest($table, 'totals' === $scenario ? [] : ['c_name' => 'nothing matches'])];
+        }
+
+        throw new \LogicException(sprintf('Unknown scenario "%s".', $scenario));
+    }
+
+    private static function sendContent(Response $response): string
+    {
+        ob_start();
+        $response->sendContent();
+
+        return (string) ob_get_clean();
     }
 
     private function exportTable(): Table

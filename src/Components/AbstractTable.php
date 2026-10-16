@@ -39,6 +39,11 @@ abstract class AbstractTable implements TableInterface
     protected $rowsPerPageOptions = [5, 10, 20, 50, 100];
 
     /**
+     * Maximum number of rows per page accepted from the requests (null: no maximum).
+     */
+    private ?int $maxRowsPerPage = null;
+
+    /**
      * Template for table and lines.
      */
     private string $template = '@KilikTable/_defaultTable.html.twig';
@@ -210,6 +215,28 @@ abstract class AbstractTable implements TableInterface
     public function getRowsPerPage(): int
     {
         return $this->rowsPerPage;
+    }
+
+    /**
+     * Sets the maximum number of rows per page accepted from the requests, or null for no maximum (the default).
+     *
+     * With a maximum, the number of rows per page of a request is limited to it, and to at least 1.
+     *
+     * @return static
+     */
+    public function setMaxRowsPerPage(?int $maxRowsPerPage)
+    {
+        if (null !== $maxRowsPerPage && $maxRowsPerPage < 1) {
+            throw new \InvalidArgumentException('The maximum number of rows per page must be at least 1.');
+        }
+        $this->maxRowsPerPage = $maxRowsPerPage;
+
+        return $this;
+    }
+
+    public function getMaxRowsPerPage(): ?int
+    {
+        return $this->maxRowsPerPage;
     }
 
     /**

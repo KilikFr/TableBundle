@@ -3,12 +3,16 @@
 namespace Kilik\TableBundle\Services;
 
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
+use Kilik\TableBundle\Doctrine\SharedResult;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TableService extends AbstractTableService
 {
@@ -22,12 +26,211 @@ class TableService extends AbstractTableService
     private static ?bool $sortDirectionSupported = null;
 
     /**
+     * Count computed by setTotalRows(), reused by setFilteredRows() when no filter changes the query.
+     *
+     * @var array{queryBuilder: \WeakReference<QueryBuilder>, state: array<mixed>, count: int|float}|null
+     */
+    private ?array $totalRowsCount = null;
+
+    /**
      * {@inheritdoc}
      */
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
         /** @var Table $table */
-        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $qb = $this->prepareQueryBuilder($table, $request, $paginate);
+
+        $query = $qb->getQuery();
+        $sharedResult = null;
+
+        // if we need to get objects, LEGACY mode
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
+            // execute the query once: the rows fetched for the objects are hydrated as scalars too
+            $sharedResult = SharedResult::share($query);
+            if (null !== $qb->getDQLPart('groupBy')) {
+                // results as objects
+                $objects = [];
+                foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
+                    if (is_object($object)) {
+                        $index = is_int($object->getId()) ? $object->getId() : (string) $object->getId();
+                        $objects[$index] = $object;
+                    } // when results are mixed with objects and scalar
+                    elseif (isset($object[0]) && is_object($object[0])) {
+                        $index = is_int($object[0]->getId()) ? $object[0]->getId() : (string) $object[0]->getId();
+                        $objects[$index] = $object[0];
+                    }
+                }
+            }
+        }
+
+        $rows = $query->getResult(Query::HYDRATE_SCALAR);
+        if (null !== $sharedResult) {
+            $rows = $sharedResult->cleanScalarRows($rows);
+        }
+
+        // if we need to get objects
+        if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
+            // create entities identifiers list from scalar rows
+            $identifiers = [];
+            // results as scalar
+            foreach ($rows as $row) {
+                // add row identifier to array
+                $identifiers[] = $row[$table->getAlias().'_id'];
+            }
+
+            // if at least one identifier should be used to load entities
+            if (count($identifiers) > 0) {
+                // loaded entities
+                $entities = $this->loadRowsById($table, $identifiers);
+
+                // associate objects to rows
+                if (count($entities) > 0) {
+                    $entityIndex = new LooseIdentifierIndex($entities);
+                    foreach ($rows as &$row) {
+                        $row['object'] = $entityIndex->find($row[$table->getAlias().'_id']);
+                    }
+                }
+            }
+        }
+
+        // if we need to get objects (legacy mode)
+        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
+            // results as scalar
+            foreach ($rows as &$row) {
+                $index = is_int($row[$table->getAlias().'_id'])
+                    ? $row[$table->getAlias().'_id']
+                    : (string) $row[$table->getAlias().'_id'];
+
+                if (isset($objects[$index])) {
+                    $row['object'] = $objects[$index];
+                }
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Export (selection by filters) as a CSV response, streamed without loading every row in memory.
+     *
+     * The CSV is the same as the one of exportAsCsv(), with two differences: the rows are read from the query while
+     * the response is sent, without calling getRows(), and the export callbacks receive an empty array of rows.
+     * The totals are computed when this method is called.
+     */
+    public function exportAsCsvResponse(TableInterface $table, Request $request, string $filename = 'export.csv'): StreamedResponse
+    {
+        /** @var Table $table */
+        $query = $this->prepareQueryBuilder($table, $request, false)->getQuery();
+        $haveTotalColumns = $table->haveTotalColumns();
+
+        $response = new StreamedResponse(static function () use ($table, $query, $haveTotalColumns): void {
+            $stream = fopen('php://output', 'w');
+            CsvWriter::write($stream, $table, self::iterateScalarRows($query), [], $haveTotalColumns);
+            fclose($stream);
+        });
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $filename,
+            (string) preg_replace('/[^\x20-\x7e]|[%\/\\\\]/u', '_', $filename)
+        ));
+
+        return $response;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loadRowsById(TableInterface $table, $identifiers)
+    {
+        /** @var Table $table */
+        $entities = [];
+        // if we need to use repository name
+        if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
+            // if repository name is missing
+            if (!$table->getEntityLoaderRepository()) {
+                throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
+            }
+
+            // load entities from identifiers
+            $loaderQueryBuilder = $table->getQueryBuilder()
+                ->getEntityManager()
+                ->getRepository($table->getEntityLoaderRepository())
+                ->createQueryBuilder('e')
+                ->select('e')
+                ->where('e.id IN (:identifiers)')
+                ->setParameter('identifiers', $identifiers);
+
+            $entities = $loaderQueryBuilder->getQuery()->getResult();
+        } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
+            // if repository callback is missing
+            if (!is_callable($table->getEntityLoaderCallback())) {
+                throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
+            }
+            // else, load entities from callback method
+            $callback = $table->getEntityLoaderCallback();
+            $entities = $callback($identifiers);
+        } else {
+            throw new \InvalidArgumentException('unsupported entity loader mode');
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Set total rows count without filters.
+     */
+    protected function setTotalRows(Table $table)
+    {
+        $qb = $table->getQueryBuilder();
+        $qbtr = clone $qb;
+
+        $identifiers = $table->getIdentifierFieldNames();
+        $count = $this->countRows($qbtr, $identifiers);
+
+        $this->totalRowsCount = ['queryBuilder' => \WeakReference::create($qb), 'state' => self::getQueryBuilderState($qb), 'count' => $count];
+        $table->setTotalRows($count);
+    }
+
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return float|int
+     */
+    protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
+    {
+        switch (true) {
+            case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && null === $identifiers:
+                $em = $qb->getEntityManager();
+                $sql = $qb->getQuery()->getSQL();
+                $rsm = new Query\ResultSetMapping();
+                $rsm->addScalarResult('dctrn_count', 'count');
+                $nativeQuery = $em->createNativeQuery(sprintf('SELECT COUNT(*) AS dctrn_count FROM (%s) AS dctrn_table', $sql), $rsm);
+                foreach ($qb->getParameters() as $key => $item) {
+                    $nativeQuery->setParameter($key + 1, $item->getValue());
+                }
+
+                return (int) $nativeQuery->getSingleScalarResult();
+            case null === $identifiers:
+                $paginatorFiltered = new Paginator(self::withoutOrderBy($qb)->getQuery());
+
+                return $paginatorFiltered->count();
+            default:
+                $qb->select($qb->expr()->count($identifiers));
+
+                return (int) $qb->getQuery()->getSingleScalarResult();
+        }
+    }
+
+    /**
+     * Applies the request to the table and its query builder: pagination, filters, sort, and computes the totals.
+     *
+     * @param Table $table
+     * @param bool  $paginate
+     */
+    private function prepareQueryBuilder(TableInterface $table, Request $request, $paginate): QueryBuilder
+    {
+        $table->setRowsPerPage($this->getRequestedRowsPerPage($table, $request));
         $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
 
         foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
@@ -85,6 +288,10 @@ class TableService extends AbstractTableService
         if ($table->haveTotalColumns()) {
             $totalQueryBuilder = clone $qb;
             $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
+            // the totals are read in the first result: with one row per root entity, it is the first row
+            if (self::isGroupedByRootEntity($totalQueryBuilder)) {
+                $totalQueryBuilder->setMaxResults(1);
+            }
             foreach ($table->getColumns() as $column) {
                 if ($column->isUseTotal()) {
                     $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField().') AS '.self::TOTAL_PREFIX.$column->getName());
@@ -107,161 +314,16 @@ class TableService extends AbstractTableService
             }
         }
 
-        $query = $qb->getQuery();
-
-        // if we need to get objects, LEGACY mode
-        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
-            if (null !== $qb->getDQLPart('groupBy')) {
-                // results as objects
-                $objects = [];
-                foreach ($query->getResult(Query::HYDRATE_OBJECT) as $object) {
-                    if (is_object($object)) {
-                        $index = is_int($object->getId()) ? $object->getId() : (string) $object->getId();
-                        $objects[$index] = $object;
-                    } // when results are mixed with objects and scalar
-                    elseif (isset($object[0]) && is_object($object[0])) {
-                        $index = is_int($object[0]->getId()) ? $object[0]->getId() : (string) $object[0]->getId();
-                        $objects[$index] = $object[0];
-                    }
-                }
-            }
-        }
-
-        $rows = $query->getResult(Query::HYDRATE_SCALAR);
-
-        // if we need to get objects
-        if ($getObjects && in_array($table->getEntityLoaderMode(), [$table::ENTITY_LOADER_REPOSITORY, $table::ENTITY_LOADER_CALLBACK])) {
-            // create entities identifiers list from scalar rows
-            $identifiers = [];
-            // results as scalar
-            foreach ($rows as $row) {
-                // add row identifier to array
-                $identifiers[] = $row[$table->getAlias().'_id'];
-            }
-
-            // if at least one identifier should be used to load entities
-            if (count($identifiers) > 0) {
-                // loaded entities
-                $entities = $this->loadRowsById($table, $identifiers);
-
-                // associate objects to rows
-                if (count($entities) > 0) {
-                    foreach ($rows as &$row) {
-                        $row['object'] = null;
-                        foreach ($entities as $entity) {
-                            if ($row[$table->getAlias().'_id'] == $entity->getId()) {
-                                $row['object'] = $entity;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // if we need to get objects (legacy mode)
-        if ($getObjects && $table->getEntityLoaderMode() == $table::ENTITY_LOADER_LEGACY) {
-            // results as scalar
-            foreach ($rows as &$row) {
-                $index = is_int($row[$table->getAlias().'_id'])
-                    ? $row[$table->getAlias().'_id']
-                    : (string) $row[$table->getAlias().'_id'];
-
-                if (isset($objects[$index])) {
-                    $row['object'] = $objects[$index];
-                }
-            }
-        }
-
-        return $rows;
+        return $qb;
     }
 
     /**
-     * {@inheritdoc}
+     * @return bool whether the query builder may have been changed
      */
-    public function loadRowsById(TableInterface $table, $identifiers)
-    {
-        /** @var Table $table */
-        $entities = [];
-        // if we need to use repository name
-        if ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_REPOSITORY) {
-            // if repository name is missing
-            if (!$table->getEntityLoaderRepository()) {
-                throw new \InvalidArgumentException('entity loader repository name is missing for ENTITY_LOADER_REPOSITORY mode');
-            }
-
-            // load entities from identifiers
-            $loaderQueryBuilder = $table->getQueryBuilder()
-                ->getEntityManager()
-                ->getRepository($table->getEntityLoaderRepository())
-                ->createQueryBuilder('e')
-                ->select('e')
-                ->where('e.id IN (:identifiers)')
-                ->setParameter('identifiers', $identifiers);
-
-            $entities = $loaderQueryBuilder->getQuery()->getResult();
-        } elseif ($table->getEntityLoaderMode() == $table::ENTITY_LOADER_CALLBACK) {
-            // if repository callback is missing
-            if (!is_callable($table->getEntityLoaderCallback())) {
-                throw new \InvalidArgumentException('entity loader callback is missing or not callable for ENTITY_LOADER_CALLBACK mode');
-            }
-            // else, load entities from callback method
-            $callback = $table->getEntityLoaderCallback();
-            $entities = $callback($identifiers);
-        } else {
-            throw new \InvalidArgumentException('unsupported entity loader mode');
-        }
-
-        return $entities;
-    }
-
-    /**
-     * Set total rows count without filters.
-     */
-    protected function setTotalRows(Table $table)
-    {
-        $qb = $table->getQueryBuilder();
-        $qbtr = clone $qb;
-
-        $identifiers = $table->getIdentifierFieldNames();
-        $count = $this->countRows($qbtr, $identifiers);
-
-        $table->setTotalRows($count);
-    }
-
-    /**
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @return float|int
-     */
-    protected function countRows(QueryBuilder $qb, ?string $identifiers = null)
-    {
-        switch (true) {
-            case $qb->getQuery()->hasHint(Query::HINT_CUSTOM_OUTPUT_WALKER) && null === $identifiers:
-                $em = $qb->getEntityManager();
-                $sql = $qb->getQuery()->getSQL();
-                $rsm = new Query\ResultSetMapping();
-                $rsm->addScalarResult('dctrn_count', 'count');
-                $nativeQuery = $em->createNativeQuery(sprintf('SELECT COUNT(*) AS dctrn_count FROM (%s) AS dctrn_table', $sql), $rsm);
-                foreach ($qb->getParameters() as $key => $item) {
-                    $nativeQuery->setParameter($key + 1, $item->getValue());
-                }
-
-                return (int) $nativeQuery->getSingleScalarResult();
-            case null === $identifiers:
-                $paginatorFiltered = new Paginator($qb->getQuery());
-
-                return $paginatorFiltered->count();
-            default:
-                $qb->select($qb->expr()->count($identifiers));
-
-                return (int) $qb->getQuery()->getSingleScalarResult();
-        }
-    }
-
-    private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder)
+    private function addSearch(Table $table, Request $request, QueryBuilder $queryBuilder): bool
     {
         $queryParams = $this->getRequestParameter($request, $table->getFormId());
+        $searchApplied = false;
 
         foreach ($table->getAllFilters() as $filter) {
             if (!isset($queryParams[$filter->getName()])) {
@@ -273,6 +335,7 @@ class TableService extends AbstractTableService
                 if (is_callable($filter->getQueryPartBuilder())) {
                     $callback = $filter->getQueryPartBuilder();
                     $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                    $searchApplied = true;
                 }
                 continue;
             }
@@ -283,6 +346,7 @@ class TableService extends AbstractTableService
             if (is_callable($filter->getQueryPartBuilder())) {
                 $callback = $filter->getQueryPartBuilder();
                 $callback($filter, $table, $queryBuilder, $searchParamRaw);
+                $searchApplied = true;
                 continue;
             }
 
@@ -366,7 +430,10 @@ class TableService extends AbstractTableService
             }
 
             $filter->getHaving() ? $queryBuilder->andHaving($sql) : $queryBuilder->andWhere($sql);
+            $searchApplied = true;
         }
+
+        return $searchApplied;
     }
 
     /**
@@ -376,12 +443,109 @@ class TableService extends AbstractTableService
     {
         $qb = $table->getQueryBuilder();
         $qbfr = clone $qb;
-        $this->addSearch($table, $request, $qbfr);
+        $searchApplied = $this->addSearch($table, $request, $qbfr);
+
+        // without any filter, the query is the one counted by setTotalRows()
+        $totalRowsCount = $this->totalRowsCount;
+        $this->totalRowsCount = null;
+        if (!$searchApplied
+            && null !== $totalRowsCount
+            && $totalRowsCount['queryBuilder']->get() === $qb
+            && $totalRowsCount['state'] === self::getQueryBuilderState($qb)
+        ) {
+            $table->setFilteredRows($totalRowsCount['count']);
+
+            return;
+        }
 
         $identifiers = $table->getIdentifierFieldNames();
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * The scalar rows of the query, read one by one when possible.
+     *
+     * @return iterable<array<string, mixed>>
+     */
+    private static function iterateScalarRows(Query $query): iterable
+    {
+        try {
+            return $query->toIterable([], Query::HYDRATE_SCALAR);
+        } catch (QueryException $exception) {
+            // queries with to-many joins (or mixing entities and scalars, with Doctrine ORM 2) cannot be iterated
+            $query->setHint(Query::HINT_INTERNAL_ITERATION, false);
+
+            return $query->getResult(Query::HYDRATE_SCALAR);
+        }
+    }
+
+    /**
+     * Whether the query is grouped by the identifier of its root entity, and by other fields of this entity only.
+     *
+     * The query then returns one row per root entity, and the object hydration one result per row, in the same order.
+     */
+    private static function isGroupedByRootEntity(QueryBuilder $queryBuilder): bool
+    {
+        $from = $queryBuilder->getDQLPart('from');
+        if (1 !== \count($from) || null !== $from[0]->getIndexBy()) {
+            return false;
+        }
+
+        $metadata = $queryBuilder->getEntityManager()->getClassMetadata($from[0]->getFrom());
+        if ($metadata->isIdentifierComposite) {
+            return false;
+        }
+
+        $rootAlias = $from[0]->getAlias();
+        $identifier = $rootAlias.'.'.$metadata->getSingleIdentifierFieldName();
+        $groupedByIdentifier = false;
+        foreach ($queryBuilder->getDQLPart('groupBy') as $groupBy) {
+            foreach ($groupBy->getParts() as $part) {
+                foreach (explode(',', (string) $part) as $expression) {
+                    $expression = trim($expression);
+                    if ($expression === $rootAlias || $expression === $identifier) {
+                        $groupedByIdentifier = true;
+                    } elseif (1 !== preg_match('/^'.preg_quote($rootAlias, '/').'\.\w+$/', $expression)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return $groupedByIdentifier;
+    }
+
+    /**
+     * A copy of the query builder without ORDER BY, needless to count the rows, unless it contains parameters.
+     *
+     * The paginator output walker keeps the ORDER BY in its subquery, and makes the database sort the rows.
+     */
+    private static function withoutOrderBy(QueryBuilder $queryBuilder): QueryBuilder
+    {
+        foreach ($queryBuilder->getDQLPart('orderBy') as $orderBy) {
+            if (1 === preg_match('/[:?]/', (string) $orderBy)) {
+                return $queryBuilder;
+            }
+        }
+
+        return (clone $queryBuilder)->resetDQLPart('orderBy');
+    }
+
+    /**
+     * Everything the count of a query builder depends on.
+     *
+     * @return array<mixed>
+     */
+    private static function getQueryBuilderState(QueryBuilder $queryBuilder): array
+    {
+        $parameters = [];
+        foreach ($queryBuilder->getParameters() as $parameter) {
+            $parameters[] = [$parameter->getName(), $parameter->getValue(), $parameter->getType()];
+        }
+
+        return [$queryBuilder->getDQL(), $parameters, $queryBuilder->getFirstResult(), $queryBuilder->getMaxResults()];
     }
 
     /**
