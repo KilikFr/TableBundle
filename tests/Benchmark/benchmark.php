@@ -161,6 +161,14 @@ $scenarios = [
         $table = $productTable();
         $service->exportAsCsv($table, new Request());
     },
+    'export_csv_streamed_all_rows' => static function () use ($service, $productTable) {
+        $table = $productTable();
+        $response = $service->exportAsCsvResponse($table, new Request());
+        // the output is discarded by chunks of 64 KB
+        ob_start(static fn (): string => '', 65536);
+        $response->sendContent();
+        ob_end_clean();
+    },
 ];
 
 $results = [];
