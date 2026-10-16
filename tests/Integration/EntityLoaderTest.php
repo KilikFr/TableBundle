@@ -251,6 +251,14 @@ final class EntityLoaderTest extends IntegrationTestCase
             'products' => $this->productTable(),
             'categories' => $this->categoryTable(),
             'documents' => $this->documentTable(),
+            'products with categories' => $this->productTable()->setQueryBuilder(
+                $this->productQueryBuilder()->addSelect('c')->leftJoin('p.category', 'c'),
+                'p'
+            ),
+            'products with a scalar named like a foreign key' => $this->productTable()->setQueryBuilder(
+                $this->productQueryBuilder()->addSelect('p.price AS p_category_id'),
+                'p'
+            ),
         };
         $withObjectsTable = $createTable();
         $withoutObjectsTable = $createTable();
@@ -271,6 +279,8 @@ final class EntityLoaderTest extends IntegrationTestCase
         yield 'entities' => ['products'];
         yield 'entities and scalars' => ['categories'];
         yield 'uuid identifiers' => ['documents'];
+        yield 'fetch join' => ['products with categories'];
+        yield 'scalar named like a foreign key' => ['products with a scalar named like a foreign key'];
     }
 
     public function testLoaderLegacyAttachesTheManagedEntities(): void
@@ -308,7 +318,7 @@ final class EntityLoaderTest extends IntegrationTestCase
 
     public function testLoaderLegacyWithAParameterThatCannotBeSerialized(): void
     {
-        $name = new class() {
+        $name = new class {
             private \Closure $value;
 
             public function __construct()
