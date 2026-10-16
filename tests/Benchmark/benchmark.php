@@ -66,19 +66,21 @@ $productTable = static function (Column ...$columns) use ($em): Table {
 
     return $table;
 };
-$categoryTable = static function () use ($em): Table {
+$categoryTable = static function (bool $withTotals = true) use ($em): Table {
     $queryBuilder = $em->createQueryBuilder()
         ->select('c', 'COUNT(p.id) AS nbProducts', 'SUM(p.price) AS sumPrice')
         ->from(Category::class, 'c')
         ->leftJoin('c.products', 'p')
         ->groupBy('c.id');
 
+    $sumColumn = (new Column())->setName('sumPrice')->setFilter((new Filter())->setName('sumPrice')->setField('p.price'));
+
     return (new Table())
         ->setId('categories')
         ->setPath('/categories')
         ->setQueryBuilder($queryBuilder, 'c')
         ->addColumn((new Column())->setName('c_name'))
-        ->addColumn((new Column())->setName('sumPrice')->setFilter((new Filter())->setName('sumPrice')->setField('p.price'))->useTotal());
+        ->addColumn($withTotals ? $sumColumn->useTotal() : $sumColumn);
 };
 $post = static fn (Table $table, array $form = [], array $extra = []) => new Request([], array_merge([$table->getFormId() => $form], ['rowsPerPage' => '50'], $extra));
 
@@ -101,6 +103,31 @@ $scenarios = [
     },
     'refresh_callback' => static function () use ($service, $productTable, $post, $em) {
         $table = $productTable()->setEntityLoaderCallback(static fn (array $ids) => $em->getRepository(Product::class)->findBy(['id' => $ids]));
+        $service->getRows($table, $post($table));
+    },
+    'refresh_repository_1000_rows' => static function () use ($service, $productTable, $post) {
+        $table = $productTable()->setEntityLoaderRepository(Product::class);
+        $service->getRows($table, $post($table, [], ['rowsPerPage' => '1000']));
+    },
+    'refresh_callback_1000_rows' => static function () use ($service, $productTable, $post, $em) {
+        $table = $productTable()->setEntityLoaderCallback(static fn (array $ids) => $em->getRepository(Product::class)->findBy(['id' => $ids]));
+        $service->getRows($table, $post($table, [], ['rowsPerPage' => '1000']));
+    },
+    'refresh_identifier_count' => static function () use ($service, $productTable, $post) {
+        $table = $productTable()->setDefaultIdentifierFieldNames();
+        $service->getRows($table, $post($table, ['p_name' => 'item 1']));
+    },
+    'refresh_to_many_join' => static function () use ($service, $em, $post) {
+        $queryBuilder = $em->createQueryBuilder()->select('c')->from(Category::class, 'c')->leftJoin('c.products', 'p');
+        $table = (new Table())
+            ->setId('categories')
+            ->setPath('/categories')
+            ->setQueryBuilder($queryBuilder, 'c')
+            ->addColumn((new Column())->setName('c_name')->setFilter((new Filter())->setName('p_name')->setField('p.name')));
+        $service->getRows($table, $post($table));
+    },
+    'refresh_group_by' => static function () use ($service, $categoryTable, $post) {
+        $table = $categoryTable(false);
         $service->getRows($table, $post($table));
     },
     'refresh_group_by_with_totals' => static function () use ($service, $categoryTable, $post) {
