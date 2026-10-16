@@ -13,6 +13,7 @@ use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Services\TableService;
 use Kilik\TableBundle\Tests\Fixtures\Entity\Category;
+use Kilik\TableBundle\Tests\Fixtures\Fixtures;
 
 /**
  * Freezes pagination and row counting in TableService::getRows().
@@ -335,6 +336,68 @@ final class PaginationTest extends IntegrationTestCase
     /**
      * Categories left joined to their products, without group by: one row per product.
      */
+    /**
+     * @dataProvider countedQueryProvider
+     *
+     * @param array<string, string> $filters
+     */
+    public function testRowsAreCountedOnDistinctRootEntities(string $query, string $filteredField, array $filters, int $expectedTotal, int $expectedFiltered): void
+    {
+        $queryBuilder = match ($query) {
+            'fetch joined to-one' => $this->productQueryBuilder()->addSelect('c')->leftJoin('p.category', 'c'),
+            'fetch joined to-many' => static::$em->createQueryBuilder()->select('c', 'p')->from(Category::class, 'c')->leftJoin('c.products', 'p'),
+            'joined to-many' => static::$em->createQueryBuilder()->select('c')->from(Category::class, 'c')->leftJoin('c.products', 'p'),
+            'distinct' => $this->productQueryBuilder()->distinct(),
+            'computed scalar' => $this->productQueryBuilder()->addSelect('p.price * 2 AS doublePrice'),
+            'hidden scalar' => $this->productQueryBuilder()->addSelect('LENGTH(p.name) AS HIDDEN nameLength')->orderBy('nameLength'),
+        };
+        $rootAlias = $queryBuilder->getRootAliases()[0];
+        $table = (new Table())
+            ->setId('counted')
+            ->setPath('/counted')
+            ->setQueryBuilder($queryBuilder, $rootAlias)
+            ->addColumn($this->filteredColumn($filteredField));
+
+        $this->tableService()->getRows($table, $this->postRequest($table, $filters));
+
+        $this->assertSame($expectedTotal, $table->getTotalRows());
+        $this->assertSame($expectedFiltered, $table->getFilteredRows());
+    }
+
+    public function countedQueryProvider(): iterable
+    {
+        $products = Fixtures::PRODUCTS;
+        // categories of the products whose name contains the word
+        $categoriesOf = static fn (string $word): int => \count(array_unique(array_filter(array_column(
+            array_filter($products, static fn (array $product): bool => str_contains($product[0], $word)),
+            6
+        ))));
+        $fruits = \count(array_filter($products, static fn (array $product): bool => 'fruits' === $product[6]));
+
+        yield 'fetch joined to-one' => ['fetch joined to-one', 'c.name', ['c_name' => '==fruits'], 25, $fruits];
+        yield 'fetch joined to-many' => ['fetch joined to-many', 'p.name', ['p_name' => 'apple'], 4, $categoriesOf('apple')];
+        yield 'joined to-many' => ['joined to-many', 'p.name', ['p_name' => 'e'], 4, $categoriesOf('e')];
+        yield 'distinct' => ['distinct', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'computed scalar' => ['computed scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
+        yield 'hidden scalar ordering the rows' => ['hidden scalar', 'p.name', ['p_name' => 'apple'], 25, 3];
+    }
+
+    /**
+     * An aggregate without GROUP BY makes a single row, rejected by MySQL and PostgreSQL with the entity columns.
+     */
+    public function testAggregateWithoutGroupByIsCountedAsASingleRow(): void
+    {
+        $table = $this->productTable()->setQueryBuilder($this->productQueryBuilder()->addSelect('COUNT(p.id) AS nbProducts'), 'p');
+
+        if (\in_array(self::platform(), ['mysql', 'postgresql'], true)) {
+            $this->expectException(\Doctrine\DBAL\Exception::class);
+        }
+        $this->tableService()->getRows($table, $this->postRequest($table));
+
+        $this->assertSame(1, $table->getTotalRows());
+        $this->assertSame(1, $table->getFilteredRows());
+    }
+
     private function categoryJoinTable(): Table
     {
         $queryBuilder = static::$em->createQueryBuilder()
