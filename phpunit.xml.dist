@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/5.2/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          backupGlobals="false"
          colors="true"
          bootstrap="vendor/autoload.php"
@@ -10,6 +10,12 @@
 >
     <php>
         <ini name="error_reporting" value="-1" />
+        <!-- Any deprecation fails the suite; set to "disabled" locally to inspect output without failing -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[total]=0" />
+        <env name="DOCTRINE_DEPRECATIONS" value="trigger" />
+        <server name="KERNEL_CLASS" value="Kilik\TableBundle\Tests\App\TestKernel" />
+        <!-- DBAL URL used by integration tests; defaults to an in-memory SQLite database -->
+        <env name="KILIK_TEST_DATABASE_URL" value="sqlite:///:memory:" />
     </php>
 
     <testsuites>
@@ -18,15 +24,14 @@
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory>./src/</directory>
-            <exclude>
-                <directory>./Resources</directory>
-                <directory>./vendor</directory>
-            </exclude>
-        </whitelist>
-    </filter>
+        </include>
+        <exclude>
+            <directory>./src/Resources</directory>
+        </exclude>
+    </coverage>
 
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener">

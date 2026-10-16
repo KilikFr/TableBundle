@@ -194,8 +194,6 @@ interface TableInterface
     /**
      * Add a custom option.
      *
-     * @param mixed  $value
-     *
      * @return static
      */
     public function addCustomOption(string $option, $value);
@@ -230,14 +228,14 @@ interface TableInterface
     public function getOptions(): array;
 
     /**
-     * Get filter by name
+     * Get filter by name.
      *
-     * @return Filter
+     * @return Filter|null
      */
     public function getFilterByName(string $filterName);
 
     /**
-     * Get form key of row selection
+     * Get form key of row selection.
      */
     public function getSelectionFormKey(): string;
 }

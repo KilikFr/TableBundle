@@ -9,11 +9,10 @@ interface ApiInterface
     /**
      * Load results.
      *
-     * @param TableInterface $table
-     * @param array          $filters associative array (key=>value)
-     * @param array          $orderBy associative aray (ex: name=>ASC,email=>DESC)
-     * @param int            $page
-     * @param int            $limit
+     * @param array $filters associative array (key=>value)
+     * @param array $orderBy associative aray (ex: name=>ASC,email=>DESC)
+     * @param int   $page
+     * @param int   $limit
      *
      * @return ResultInterface
      */

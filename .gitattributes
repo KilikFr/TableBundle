@@ -1,0 +1,15 @@
+# Development files excluded from the distributed archives
+/.composer export-ignore
+/.gitattributes export-ignore
+/.github export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/phpstan.dist.neon export-ignore
+/phpunit.xml.dist export-ignore
+/prepare-tests.sh export-ignore
+/run-tests.sh export-ignore
+/scripts export-ignore
+/tests export-ignore
+/.git-blame-ignore-revs export-ignore

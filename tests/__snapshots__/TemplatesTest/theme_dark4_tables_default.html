@@ -1,0 +1,120 @@
+<form name="products_form" method="post">
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                                    <div id="products_pagination" class="btn-group" role="group">
+                                                    
+                                            </div>
+                                                    Default title
+                            </div>
+        </div>
+        <div class="card-body table-responsive">
+            <div id="products-table-loading-container" class="table-loading-container"><div class="table-loader"><div></div><div></div><div></div><div></div></div></div>                            <div style="display:none;width:0; height:0;" data-kiliktable-id="products" data-kiliktable-path="/products/list">{"askForReloadDelay":500,"rowsPerPage":20,"defaultHiddenColumns":["p_createdAt"],"skipLoadFromLocalStorage":false,"skipLoadFilterFromLocalStorage":false}</div>
+                        <table class="table table-hover table-striped table-bordered" id="products">
+                <thead>
+                                    <tr>
+                                                                <th class="mass-action">
+
+        </th>
+    
+                                                                                                            
+    <th class="columnSortable" data-column="p_id" data-sort-column="p_id"  data-label="Id" scope="col">
+        <a href="#">
+            Id
+        </a>
+        <i class="fa columnSortableIcon"></i>
+    </th>
+
+                                                            
+    <th class="columnSortable name-header" data-column="p_name" data-sort-column="p_name"  data-label="Name" scope="col">
+        <a href="#">
+            Name
+        </a>
+        <i class="fa columnSortableIcon"></i>
+    </th>
+
+                                                                                
+    <th data-column="p_status" data-label="kiliktable.show" scope="col">
+        Show
+    </th>
+
+                                                            
+    <th data-column="p_out" data-label="Out of stock" scope="col">
+        Out of stock
+    </th>
+
+                                                            
+    <th data-column="p_createdAt" data-label="Created" scope="col">
+        Created
+    </th>
+
+                                                            
+    <th data-column="p_description" data-label="Description" scope="col">
+        Description
+    </th>
+
+                                                                        </tr>
+                                            <tr>
+                                                                        <td class="mass-action" data-label="select all">
+            <div class="input-group btn-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="kilik_products_mass_check"/>
+                </span>
+                <button type="button" class="btn dropdown-toggle table-action-hide" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                                            <li>
+                            <a href="#" id="kilik_products_btn_mass_delete_selected"
+                               data-mass-action="/products/delete"
+                               data-name="delete"
+                               class="btn-border-success checkbox-action"
+                            >
+                                <b class="success"><i class="fa fa-trash"></i> Delete selection</b>
+                            </a>
+                        </li>
+                                                    <li role="separator" class="divider"></li>
+                                                                    <li>
+                            <a href="#" id="kilik_products_btn_mass_export_selected"
+                               data-mass-action=""
+                               data-name="export"
+                               class="btn-border-success checkbox-action"
+                            >
+                                <b class="success"><i class="fa fa-download"></i> Export</b>
+                            </a>
+                        </li>
+                                                            </ul>
+            </div>
+        </td>
+    
+                                                                                                                            <td data-column="p_id"  data-label="Id">
+    </td>
+                                                                    <td data-column="p_name" class="name-filter"  data-label="Name">
+            <input type="text" id="products_form_p_name" name="products_form[p_name]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_name" value="apple" />
+    </td>
+                                                                    <td data-column="p_status"  data-label="kiliktable.show">
+            <select id="products_form_p_status" name="products_form[p_status]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_status"><option value="">All</option><option value="new">New</option><option value="validated">Validated</option></select>
+    </td>
+                                                                    <td data-column="p_out"  data-label="Out of stock">
+            <input type="checkbox" id="products_form_p_out" name="products_form[p_out]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_out" value="1" />
+    </td>
+                                                                    <td data-column="p_createdAt"  data-label="Created">
+            <input type="text" id="products_form_p_createdAt" name="products_form[p_createdAt]" class="form-control refreshOnKeyup refreshOnChange" data-column="p_createdAt" />
+    </td>
+                                                                    <td data-column="p_description"  data-label="Description">
+    </td>
+                                                                                    </tr>
+                                                    </thead>
+                <tbody id="products_body">
+                                                                    </tbody>
+                            </table>
+        </div>
+        <div class="card-footer">
+                            <div id="products_stats">
+                                            
+                                    </div>
+                    </div>
+    </div>
+</div>
+<div><label for="products_form_search">Search</label><input type="text" id="products_form_search" name="products_form[search]" /></div><input type="hidden" id="products_form_sortColumn" name="products_form[sortColumn]" /><input type="hidden" id="products_form_sortReverse" name="products_form[sortReverse]" /></form>

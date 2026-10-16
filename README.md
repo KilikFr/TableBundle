@@ -40,6 +40,20 @@ Planned features:
 - more translations
 - add advanced templates
 
+Supported versions
+------------------
+
+| Dependency     | Versions                                   |
+|----------------|--------------------------------------------|
+| PHP            | 8.2 to 8.5                                 |
+| Symfony        | 6.4, 7.4, 8.1+                             |
+| Doctrine ORM   | 2.17+, 3.2+ (Symfony 8 requires ORM 3)     |
+| DoctrineBundle | 2.11+, 3.1+ (Symfony 8 requires 3.x)       |
+| Twig           | 3.30+                                      |
+| jQuery         | 3.x, 4.x                                   |
+
+Version 3.4 supports older PHP, Symfony, Doctrine and Twig versions. See the [changelog](CHANGELOG.md).
+
 Installation
 ------------
 ```sh
@@ -262,6 +276,23 @@ When a filter is filled, class <em>table-filter-filled</em> is added on field. B
 }
 ```
 
+### Sort columns
+
+A column sort is a list of fields with their direction, `"asc"` or `"desc"`. With Doctrine ORM 3.7, you can also use
+the `\SortDirection` enum (PHP 8.6, or `symfony/polyfill-php86`):
+
+```php
+$table
+    ->addColumn(
+        (new Column())
+            ->setName('p_name')
+            ->setSort(['p.name' => 'asc', 'p.id' => \SortDirection::Descending])
+            // optional, the sort is inverted automatically otherwise
+            ->setSortReverse(['p.name' => 'desc'])
+    )
+;
+```
+
 ### Filter date columns
 
 ```php
@@ -303,4 +334,29 @@ For bundle developpers
 
 # launch composer
 ./scripts/composer.sh
+```
+
+The test suite fails on any deprecation. Integration tests use an in-memory SQLite database by default;
+run them against MySQL, MariaDB or PostgreSQL with a DBAL URL:
+
+```shell
+KILIK_TEST_DATABASE_URL="mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=8.4" vendor/bin/phpunit
+KILIK_TEST_DATABASE_URL="mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=11.4.0-MariaDB" vendor/bin/phpunit
+KILIK_TEST_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/kilik_table?serverVersion=17" vendor/bin/phpunit
+```
+
+Large outputs (CSV, JSON responses, HTML) are compared with snapshots stored in `tests/__snapshots__`.
+After an intended change, rewrite them with `KILIK_UPDATE_SNAPSHOTS=1 vendor/bin/phpunit` and review the diff.
+
+```shell
+# static analysis
+vendor/bin/phpstan analyse
+
+# KilikTable.js tests (jsdom), with jQuery 3 and jQuery 4
+npm ci
+npm run test:jquery3
+npm run test:jquery4
+
+# SQL queries, time and memory of the main scenarios
+php tests/Benchmark/benchmark.php --rows=10000 --runs=7
 ```

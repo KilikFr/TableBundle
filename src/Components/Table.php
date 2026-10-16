@@ -6,13 +6,13 @@ use Doctrine\ORM\QueryBuilder;
 
 class Table extends AbstractTable
 {
-    const ENTITY_LOADER_NONE = 0;
+    public const ENTITY_LOADER_NONE = 0;
     // old entity loader mechanism
-    const ENTITY_LOADER_LEGACY = 1;
+    public const ENTITY_LOADER_LEGACY = 1;
     // entity loader from Repository Name
-    const ENTITY_LOADER_REPOSITORY = 2;
+    public const ENTITY_LOADER_REPOSITORY = 2;
     // entity loader from custom load method
-    const ENTITY_LOADER_CALLBACK = 3;
+    public const ENTITY_LOADER_CALLBACK = 3;
 
     private QueryBuilder $queryBuilder;
 
@@ -26,9 +26,9 @@ class Table extends AbstractTable
      * If is null a classical 'COUNT(*) FROM (query)' will be done.
      * Be aware no to use this option with GROUP BY query.
      *
-     * @var string|void
+     * @var string|null
      */
-    private $identifierFieldNames = null;
+    private $identifierFieldNames;
 
     /**
      * Entity loader method.
@@ -40,14 +40,14 @@ class Table extends AbstractTable
      *
      * @var string
      */
-    private $entityLoaderRepository = null;
+    private $entityLoaderRepository;
 
     /**
      * Entity loader callback (ENTITY_LOADER_METHOD mode).
      *
      * @var callable
      */
-    private $entityLoaderCallback = null;
+    private $entityLoaderCallback;
 
     /**
      * @return static
@@ -63,16 +63,15 @@ class Table extends AbstractTable
     /**
      * Defines default identifiers from query builder in order to optimize count queries.
      *
+     * @throws \Doctrine\Persistence\Mapping\MappingException
      * @return $this
-     *
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      */
     public function setDefaultIdentifierFieldNames()
     {
-        //Default identifier for table rows
+        // Default identifier for table rows
         $rootEntity = $this->queryBuilder->getRootEntities()[0];
         $metadata = $this->queryBuilder->getEntityManager()->getMetadataFactory()->getMetadataFor($rootEntity);
-        $identifiers = array();
+        $identifiers = [];
         foreach ($metadata->getIdentifierFieldNames() as $identifierFieldName) {
             $identifiers[] = $this->getAlias().'.'.$identifierFieldName;
         }
@@ -161,7 +160,7 @@ class Table extends AbstractTable
     }
 
     /**
-     * @return callable
+     * @return callable|null
      */
     public function getEntityLoaderCallback()
     {

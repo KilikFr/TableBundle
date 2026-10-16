@@ -1,0 +1,221 @@
+page: 1
+rowsPerPage: 5
+totalRows: 25
+filteredRows: 25
+lastPage: 5
+===== tableBody =====
+                                                                        <tr>
+                                                                                <td class="mass-action" data-label="select">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-1" name="kilik_products_selected[]" value="1"/>
+                    <label for="checkbox-1"></label>
+                </span>
+            </div>
+        </td>
+    
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                1
+                                    </td>
+                                                                                                                                                                                                                
+            <td class="name-cell" data-label="Name">
+                                                                red apple
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="kiliktable.show">
+                                                                new
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Price">
+                                                                1.20 EUR (0 rows)
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Description">
+                                                                fresh and sweet
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Created">
+                                                                15/01/2024
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                                <td class="mass-action" data-label="select">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-2" name="kilik_products_selected[]" value="2"/>
+                    <label for="checkbox-2"></label>
+                </span>
+            </div>
+        </td>
+    
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                2
+                                    </td>
+                                                                                                                                                                                                                
+            <td class="name-cell" data-label="Name">
+                                                                green apple
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="kiliktable.show">
+                                                                validated
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Price">
+                                                                0.80 EUR (0 rows)
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Description">
+                                                                <i>none</i>
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Created">
+                                                                01/02/2024
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                                <td class="mass-action" data-label="select">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-3" name="kilik_products_selected[]" value="3"/>
+                    <label for="checkbox-3"></label>
+                </span>
+            </div>
+        </td>
+    
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                3
+                                    </td>
+                                                                                                                                                                                                                
+            <td class="name-cell" data-label="Name">
+                                                                apple pie
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="kiliktable.show">
+                                                                new
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Price">
+                                                                4.50 EUR (0 rows)
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Description">
+                                                                homemade
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Created">
+                                                                10/03/2024
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                                <td class="mass-action" data-label="select">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-4" name="kilik_products_selected[]" value="4"/>
+                    <label for="checkbox-4"></label>
+                </span>
+            </div>
+        </td>
+    
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                4
+                                    </td>
+                                                                                                                                                                                                                
+            <td class="name-cell" data-label="Name">
+                                                                banana
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="kiliktable.show">
+                                                                cancelled
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Price">
+                                                                0.60 EUR (0 rows)
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Description">
+                                                                yellow fruit
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Created">
+                                                                29/02/2024
+                                    </td>
+                                                                                                                                            </tr>
+                                                    <tr>
+                                                                                <td class="mass-action" data-label="select">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="checkbox-5" name="kilik_products_selected[]" value="5"/>
+                    <label for="checkbox-5"></label>
+                </span>
+            </div>
+        </td>
+    
+                                                                                                                                                                                                                                    
+            <td  data-label="Id">
+                                                                5
+                                    </td>
+                                                                                                                                                                                                                
+            <td class="name-cell" data-label="Name">
+                                                                chess board
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="kiliktable.show">
+                                                                validated
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Price">
+                                                                30.00 EUR (0 rows)
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Description">
+                                                                wooden board
+                                    </td>
+                                                                                                                                                                                                                
+            <td  data-label="Created">
+                                                                01/01/2024
+                                    </td>
+                                                                                                                                            </tr>
+                                                            
+===== tableFoot =====
+                                            <tr>
+                                                                                                                                        <td  >
+                                                                                            TOTAL
+                                                                                    </td>
+                                                                                                                                                <td class="name-cell" >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                        </tr>
+                                    
+===== tableStats =====
+                    
+    showing 1 to 5 of 25 entries
+                    
+===== tablePagination =====
+                        
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
+        1
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton " data-table-page="2">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton " data-table-page="5">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+                    

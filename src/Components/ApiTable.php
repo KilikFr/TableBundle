@@ -12,8 +12,6 @@ class ApiTable extends AbstractTable
     private $api;
 
     /**
-     * @param ApiInterface $api
-     *
      * @return static
      */
     public function setApi(ApiInterface $api)

@@ -1,0 +1,10 @@
+p_id;Name;p_status;p_createdAt;p_price;p_description
+2;"green apple";VALIDATED;01/02/2024;;
+5;"chess board";VALIDATED;01/01/2024;;"wooden board"
+7;"yellow submarine";VALIDATED;31/12/2023;;toy
+11;"red toolbox";VALIDATED;;;"red plastic box"
+14;"red house";VALIDATED;;;"model kit"
+16;"green tea";VALIDATED;10/10/2024;;organic
+20;drill;VALIDATED;24/12/2024;;"cordless drill"
+22;kite;VALIDATED;14/02/2025;;
+24;pear;VALIDATED;04/04/2025;;"green fruit"

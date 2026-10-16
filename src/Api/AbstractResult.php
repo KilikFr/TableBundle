@@ -28,7 +28,7 @@ abstract class AbstractResult implements ResultInterface
     /**
      * Set Nb Total Rows.
      *
-     * @param int
+     * @param int $nbTotalRows
      *
      * @return static
      */
@@ -50,7 +50,7 @@ abstract class AbstractResult implements ResultInterface
     /**
      * Set Nb Filtered Rows.
      *
-     * @param int
+     * @param int $nbFilteredRows
      *
      * @return static
      */
@@ -71,8 +71,6 @@ abstract class AbstractResult implements ResultInterface
 
     /**
      * Add a row.
-     *
-     * @param mixed $row
      */
     public function addRow($row)
     {

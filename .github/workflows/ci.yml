@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # any deprecation fails the test suite
+  SYMFONY_DEPRECATIONS_HELPER: 'max[total]=0'
+  DOCTRINE_DEPRECATIONS: trigger
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }} · Symfony ${{ matrix.symfony }} · ORM ${{ matrix.orm }} · ${{ matrix.database }}${{ matrix.dependencies == 'lowest' && ' · lowest' || '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', symfony: '6.4.*', orm: '^2.17', database: sqlite, dependencies: lowest }
+          - { php: '8.2', symfony: '6.4.*', orm: '^3.2', database: sqlite, dependencies: highest }
+          # ORM 2.x on PHP >= 8.4 triggers unavoidable symfony/var-exporter deprecations (lazy ghost proxies)
+          - { php: '8.3', symfony: '7.4.*', orm: '^2.20', database: sqlite, dependencies: highest }
+          # ORM < 3.7 with symfony/polyfill-php86 installed: \SortDirection exists but is not accepted by the ORM
+          - { php: '8.4', symfony: '7.4.*', orm: '3.6.*', database: sqlite, dependencies: highest }
+          # lowest Symfony 8 versions not affected by security advisories (Composer blocks the others)
+          - { php: '8.4', symfony: '8.*', orm: '^3.2', database: sqlite, dependencies: lowest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', database: sqlite, dependencies: highest }
+          - { php: '8.4', symfony: '7.4.*', orm: '^3.7', database: mysql, dependencies: highest }
+          - { php: '8.3', symfony: '6.4.*', orm: '^2.20', database: mariadb, dependencies: highest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', database: postgresql, dependencies: highest }
+    services:
+      mysql:
+        image: ${{ matrix.database == 'mysql' && 'mysql:8.4' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: kilik_table
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+      mariadb:
+        image: ${{ matrix.database == 'mariadb' && 'mariadb:11.4' || '' }}
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: kilik_table
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+      postgres:
+        image: ${{ matrix.database == 'postgresql' && 'postgres:17' || '' }}
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kilik_table
+          # C collation: same ordering as SQLite and MySQL for the fixtures
+          POSTGRES_INITDB_ARGS: '--locale=C --encoding=UTF8'
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      KILIK_TEST_DATABASE_URL: >-
+        ${{ matrix.database == 'mysql' && 'mysql://root:root@127.0.0.1:3306/kilik_table?serverVersion=8.4&charset=utf8mb4'
+        || matrix.database == 'mariadb' && 'mysql://root:root@127.0.0.1:3307/kilik_table?serverVersion=11.4.0-MariaDB&charset=utf8mb4'
+        || matrix.database == 'postgresql' && 'postgresql://postgres:postgres@127.0.0.1:5432/kilik_table?serverVersion=17&charset=utf8'
+        || 'sqlite:///:memory:' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, pdo_mysql, pdo_pgsql
+          coverage: none
+          tools: flex
+
+      - name: Restrict the Doctrine ORM version
+        run: composer require --no-update --no-interaction "doctrine/orm:${{ matrix.orm }}"
+
+      - name: Get the Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ matrix.symfony }}-${{ matrix.orm }}-${{ matrix.dependencies }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ runner.os }}-${{ matrix.php }}-
+
+      - name: Install dependencies
+        env:
+          SYMFONY_REQUIRE: ${{ matrix.symfony }}
+        run: composer update --no-interaction --no-progress --prefer-dist --prefer-stable ${{ matrix.dependencies == 'lowest' && '--prefer-lowest' || '' }}
+
+      - name: Show the main installed versions
+        run: composer show | grep -E '^(symfony/(http-foundation|form)|doctrine/(orm|dbal|doctrine-bundle)|twig/twig) '
+
+      - name: Run the test suite
+        run: vendor/bin/phpunit
+
+  phpstan:
+    name: PHPStan · ${{ matrix.dependencies }} dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', symfony: '6.4.*', orm: '^2.17', dependencies: lowest }
+          - { php: '8.5', symfony: '8.1.*', orm: '^3.7', dependencies: highest }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: flex
+      - name: Restrict the Doctrine ORM version
+        run: composer require --no-update --no-interaction "doctrine/orm:${{ matrix.orm }}"
+      - name: Install dependencies
+        env:
+          SYMFONY_REQUIRE: ${{ matrix.symfony }}
+        run: composer update --no-interaction --no-progress --prefer-dist --prefer-stable ${{ matrix.dependencies == 'lowest' && '--prefer-lowest' || '' }}
+      - run: vendor/bin/phpstan analyse --no-progress
+
+  coding-standards:
+    name: PHP CS Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: php-cs-fixer:3.95.27
+      - run: php-cs-fixer fix --dry-run --diff --show-progress=none
+
+  composer:
+    name: Composer validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - run: composer validate --strict
+
+  javascript:
+    name: KilikTable.js · ${{ matrix.jquery }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jquery: [jquery3, jquery4]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:${{ matrix.jquery }}

@@ -1,0 +1,47 @@
+page: 1
+rowsPerPage: 10
+totalRows: 25
+filteredRows: 0
+lastPage: 0
+===== tableBody =====
+                                                                                
+===== tableFoot =====
+                                            <tr>
+                                                                                                                                        <td  >
+                                                                                            TOTAL
+                                                                                    </td>
+                                                                                                                                                <td class="name-cell" >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                                                <td  >
+                                                                                    </td>
+                                                                                                                        </tr>
+                                    
+===== tableStats =====
+                    
+    no matching records found
+            (filtered from 25 total entries)
+                    
+===== tablePagination =====
+                        
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="1">
+        <span class="glyphicon glyphicon-fast-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton" data-table-page="1">
+        1
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <a href="#" class="btn btn-default tablePaginationButton disabled" data-table-page="0">
+        <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+                    
