@@ -93,6 +93,10 @@ class TableService extends AbstractTableService
         if ($table->haveTotalColumns()) {
             $totalQueryBuilder = clone $qb;
             $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
+            // the totals are read in the first result: with one row per root entity, it is the first row
+            if (self::isGroupedByRootEntity($totalQueryBuilder)) {
+                $totalQueryBuilder->setMaxResults(1);
+            }
             foreach ($table->getColumns() as $column) {
                 if ($column->isUseTotal()) {
                     $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField().') AS '.self::TOTAL_PREFIX.$column->getName());
@@ -419,6 +423,42 @@ class TableService extends AbstractTableService
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * Whether the query is grouped by the identifier of its root entity, and by other fields of this entity only.
+     *
+     * The query then returns one row per root entity, and the object hydration one result per row, in the same order.
+     */
+    private static function isGroupedByRootEntity(QueryBuilder $queryBuilder): bool
+    {
+        $from = $queryBuilder->getDQLPart('from');
+        if (1 !== \count($from) || null !== $from[0]->getIndexBy()) {
+            return false;
+        }
+
+        $metadata = $queryBuilder->getEntityManager()->getClassMetadata($from[0]->getFrom());
+        if ($metadata->isIdentifierComposite) {
+            return false;
+        }
+
+        $rootAlias = $from[0]->getAlias();
+        $identifier = $rootAlias.'.'.$metadata->getSingleIdentifierFieldName();
+        $groupedByIdentifier = false;
+        foreach ($queryBuilder->getDQLPart('groupBy') as $groupBy) {
+            foreach ($groupBy->getParts() as $part) {
+                foreach (explode(',', (string) $part) as $expression) {
+                    $expression = trim($expression);
+                    if ($expression === $rootAlias || $expression === $identifier) {
+                        $groupedByIdentifier = true;
+                    } elseif (1 !== preg_match('/^'.preg_quote($rootAlias, '/').'\.\w+$/', $expression)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return $groupedByIdentifier;
     }
 
     /**
