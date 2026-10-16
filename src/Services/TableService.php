@@ -35,89 +35,7 @@ class TableService extends AbstractTableService
     public function getRows(TableInterface $table, Request $request, $paginate = true, $getObjects = true)
     {
         /** @var Table $table */
-        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
-        $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
-
-        foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
-            $column = $table->getColumnByName($hiddenColumnName);
-            if (null !== $column) {
-                $column->setHidden(true);
-            }
-        }
-
-        $qb = $table->getQueryBuilder();
-
-        if ($paginate) {
-            // @todo: had possibility to define custom count queries
-            $this->setTotalRows($table);
-            $this->setFilteredRows($table, $request);
-
-            // compute last page and floor curent page
-            $table->setLastPage((int) ceil($table->getFilteredRows() / $table->getRowsPerPage()));
-
-            if ($table->getPage() > $table->getLastPage()) {
-                $table->setPage($table->getLastPage());
-            }
-
-            $qb->setMaxResults($table->getRowsPerPage());
-            $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
-        }
-
-        // add filters
-        $this->addSearch($table, $request, $qb);
-
-        // handle ordering
-        $queryParams = $this->getRequestParameter($request, $table->getFormId());
-
-        if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
-            $column = $table->getColumnByName($queryParams['sortColumn']);
-            // if column exists
-            if (null !== $column) {
-                if (null !== $column->getSort()) {
-                    $qb->resetDQLPart('orderBy');
-                    if (isset($queryParams['sortReverse'])) {
-                        $sortReverse = $queryParams['sortReverse'];
-                    } else {
-                        $sortReverse = false;
-                    }
-                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
-                        $qb->addOrderBy($sortField, $this->toOrmSortDirection($sortOrder));
-                    }
-                }
-            }
-        }
-
-        // force a final ordering by id
-        $qb->addOrderBy($table->getAlias().'.id', $this->toOrmSortDirection('asc'));
-
-        if ($table->haveTotalColumns()) {
-            $totalQueryBuilder = clone $qb;
-            $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
-            // the totals are read in the first result: with one row per root entity, it is the first row
-            if (self::isGroupedByRootEntity($totalQueryBuilder)) {
-                $totalQueryBuilder->setMaxResults(1);
-            }
-            foreach ($table->getColumns() as $column) {
-                if ($column->isUseTotal()) {
-                    $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField().') AS '.self::TOTAL_PREFIX.$column->getName());
-                }
-            }
-            $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
-            foreach ($table->getColumns() as $column) {
-                $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
-                if ($column->isUseTotal()) {
-                    $callback = $column->getDisplayCallback();
-                    if (null !== $callback) {
-                        if (!is_callable($callback)) {
-                            throw new \Exception('displayCallback is not callable');
-                        }
-                        $column->setTotal($callback($totalResults[$totalColumnResultName]) ?? 0);
-                    } else {
-                        $column->setTotal($totalResults[$totalColumnResultName] ?? 0);
-                    }
-                }
-            }
-        }
+        $qb = $this->prepareQueryBuilder($table, $request, $paginate);
 
         $query = $qb->getQuery();
         $sharedResult = null;
@@ -271,6 +189,101 @@ class TableService extends AbstractTableService
 
                 return (int) $qb->getQuery()->getSingleScalarResult();
         }
+    }
+
+    /**
+     * Applies the request to the table and its query builder: pagination, filters, sort, and computes the totals.
+     *
+     * @param Table $table
+     * @param bool  $paginate
+     */
+    private function prepareQueryBuilder(TableInterface $table, Request $request, $paginate): QueryBuilder
+    {
+        $table->setRowsPerPage((int) $this->getRequestParameter($request, 'rowsPerPage', 10));
+        $table->setPage((int) $this->getRequestParameter($request, 'page', 1));
+
+        foreach ((array) $this->getRequestParameter($request, 'hiddenColumns', []) as $hiddenColumnName => $notUsed) {
+            $column = $table->getColumnByName($hiddenColumnName);
+            if (null !== $column) {
+                $column->setHidden(true);
+            }
+        }
+
+        $qb = $table->getQueryBuilder();
+
+        if ($paginate) {
+            // @todo: had possibility to define custom count queries
+            $this->setTotalRows($table);
+            $this->setFilteredRows($table, $request);
+
+            // compute last page and floor curent page
+            $table->setLastPage((int) ceil($table->getFilteredRows() / $table->getRowsPerPage()));
+
+            if ($table->getPage() > $table->getLastPage()) {
+                $table->setPage($table->getLastPage());
+            }
+
+            $qb->setMaxResults($table->getRowsPerPage());
+            $qb->setFirstResult(($table->getPage() - 1) * $table->getRowsPerPage());
+        }
+
+        // add filters
+        $this->addSearch($table, $request, $qb);
+
+        // handle ordering
+        $queryParams = $this->getRequestParameter($request, $table->getFormId());
+
+        if (isset($queryParams['sortColumn']) && '' != $queryParams['sortColumn']) {
+            $column = $table->getColumnByName($queryParams['sortColumn']);
+            // if column exists
+            if (null !== $column) {
+                if (null !== $column->getSort()) {
+                    $qb->resetDQLPart('orderBy');
+                    if (isset($queryParams['sortReverse'])) {
+                        $sortReverse = $queryParams['sortReverse'];
+                    } else {
+                        $sortReverse = false;
+                    }
+                    foreach ($column->getAutoSort($sortReverse) as $sortField => $sortOrder) {
+                        $qb->addOrderBy($sortField, $this->toOrmSortDirection($sortOrder));
+                    }
+                }
+            }
+        }
+
+        // force a final ordering by id
+        $qb->addOrderBy($table->getAlias().'.id', $this->toOrmSortDirection('asc'));
+
+        if ($table->haveTotalColumns()) {
+            $totalQueryBuilder = clone $qb;
+            $totalQueryBuilder->setMaxResults(null)->setFirstResult(null);
+            // the totals are read in the first result: with one row per root entity, it is the first row
+            if (self::isGroupedByRootEntity($totalQueryBuilder)) {
+                $totalQueryBuilder->setMaxResults(1);
+            }
+            foreach ($table->getColumns() as $column) {
+                if ($column->isUseTotal()) {
+                    $totalQueryBuilder->addSelect('SUM('.$column->getFilter()->getField().') AS '.self::TOTAL_PREFIX.$column->getName());
+                }
+            }
+            $totalResults = $totalQueryBuilder->getQuery()->getResult()[0] ?? [];
+            foreach ($table->getColumns() as $column) {
+                $totalColumnResultName = self::TOTAL_PREFIX.$column->getName();
+                if ($column->isUseTotal()) {
+                    $callback = $column->getDisplayCallback();
+                    if (null !== $callback) {
+                        if (!is_callable($callback)) {
+                            throw new \Exception('displayCallback is not callable');
+                        }
+                        $column->setTotal($callback($totalResults[$totalColumnResultName]) ?? 0);
+                    } else {
+                        $column->setTotal($totalResults[$totalColumnResultName] ?? 0);
+                    }
+                }
+            }
+        }
+
+        return $qb;
     }
 
     /**
