@@ -3,6 +3,21 @@
 All notable changes are documented in this file. Changes of earlier versions are listed in the
 [GitHub releases](https://github.com/KilikFr/TableBundle/releases).
 
+## 3.6.0 (unreleased)
+
+### Added
+
+- `TableService::exportAsCsvResponse()`: the CSV export as a streamed response, which reads the rows one by one
+  instead of loading them all in memory.
+
+### Performance
+
+- The query of the page is executed once instead of twice with the LEGACY entity loader (the default one).
+- The rows are counted once instead of twice when no filter is applied.
+- The count queries no longer sort the rows when the query builder of the table has an ORDER BY.
+- The total query fetches a single row, instead of hydrating every group, when the query is grouped by its root entity.
+- The REPOSITORY and CALLBACK entity loaders attach the entities to the rows in linear time.
+
 ## 3.5.0 (unreleased)
 
 ### Added

@@ -3,13 +3,16 @@
 namespace Kilik\TableBundle\Services;
 
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Kilik\TableBundle\Components\Filter;
 use Kilik\TableBundle\Components\Table;
 use Kilik\TableBundle\Components\TableInterface;
 use Kilik\TableBundle\Doctrine\SharedResult;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TableService extends AbstractTableService
 {
@@ -105,6 +108,34 @@ class TableService extends AbstractTableService
         }
 
         return $rows;
+    }
+
+    /**
+     * Export (selection by filters) as a CSV response, streamed without loading every row in memory.
+     *
+     * The CSV is the same as the one of exportAsCsv(), with two differences: the rows are read from the query while
+     * the response is sent, without calling getRows(), and the export callbacks receive an empty array of rows.
+     * The totals are computed when this method is called.
+     */
+    public function exportAsCsvResponse(TableInterface $table, Request $request, string $filename = 'export.csv'): StreamedResponse
+    {
+        /** @var Table $table */
+        $query = $this->prepareQueryBuilder($table, $request, false)->getQuery();
+        $haveTotalColumns = $table->haveTotalColumns();
+
+        $response = new StreamedResponse(static function () use ($table, $query, $haveTotalColumns): void {
+            $stream = fopen('php://output', 'w');
+            CsvWriter::write($stream, $table, self::iterateScalarRows($query), [], $haveTotalColumns);
+            fclose($stream);
+        });
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $filename,
+            (string) preg_replace('/[^\x20-\x7e]|[%\/\\\\]/u', '_', $filename)
+        ));
+
+        return $response;
     }
 
     /**
@@ -431,6 +462,23 @@ class TableService extends AbstractTableService
         $count = $this->countRows($qbfr, $identifiers);
 
         $table->setFilteredRows($count);
+    }
+
+    /**
+     * The scalar rows of the query, read one by one when possible.
+     *
+     * @return iterable<array<string, mixed>>
+     */
+    private static function iterateScalarRows(Query $query): iterable
+    {
+        try {
+            return $query->toIterable([], Query::HYDRATE_SCALAR);
+        } catch (QueryException $exception) {
+            // queries with to-many joins (or mixing entities and scalars, with Doctrine ORM 2) cannot be iterated
+            $query->setHint(Query::HINT_INTERNAL_ITERATION, false);
+
+            return $query->getResult(Query::HYDRATE_SCALAR);
+        }
     }
 
     /**

@@ -322,6 +322,34 @@ Users can filter this data using various operators, for example :
 - `!=` : expects date is not NULL
 
 
+### CSV export
+
+`exportAsCsv()` returns the filtered and sorted rows as a CSV string, without pagination:
+
+```php
+public function export(Request $request): Response
+{
+    $table = $this->getTable();
+    $csv = $this->get('kilik_table')->exportAsCsv($table, $request);
+
+    return new Response($csv, 200, ['Content-Type' => 'text/csv']);
+}
+```
+
+With many rows, `exportAsCsvResponse()` returns a streamed response instead, which reads the rows one by one while
+it is sent, without loading them all in memory (Doctrine ORM tables only):
+
+```php
+public function export(Request $request): Response
+{
+    return $this->get('kilik_table')->exportAsCsvResponse($this->getTable(), $request, 'products.csv');
+}
+```
+
+The CSV is the same, with two differences: `getRows()` is not called, and the export callbacks receive an empty array
+as third argument (the rows are not loaded). The queries that Doctrine cannot iterate (to-many joins, or entities with
+scalars on Doctrine ORM 2) are read at once, as by `exportAsCsv()`.
+
 For bundle developpers
 ======================
 
